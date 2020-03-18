@@ -39,6 +39,8 @@ sourceSets {
    main {
       java {
          srcDir 'src'
+         srcDir 'generated/javacc'
+         srcDir 'generated/jjtree'
       }
    }
 	
@@ -46,10 +48,18 @@ sourceSets {
       java {
          srcDir 'test'
       }
+      resources {
+         srcDir 'test'
+      }
    }
     
 }
 
+/*
+test {
+   testLogging.showStandardStreams = true
+}
+*/
 
 // Create JAR with main class
 jar {
