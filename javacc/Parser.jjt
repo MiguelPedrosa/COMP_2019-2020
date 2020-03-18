@@ -140,7 +140,7 @@ TOKEN:
     /* Literals */
     | < INTEGER_LITERAL : (<DIGIT>)+    >   
     /* Identifiers */
-    | < IDENTIFIER  : <LETTER> 
+    | < IDENTIFIER  : (<LETTER> | "_" | "$")
         ( <LETTER> | "_" | <DIGIT> )*   >
     | < DIGIT       : (["0" -"9"])      >
     | < LETTER      : ["a"-"z", "A"-"Z"]>
