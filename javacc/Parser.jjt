@@ -1,0 +1,309 @@
+options {
+    LOOKAHEAD=1;
+//    ERROR_REPORTING=true;
+//    DEBUG_LOOKAHEAD = true;
+//    DEBUG_PARSER = true;
+    MULTI=true;
+//    NODE_PACKAGE="nodes";
+}
+PARSER_BEGIN(Parser)
+
+import java.io.InputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.lang.System;
+import java.util.ArrayList;
+
+public class Parser {
+    public static String ANSI_RED = "\u001B[31m";
+    public static String ANSI_YELLOW = "\u001B[33m";
+    public static String ANSI_RESET = "\u001B[0m";
+    public static String ANSI_CYAN = "\u001B[36m";
+
+    public static int err_counter = 0;
+    public static int MAX_ERRORS = 10;
+    
+    public static void main(String args[]) throws ParseException {
+
+        final String filePath = args[0];
+        Parser myProgram = new Parser(openFile(filePath));
+
+        SimpleNode root = myProgram.Start();
+        root.dump("");
+    }
+
+    public static InputStream openFile(String filePath) {
+        final File file = new File(filePath);
+        try {
+            return new FileInputStream(file);
+        } catch(FileNotFoundException e) {
+            System.out.println("No file given.");
+            return null;
+        }
+    }
+
+    public static ArrayList<String> getExpectedTokens(ParseException e){
+        ArrayList<String> tokens = new ArrayList<String>();
+        for(int i = 0; i < e.expectedTokenSequences.length; i++){
+            for(int j = 0; j < e.expectedTokenSequences[i].length; j++){
+                tokens.add(tokenImage[e.expectedTokenSequences[i][j]]);
+            }
+        }
+        return tokens;
+    }
+
+    public void SkipTo(int kind, String errType) {
+        ParseException e = generateParseException();
+        boolean isEOF = false;
+        Token token = getToken(0);
+        Token t;
+        do {
+          t = getNextToken();
+          if(t.kind == EOF){
+            isEOF = true;
+            break;
+          }
+        } while (t.kind != kind);
+
+        System.out.println(ANSI_RED + "ERROR" + ANSI_YELLOW + " " + errType + ANSI_RESET);
+
+        if(isEOF)
+            System.out.println("\tMissing"  + ANSI_CYAN +  " '{'" + ANSI_RESET +  " at"  + ANSI_CYAN + " line " + String.valueOf(token.beginLine) + ANSI_RESET);
+        else{
+            System.out.println("\tFound " + ANSI_CYAN + "\"" + t.image + "\""  + ANSI_RESET +  " at " + ANSI_CYAN + "line " + String.valueOf(t.beginLine) + ", column " + String.valueOf(t.beginColumn) + ANSI_RESET + ".");
+            System.out.print("\tExpected one of: ");
+            for(int i = 0; i < getExpectedTokens(e).size() - 1; i++)
+                System.out.print(getExpectedTokens(e).get(i) + ", ");
+            System.out.println(getExpectedTokens(e).get(getExpectedTokens(e).size() - 1));
+        }
+        System.out.println();
+        err_counter++;
+        if(err_counter == MAX_ERRORS){
+            System.out.println(ANSI_RED + "Aborted after " + MAX_ERRORS + " errors." + ANSI_RESET);
+            System.exit(0);
+        }
+      }
+}
+PARSER_END(Parser)
+
+
+SKIP:
+{
+      " " | "\r" | "\t" | "\n"
+    | < SINGLE_LINE : "//"  (~["\n"])* "\n" >
+    | < MULTIPLE_LINE : "/*" ( ~["*"] | ("*" ~["/"]) )* "*/" >
+}
+
+TOKEN:
+{
+    /* Primitives */
+      < TRUE        : "true"            >
+    | < FALSE       : "false"           >
+    | < BOOLEAN     : "boolean"         >
+    | < INT         : "int"             >
+    | < VOID        : "void"            >
+    | < STRING      : "String"          >
+    /* Keywords and characters */
+    | < THIS        : "this"            >
+    | < NEW         : "new"             >
+    | < LPARENS     : "("               >
+    | < RPARENS     : ")"               >
+    | < LSQPARENS   : "["               >
+    | < RSQPARENS   : "]"               >
+    | < DOT         : "."               >
+    | < LBRACKET    : "{"               >
+    | < RBRACKET    : "}"               >
+    | < SEMICOLON   : ";"               >
+    | < COMMA       : ","               >
+    | < LENGTH      : "length"          >
+    | < IMPORT      : "import"          >
+    | < CLASS       : "class"           >
+    | < EXTENDS     : "extends"         >
+    | < METHOD      : "method"          >
+    | < PUBLIC      : "public"          >
+    | < RETURN      : "return"          >
+    | < IF          : "if"              >
+    | < ELSE        : "else"            >
+    | < WHILE       : "while"           >
+    | < STATIC      : "static"          >
+    | < MAIN        : "main"            >
+    /* Operators */
+    | < NOT         : "!"               >
+    | < AND         : "&&"              >
+    | < LESSTHAN    : "<"               >
+    | < PLUS        : "+"               >
+    | < MINUS       : "-"               >
+    | < TIMES       : "*"               >
+    | < DIVIDOR     : "/"               >
+    | < EQUALS      : "="               >
+    /* Literals */
+    | < INTEGER_LITERAL : (<DIGIT>)+    >   
+    /* Identifiers */
+    | < IDENTIFIER  : <LETTER> 
+        ( <LETTER> | "_" | <DIGIT> )*   >
+    | < DIGIT       : (["0" -"9"])      >
+    | < LETTER      : ["a"-"z", "A"-"Z"]>
+}
+
+SimpleNode Start(): {}
+{
+    (ImportDeclaration())* ClassDeclaration() <EOF> {
+        return jjtThis;
+    }
+}
+
+void ImportDeclaration() #void: {} 
+{
+    <IMPORT>
+    [<STATIC>] //Static is optional
+    <IDENTIFIER> (<DOT> <IDENTIFIER>)* //Multiple class espefiers, last one will be function name
+    [<LPARENS> [Type() (<COMMA> Type())* | <VOID> ] <RPARENS>] //Optional and variable number of arguments
+    [Type() | <VOID>] //Optional return type
+    <SEMICOLON>
+}
+
+void ClassDeclaration() #ClassDeclaration: {Token classId,extendsId;} 
+{
+    <CLASS> classId=<IDENTIFIER> { jjtThis.classId = classId.image; } [ <EXTENDS> extendsId=<IDENTIFIER> { jjtThis.extendsId = extendsId.image; } ] <LBRACKET>
+    (VarDeclaration())* (FunctionDeclaration())*
+    <RBRACKET>
+}
+
+void VarDeclaration() #VarDeclaration: {Token varId;String type;}
+{ 
+    LOOKAHEAD({ getToken(2).kind == IDENTIFIER || getToken(2).kind == LSQPARENS } )
+    type=Type() { jjtThis.type=type; } varId=<IDENTIFIER> { jjtThis.varId = varId.image; } <SEMICOLON>
+}
+
+void FunctionDeclaration() #void: {}
+{
+    <PUBLIC> (
+        MethodDeclaration()
+        | MainDeclaration()
+    )
+}
+
+void MethodDeclaration() #MethodDeclaration: {Token methodId;}
+{
+    Type() methodId=<IDENTIFIER> { jjtThis.methodId = methodId.image; } <LPARENS> [ Type() <IDENTIFIER> ( <COMMA> Type() <IDENTIFIER>)* ] <RPARENS> <LBRACKET>
+    (VarDeclaration())* (Statement())*
+    Return() <RBRACKET>
+}
+
+void Return() #Return: {}
+{
+    <RETURN> Expression() <SEMICOLON>
+}
+
+void MainDeclaration() #MainDeclaration: {}
+{
+    <STATIC> <VOID> <MAIN> <LPARENS> <STRING> <LSQPARENS> <RSQPARENS> <IDENTIFIER> <RPARENS>
+    <LBRACKET>
+    (VarDeclaration())*
+    (Statement())*
+    <RBRACKET>
+}
+
+String Type() #void: {Token type; String sType;}
+{
+    (type=<BOOLEAN> { sType=type.image; }
+    | type=<INT> { sType=type.image; } [ <LSQPARENS> <RSQPARENS> { sType+="[]"; }]
+    | type=<IDENTIFIER> { sType=type.image; }) { return sType; }
+}
+
+void Statement() #void: {}
+{
+      <LBRACKET> (Statement())* <RBRACKET>
+    | IfStatement()
+    | WhileStatement() Statement()
+    | ( LOOKAHEAD(2) //Lookahead is used because Expression can also expand to an identifier
+        EqualsStatement()
+        | Expression() <SEMICOLON>
+    )
+}
+
+void EqualsStatement() #Equals(2): {}
+{
+    EqualsIdentifier() <EQUALS> Expression() <SEMICOLON>
+}
+
+void EqualsIdentifier() #EqualsId: { Token eqId; }
+{
+    eqId=<IDENTIFIER> [ <LSQPARENS> Expression() <RSQPARENS> ] {jjtThis.identifier = eqId.image;}
+}
+
+void IfStatement() #void: {}
+{
+    <IF> <LPARENS> Expression() <RPARENS> Statement() <ELSE> Statement()
+}
+
+void WhileStatement() #While: {}
+{
+    try {
+        <WHILE> <LPARENS> Expression() <RPARENS>
+    }
+    catch (ParseException e) {
+        SkipTo(LBRACKET, "while statement");
+    }
+}
+
+void Expression() #Expression : {}
+{
+    Expression_1()
+}
+
+void Expression_1() #void: {}
+{
+    Expression_2() [<AND> Expression_1() #And(2)]
+}
+
+void Expression_2() #void: {}
+{
+    Expression_3() [<LESSTHAN> Expression_2() #LessThan(2)]
+}
+
+void Expression_3() #void: {}
+{
+    Expression_4() [<PLUS> Expression_3() #Plus(2) | <MINUS> Expression_3() #Minus(2)]
+}
+
+void Expression_4() #void: {}
+{
+    Expression_5() [<TIMES> Expression_4() #Times(2)| <DIVIDOR> Expression_4() #Dividor(2)]
+}
+
+void Expression_5() #void: {}
+{
+    Expression_6() [<DOT> Expr_DOT() #Dot(2)] 
+}
+
+void Expr_DOT() #void: {}
+{
+      <LENGTH> #Length
+    | <IDENTIFIER> <LPARENS> [Expression() (<COMMA> Expression())* ] <RPARENS> #Identifier
+}
+
+void Expression_6() #void: {}
+{
+    Expression_LT() [<LSQPARENS> Expression() <RSQPARENS>]
+}
+
+void Expression_LT() #void: {}
+{
+    Literal()
+    | <NEW> Expr_NEW()
+    | <LPARENS> Expression() <RPARENS>
+    | <NOT> Expression_LT() #Not(1)
+}
+
+void Literal() #Literal: {Token literal;}
+{
+    (literal=<INTEGER_LITERAL> | literal=<TRUE> | literal=<FALSE> | literal=<IDENTIFIER> | literal=<THIS>) {jjtThis.literal = literal.image;}
+}
+
+void Expr_NEW() #New: {}
+{
+      <INT> <LSQPARENS> Expression() <RSQPARENS>
+    | <IDENTIFIER> <LPARENS> <RPARENS>
+}
