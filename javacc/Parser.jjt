@@ -153,13 +153,20 @@ SimpleNode Start(): {}
     }
 }
 
-void ImportDeclaration() #void: {} 
+void ImportDeclaration() #ImportDeclaration: {Token name; String argument, returnType; } 
 {
     <IMPORT>
-    [<STATIC>] //Static is optional
-    <IDENTIFIER> (<DOT> <IDENTIFIER>)* //Multiple class espefiers, last one will be function name
-    [<LPARENS> [Type() (<COMMA> Type())* | <VOID> ] <RPARENS>] //Optional and variable number of arguments
-    [Type() | <VOID>] //Optional return type
+    /* Static is optional */
+    [<STATIC> {jjtThis.setStatic();}]
+    /* Grab full function name and store it*/
+    name=<IDENTIFIER> {jjtThis.buildMethodName(name.image);}
+    //Multiple class espefiers, last one will be function name
+    (<DOT> name=<IDENTIFIER> { jjtThis.buildMethodName(name.image); } )*
+    /* Store all arguments' info */
+    [<LPARENS> [argument=Type() { jjtThis.addArgument(argument); } (<COMMA> argument=Type() {jjtThis.addArgument(argument);} )*
+        | <VOID>] <RPARENS>]
+    /* Store optional return type*/
+    [returnType=Type() {jjtThis.setReturnType(returnType);} | <VOID>] //Default in node is already set to void
     <SEMICOLON>
 }
 
