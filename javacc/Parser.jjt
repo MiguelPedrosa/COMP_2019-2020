@@ -191,10 +191,19 @@ void FunctionDeclaration() #void: {}
     )
 }
 
-void MethodDeclaration() #MethodDeclaration: {Token methodId;}
+void MethodDeclaration() #MethodDeclaration: {Token methodId, argName; String argType, returnType;}
 {
-    Type() methodId=<IDENTIFIER> { jjtThis.methodId = methodId.image; } <LPARENS> [ Type() <IDENTIFIER> ( <COMMA> Type() <IDENTIFIER>)* ] <RPARENS> <LBRACKET>
-    (VarDeclaration())* (Statement())*
+    /* Store function return type*/
+    returnType=Type() {jjtThis.setReturnType(returnType);}
+    /* Store function name */
+    methodId=<IDENTIFIER>  {jjtThis.buildMethodName(methodId.image);}
+    <LPARENS>
+    /* Store arguments' type and name */
+    [ argType=Type() argName=<IDENTIFIER> {jjtThis.addArgument(argType, argName.image);}
+        ( <COMMA> argType=Type() argName=<IDENTIFIER> {jjtThis.addArgument(argType, argName.image);} )* ]
+    <RPARENS> <LBRACKET>
+    (VarDeclaration())*
+    (Statement())*
     Return() <RBRACKET>
 }
 
