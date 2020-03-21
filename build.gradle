@@ -64,7 +64,7 @@ test {
 // Create JAR with main class
 jar {
    manifest {
-      attributes 'Main-Class': 'Main'
+      attributes 'Main-Class': 'Parser'
    }
 }
 
