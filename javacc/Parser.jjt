@@ -223,9 +223,13 @@ void MainDeclaration() #MainDeclaration: {}
 
 String Type() #void: {Token type; String sType;}
 {
-    (type=<BOOLEAN> { sType=type.image; }
-    | type=<INT> { sType=type.image; } [ <LSQPARENS> <RSQPARENS> { sType+="[]"; }]
-    | type=<IDENTIFIER> { sType=type.image; }) { return sType; }
+    (     <BOOLEAN> { sType="boolean"; }
+        | <INT> { sType="int"; } 
+            [<LSQPARENS> <RSQPARENS> { sType+="[]"; }]
+        | <STRING> { sType="String"; }
+        | type=<IDENTIFIER> { sType=type.image; }
+    )
+    { return sType; }
 }
 
 void Statement() #void: {}
