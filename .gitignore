@@ -1,4 +1,7 @@
 .gradle
+.classpath
+.project
+/bin/
 /build/
 /generated/
 *.jar
