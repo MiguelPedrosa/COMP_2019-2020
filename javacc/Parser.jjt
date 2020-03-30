@@ -283,7 +283,7 @@ void Expression_5() #void: {}
 void Expr_DOT() #void: {}
 {
       <LENGTH> #Length
-    | <IDENTIFIER> <LPARENS> [Expression() (<COMMA> Expression())* ] <RPARENS> #Identifier
+    | Identifier() <LPARENS> [Expression() (<COMMA> Expression())* ] <RPARENS>
 }
 
 void Expression_6() #void: {}
@@ -307,5 +307,12 @@ void Literal() #Literal: {Token literal;}
 void Expr_NEW() #New: {}
 {
       <INT> <LSQPARENS> Expression() <RSQPARENS>
-    | <IDENTIFIER> <LPARENS> <RPARENS>
+    | Identifier() <LPARENS> <RPARENS>
+}
+
+void Identifier() #Identifier: {Token identifier;}
+{
+    identifier=<IDENTIFIER> {
+        jjtThis.setIdentifier(identifier.image);
+    }
 }
