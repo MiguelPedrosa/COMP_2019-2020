@@ -4,14 +4,10 @@ options {
 //    DEBUG_LOOKAHEAD = true;
 //    DEBUG_PARSER = true;
     MULTI=true;
-//    NODE_PACKAGE="nodes";
+    BUILD_NODE_FILES=false;
 }
 PARSER_BEGIN(Parser)
 
-import java.io.InputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.lang.System;
 import java.util.ArrayList;
 
@@ -24,25 +20,6 @@ public class Parser {
     public static int err_counter = 0;
     public static int MAX_ERRORS = 10;
     
-    public static void main(String args[]) throws ParseException {
-
-        final String filePath = args[0];
-        Parser myProgram = new Parser(openFile(filePath));
-
-        SimpleNode root = myProgram.Start();
-        root.dump("");
-    }
-
-    public static InputStream openFile(String filePath) {
-        final File file = new File(filePath);
-        try {
-            return new FileInputStream(file);
-        } catch(FileNotFoundException e) {
-            System.out.println("No file given.");
-            return null;
-        }
-    }
-
     public static ArrayList<String> getExpectedTokens(ParseException e){
         ArrayList<String> tokens = new ArrayList<String>();
         for(int i = 0; i < e.expectedTokenSequences.length; i++){
