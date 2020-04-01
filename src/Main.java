@@ -11,6 +11,10 @@ public class Main {
 
         SimpleNode root = myProgram.Start();
         root.dump("");
+        // Semantic analyser
+        SemanticAnalyser semantic = new SemanticAnalyser(root);
+        SymbolTable classTable = semantic.Start();
+        System.out.println(classTable);
     }
 
     public static InputStream openFile(String filePath) {
