@@ -252,32 +252,32 @@ void WhileStatement() #While: {}
 
 void Expression() #Expression : {}
 {
-    Expression_1()
+    AndExpression()
 }
 
-void Expression_1() #void: {}
+void AndExpression() #void: {}
 {
-    Expression_2() [<AND> Expression_1() #And(2)]
+    LessExpression() [<AND> AndExpression() #And(2)]
 }
 
-void Expression_2() #void: {}
+void LessExpression() #void: {}
 {
-    Expression_3() [<LESSTHAN> Expression_2() #LessThan(2)]
+    SumSubExpression() [<LESSTHAN> LessExpression() #LessThan(2)]
 }
 
-void Expression_3() #void: {}
+void SumSubExpression() #void: {}
 {
-    Expression_4() [<PLUS> Expression_3() #Plus(2) | <MINUS> Expression_3() #Minus(2)]
+    MulDivExpression() [<PLUS> SumSubExpression() #Plus(2) | <MINUS> SumSubExpression() #Minus(2)]
 }
 
-void Expression_4() #void: {}
+void MulDivExpression() #void: {}
 {
-    Expression_5() [<TIMES> Expression_4() #Times(2)| <DIVIDOR> Expression_4() #Dividor(2)]
+    DotExpression() [<TIMES> MulDivExpression() #Times(2)| <DIVIDOR> MulDivExpression() #Dividor(2)]
 }
 
-void Expression_5() #void: {}
+void DotExpression() #void: {}
 {
-    Expression_6() [<DOT> Expr_DOT() #Dot(2)] 
+    ParensExpression() [<DOT> Expr_DOT() #Dot(2)] 
 }
 
 void Expr_DOT() #void: {}
@@ -286,7 +286,7 @@ void Expr_DOT() #void: {}
     | Identifier() <LPARENS> [Expression() (<COMMA> Expression())* ] <RPARENS>
 }
 
-void Expression_6() #void: {}
+void ParensExpression() #void: {}
 {
     Expression_LT() [<LSQPARENS> Expression() <RSQPARENS>]
 }
