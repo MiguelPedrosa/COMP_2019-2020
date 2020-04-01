@@ -12,11 +12,6 @@ import java.lang.System;
 import java.util.ArrayList;
 
 public class Parser {
-    public static String ANSI_RED = "\u001B[31m";
-    public static String ANSI_YELLOW = "\u001B[33m";
-    public static String ANSI_RESET = "\u001B[0m";
-    public static String ANSI_CYAN = "\u001B[36m";
-
     public static int err_counter = 0;
     public static int MAX_ERRORS = 10;
     
@@ -43,12 +38,12 @@ public class Parser {
           }
         } while (t.kind != kind);
 
-        System.out.println(ANSI_RED + "ERROR" + ANSI_YELLOW + " " + errType + ANSI_RESET);
+        System.out.println(MyUtils.ANSI_RED + "ERROR" + MyUtils.ANSI_YELLOW + " " + errType + MyUtils.ANSI_RESET);
 
         if(isEOF)
-            System.out.println("\tMissing"  + ANSI_CYAN +  " '{'" + ANSI_RESET +  " at"  + ANSI_CYAN + " line " + String.valueOf(token.beginLine) + ANSI_RESET);
+            System.out.println("\tMissing"  + MyUtils.ANSI_CYAN +  " '{'" + MyUtils.ANSI_RESET +  " at"  + MyUtils.ANSI_CYAN + " line " + String.valueOf(token.beginLine) + MyUtils.ANSI_RESET);
         else{
-            System.out.println("\tFound " + ANSI_CYAN + "\"" + t.image + "\""  + ANSI_RESET +  " at " + ANSI_CYAN + "line " + String.valueOf(t.beginLine) + ", column " + String.valueOf(t.beginColumn) + ANSI_RESET + ".");
+            System.out.println("\tFound " + MyUtils.ANSI_CYAN + "\"" + t.image + "\""  + MyUtils.ANSI_RESET +  " at " + MyUtils.ANSI_CYAN + "line " + String.valueOf(t.beginLine) + ", column " + String.valueOf(t.beginColumn) + MyUtils.ANSI_RESET + ".");
             System.out.print("\tExpected one of: ");
             for(int i = 0; i < getExpectedTokens(e).size() - 1; i++)
                 System.out.print(getExpectedTokens(e).get(i) + ", ");
@@ -57,7 +52,7 @@ public class Parser {
         System.out.println();
         err_counter++;
         if(err_counter == MAX_ERRORS){
-            System.out.println(ANSI_RED + "Aborted after " + MAX_ERRORS + " errors." + ANSI_RESET);
+            System.out.println(MyUtils.ANSI_RED + "Aborted after " + MAX_ERRORS + " errors." + MyUtils.ANSI_RESET);
             System.exit(0);
         }
       }
