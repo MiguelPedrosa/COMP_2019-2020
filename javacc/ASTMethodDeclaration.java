@@ -31,6 +31,18 @@ public class ASTMethodDeclaration extends SimpleNode {
 		this.returnType = returnType;
 	}
 
+	public String getReturnType() {
+		return returnType;
+	}
+
+	public String getMethodName() {
+		return methodName;
+	}
+
+	public List<String> getArgumentTypes() {
+		return argumentTypes;
+	}
+
 	@Override
 	public String toString() {
 		final String name = "name=\'" + methodName + "\'";

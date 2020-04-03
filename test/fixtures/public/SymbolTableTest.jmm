@@ -1,0 +1,72 @@
+import static io.read() int;
+import static io.println() void;
+import static io.println(int) void;
+class Life {
+
+    int UNDERPOP_LIM;
+    int OVERPOP_LIM;
+    int REPRODUCE_NUM;
+
+    int LOOPS_PER_MS;
+
+    int xMax;
+    int yMax;
+    int[] field;
+
+    public static void main(String[] a) {
+		Life l;
+		int unused;
+        int xMax;
+
+		l = new Life();
+		l.init();
+
+        while (true) {
+            l.printField();
+            l.update();
+            unused = io.read();
+        }
+
+    }
+
+    public boolean quicksort(int[] L) {
+        int xMax;
+        boolean lazy;
+        if ( MathUtils.random(0, 5) < 4 ) {
+            this.beLazy(L);
+            lazy = true;
+        }
+        else {
+            lazy = false;
+        }
+        
+        if ( lazy ) {
+            lazy = !lazy;
+        }
+        else {
+            lazy = this.quicksort(L, 0, L.length - 1);
+        }
+        
+        return lazy;
+    }
+
+    public boolean quicksort2(int[] L) {
+        boolean lazy;
+        if ( MathUtils.random(0, 5) < 4 ) {
+            this.beLazy(L);
+            lazy = true;
+        }
+        else {
+            lazy = false;
+        }
+        
+        if ( lazy ) {
+            lazy = !lazy;
+        }
+        else {
+            lazy = this.quicksort(L, 0, L.length - 1);
+        }
+        
+        return lazy;
+    }
+}

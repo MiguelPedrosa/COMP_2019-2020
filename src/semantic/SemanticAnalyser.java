@@ -1,3 +1,5 @@
+import java.util.List;
+
 public class SemanticAnalyser {
 
     private SimpleNode root;
@@ -14,7 +16,7 @@ public class SemanticAnalyser {
             // First childs are import
         }
         // class node
-        final SimpleNode classNode = (SimpleNode) this.root.jjtGetChild(this.root.jjtGetNumChildren() -1);
+        SimpleNode classNode = (SimpleNode) this.root.jjtGetChild(this.root.jjtGetNumChildren() -1);
 
         for(int i = 0; i < classNode.jjtGetNumChildren(); i++){
             // First childs are variables
@@ -22,9 +24,13 @@ public class SemanticAnalyser {
             if(childNode instanceof ASTVarDeclaration) {
                 processVarNode((ASTVarDeclaration) childNode);
             }
-            // Then methods declarations
-            else if(childNode instanceof ASTMethodDeclaration || childNode instanceof ASTMainDeclaration){
-
+            // Main declaration
+            else if(childNode instanceof ASTMainDeclaration){
+                processMainNode((ASTMainDeclaration) childNode);
+            } 
+            // Methods declarations
+            else if(childNode instanceof ASTMethodDeclaration){
+                processMethodNode((ASTMethodDeclaration) childNode);
             }
         }
 
@@ -32,8 +38,41 @@ public class SemanticAnalyser {
     }
 
     private void processVarNode(ASTVarDeclaration childNode) {
-        final String type = childNode.getType();
-        final String varID = childNode.getVarId();
+        String type = childNode.getType();
+        String varID = childNode.getVarId();
         this.ST.addVariable(type, varID);
+    }
+
+    private void processMainNode(ASTMainDeclaration mainNode) {
+        this.ST.addMain();
+
+        for(int i = 0; i < mainNode.jjtGetNumChildren(); i++){
+            final SimpleNode childNode = (SimpleNode) mainNode.jjtGetChild(i);
+            // First childs are local variables
+            if(childNode instanceof ASTVarDeclaration) {
+                processLocalVarNode("main", (ASTVarDeclaration) childNode);
+            }
+        }
+    }
+
+    private void processMethodNode(ASTMethodDeclaration methodNode) {
+        String returnType = methodNode.getReturnType();
+        String methodName = methodNode.getMethodName();
+        List<String> argumentTypes = methodNode.getArgumentTypes();
+        this.ST.addMethod(returnType, methodName, argumentTypes);
+
+        for(int i = 0; i < methodNode.jjtGetNumChildren(); i++){
+            final SimpleNode childNode = (SimpleNode) methodNode.jjtGetChild(i);
+            // First childs are local variables
+            if(childNode instanceof ASTVarDeclaration) {
+                processLocalVarNode(methodName, (ASTVarDeclaration) childNode);
+            }
+        }
+    }
+
+    private void processLocalVarNode(String MethodName, ASTVarDeclaration childNode) {
+        String type = childNode.getType();
+        String varID = childNode.getVarId();
+        this.ST.addLocalVariable(MethodName, type, varID);
     }
 }
