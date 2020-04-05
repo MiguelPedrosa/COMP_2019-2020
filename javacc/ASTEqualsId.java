@@ -10,6 +10,10 @@ public class ASTEqualsId extends SimpleNode {
     super(p, id);
   }
 
+  public String getIdentifier() {
+    return identifier;
+  }
+
   @Override
   public String toString() {
     return super.toString() + " [ " + identifier + " ]";

@@ -10,6 +10,10 @@ public class ASTLiteral extends SimpleNode {
     super(p, id);
   }
 
+  public String getLiteral() {
+    return literal;
+  }
+
   @Override
   public String toString() {
     return super.toString() + " [ " + literal + " ]";

@@ -19,6 +19,7 @@ class Life {
         int xMax;
 
 		l = new Life();
+        l = 1;
 		l.init();
 
         while (true) {
