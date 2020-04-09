@@ -227,12 +227,7 @@ void EqualsIdentifier() #EqualsId: { Token eqId; }
 
 void IfStatement() #IF: {}
 {
-    <IF> <LPARENS> Expression() <RPARENS> Statement() Else()
-}
-
-void Else() #Else: {}
-{
-    <ELSE> Statement()
+    <IF> <LPARENS> Expression() <RPARENS> Statement() <ELSE> Statement()
 }
 
 void WhileStatement() #While: {}
