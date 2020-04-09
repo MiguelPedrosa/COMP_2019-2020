@@ -299,14 +299,19 @@ void ParensExpression() #void: {}
 
 void Expression_LT() #void: {}
 {
-    Literal()
+      Literal()
+    | Identifier()
     | Expr_NEW()
     | <LPARENS> Expression() <RPARENS>
 }
 
 void Literal() #Literal: {Token literal;}
 {
-    (literal=<INTEGER_LITERAL> | literal=<TRUE> | literal=<FALSE> | literal=<IDENTIFIER> | literal=<THIS>) {jjtThis.literal = literal.image;}
+    (     literal=<INTEGER_LITERAL>
+        | literal=<TRUE>
+        | literal=<FALSE>
+        | literal=<THIS>
+    ) {jjtThis.literal = literal.image;}
 }
 
 void Expr_NEW() #New: {}
