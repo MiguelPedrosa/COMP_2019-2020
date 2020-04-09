@@ -206,13 +206,18 @@ String Type() #void: {Token type; String sType;}
 
 void Statement() #void: {}
 {
-      <LBRACKET> (Statement())* <RBRACKET>
+      Scope()
     | IfStatement()
     | WhileStatement()
     | ( LOOKAHEAD(2) //Lookahead is used because Expression can also expand to an identifier
         EqualsStatement()
         | Expression() <SEMICOLON>
     )
+}
+
+void Scope() #Scope: {}
+{
+    <LBRACKET> (Statement())* <RBRACKET>
 }
 
 void EqualsStatement() #Equals(): {}
