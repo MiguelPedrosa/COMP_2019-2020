@@ -208,7 +208,7 @@ void Statement() #void: {}
 {
       <LBRACKET> (Statement())* <RBRACKET>
     | IfStatement()
-    | WhileStatement() Statement()
+    | WhileStatement()
     | ( LOOKAHEAD(2) //Lookahead is used because Expression can also expand to an identifier
         EqualsStatement()
         | Expression() <SEMICOLON>
@@ -243,6 +243,7 @@ void WhileStatement() #While: {}
     catch (ParseException e) {
         SkipTo(LBRACKET, "while statement");
     }
+    Statement()
 }
 
 void Expression() #Expression : {}
