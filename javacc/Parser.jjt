@@ -241,7 +241,7 @@ void WhileStatement() #While: {}
     Statement()
 }
 
-void Expression() #Expression : {}
+void Expression() #void : {}
 {
     AndExpression()
 }
