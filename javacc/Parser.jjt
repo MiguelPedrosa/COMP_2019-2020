@@ -294,7 +294,7 @@ void Expr_DOT() #void: {}
 
 void ParensExpression() #void: {}
 {
-    Expression_LT() [<LSQPARENS> Expression() <RSQPARENS>]
+    Expression_LT() [<LSQPARENS> Expression() <RSQPARENS> #ArrayAccess(2)]
 }
 
 void Expression_LT() #void: {}
