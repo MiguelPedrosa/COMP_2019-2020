@@ -27,11 +27,9 @@ public class SymbolVar {
     }
 
     public String toString(){
-        String variableInfo;
-        if(getValue() == null)
-            variableInfo = "name=" + getName() + ";type=" + getType() + ";value=;";
-        else
-            variableInfo = "name=" + getName() + ";type=" + getType() + ";value=" + getValue() + ";";
+        String variableInfo = "name = " + getName() + "; type = " + getType() + ";";
+        if(getValue() != null)
+            variableInfo += " value = " + getValue() + ";";
         return variableInfo;
     }
 }
