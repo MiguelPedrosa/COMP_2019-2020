@@ -215,7 +215,7 @@ void Statement() #void: {}
     )
 }
 
-void EqualsStatement() #Equals(2): {}
+void EqualsStatement() #Equals(): {}
 {
     EqualsIdentifier() <EQUALS> Expression() <SEMICOLON>
 }
@@ -253,22 +253,22 @@ void Expression() #Expression : {}
 
 void AndExpression() #void: {}
 {
-    LessExpression() [<AND> AndExpression() #And(2)]
+    LessExpression() [<AND> AndExpression() #And()]
 }
 
 void LessExpression() #void: {}
 {
-    SumSubExpression() [<LESSTHAN> LessExpression() #LessThan(2)]
+    SumSubExpression() [<LESSTHAN> LessExpression() #LessThan()]
 }
 
 void SumSubExpression() #void: {}
 {
-    MulDivExpression() [<PLUS> SumSubExpression() #Plus(2) | <MINUS> SumSubExpression() #Minus(2)]
+    MulDivExpression() [<PLUS> SumSubExpression() #Plus() | <MINUS> SumSubExpression() #Minus()]
 }
 
 void MulDivExpression() #void: {}
 {
-    DotExpression() [<TIMES> MulDivExpression() #Times(2)| <DIVIDOR> MulDivExpression() #Dividor(2)]
+    DotExpression() [<TIMES> MulDivExpression() #Times()| <DIVIDOR> MulDivExpression() #Dividor()]
 }
 
 void DotExpression() #void: {}
@@ -292,7 +292,7 @@ void Expression_LT() #void: {}
     Literal()
     | <NEW> Expr_NEW()
     | <LPARENS> Expression() <RPARENS>
-    | <NOT> Expression_LT() #Not(1)
+    | <NOT> Expression_LT() #Not()
 }
 
 void Literal() #Literal: {Token literal;}
