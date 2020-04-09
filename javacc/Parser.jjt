@@ -241,24 +241,31 @@ void WhileStatement() #While: {}
     Statement()
 }
 
-void Expression() #void : {}
+void Expression() #void: {}
 {
     AndExpression()
 }
 
 void AndExpression() #void: {}
 {
-    LessExpression() [<AND> AndExpression() #And()]
+    LessExpression() [
+        <AND> AndExpression() #And(2)
+    ]
 }
 
 void LessExpression() #void: {}
 {
-    SumSubExpression() [<LESSTHAN> LessExpression() #LessThan()]
+    SumSubExpression() [
+        <LESSTHAN> LessExpression() #LessThan(2)
+    ]
 }
 
 void SumSubExpression() #void: {}
 {
-    MulDivExpression() [<PLUS> SumSubExpression() #Plus() | <MINUS> SumSubExpression() #Minus()]
+    MulDivExpression() [
+          <PLUS>  SumSubExpression() #Plus(2)
+        | <MINUS> SumSubExpression() #Minus(2)
+    ]
 }
 
 void MulDivExpression() #void: {}
