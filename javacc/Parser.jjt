@@ -300,7 +300,7 @@ void ParensExpression() #void: {}
 void Expression_LT() #void: {}
 {
     Literal()
-    | <NEW> Expr_NEW()
+    | Expr_NEW()
     | <LPARENS> Expression() <RPARENS>
 }
 
@@ -311,8 +311,10 @@ void Literal() #Literal: {Token literal;}
 
 void Expr_NEW() #New: {}
 {
-      <INT> <LSQPARENS> Expression() <RSQPARENS>
-    | Identifier() <LPARENS> <RPARENS>
+    <NEW> (
+          <INT> <LSQPARENS> Expression() <RSQPARENS>
+        | Identifier() <LPARENS> <RPARENS>
+    )
 }
 
 void ComplexIdentifier() #void: {}
