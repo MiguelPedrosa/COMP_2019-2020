@@ -270,7 +270,15 @@ void SumSubExpression() #void: {}
 
 void MulDivExpression() #void: {}
 {
-    DotExpression() [<TIMES> MulDivExpression() #Times()| <DIVIDOR> MulDivExpression() #Dividor()]
+    NotExpression() [
+          <TIMES>   MulDivExpression() #Times(2)
+        | <DIVIDOR> MulDivExpression() #Dividor(2)
+    ]
+}
+
+void NotExpression() #Not(addNot) : {boolean addNot=false;}
+{
+    [<NOT> {addNot=true;}] DotExpression()
 }
 
 void DotExpression() #void: {}
@@ -294,7 +302,6 @@ void Expression_LT() #void: {}
     Literal()
     | <NEW> Expr_NEW()
     | <LPARENS> Expression() <RPARENS>
-    | <NOT> Expression_LT() #Not()
 }
 
 void Literal() #Literal: {Token literal;}
