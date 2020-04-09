@@ -222,12 +222,7 @@ void Scope() #Scope: {}
 
 void EqualsStatement() #Equals(): {}
 {
-    EqualsIdentifier() <EQUALS> Expression() <SEMICOLON>
-}
-
-void EqualsIdentifier() #EqualsId: { Token eqId; }
-{
-    eqId=<IDENTIFIER> [ <LSQPARENS> Expression() <RSQPARENS> ] {jjtThis.identifier = eqId.image;}
+    ComplexIdentifier() <EQUALS> Expression() <SEMICOLON>
 }
 
 void IfStatement() #IF: {}
@@ -304,6 +299,11 @@ void Expr_NEW() #New: {}
 {
       <INT> <LSQPARENS> Expression() <RSQPARENS>
     | Identifier() <LPARENS> <RPARENS>
+}
+
+void ComplexIdentifier() #void: {}
+{
+    Identifier() [ <LSQPARENS> Expression() <RSQPARENS> #ArrayAccess(2)]
 }
 
 void Identifier() #Identifier: {Token identifier;}
