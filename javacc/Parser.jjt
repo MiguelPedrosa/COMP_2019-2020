@@ -283,13 +283,24 @@ void NotExpression() #Not(addNot) : {boolean addNot=false;}
 
 void DotExpression() #void: {}
 {
-    ParensExpression() [<DOT> Expr_DOT() #Dot(2)] 
+    ParensExpression() [
+        <DOT> (
+              <LENGTH> #Length(1)
+            // Function call has 3 children: class name, method name and arguments
+            | FunctionCall() #FuncCall(3)
+        )
+    ]
 }
 
-void Expr_DOT() #void: {}
+void FunctionCall() #void: {}
 {
-      <LENGTH> #Length
-    | Identifier() <LPARENS> [Expression() (<COMMA> Expression())* ] <RPARENS>
+    Identifier() <LPARENS> FunctionArguments() <RPARENS>
+}
+
+
+void FunctionArguments() #FuncArgs: {}
+{
+    [Expression() (<COMMA> Expression())* ]
 }
 
 void ParensExpression() #void: {}
