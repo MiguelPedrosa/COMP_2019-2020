@@ -61,7 +61,8 @@ public class SimpleNode implements Node {
      out its children. */
 
   public void dump(String prefix, int step) {
-    System.out.println(step + ")" + toString(prefix));
+//    System.out.println(step + ")" + toString(prefix));
+    System.out.printf( "%2d)%s\n", step, toString(prefix));
     if (children != null) {
       for (int i = 0; i < children.length; ++i) {
         SimpleNode n = (SimpleNode)children[i];
