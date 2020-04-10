@@ -283,7 +283,7 @@ void NotExpression() #Not(addNot) : {boolean addNot=false;}
 
 void DotExpression() #void: {}
 {
-    ParensExpression() [
+    ArrayAccess() [
         <DOT> (
               <LENGTH> #Length(1)
             // Function call has 3 children: class name, method name and arguments
@@ -303,7 +303,7 @@ void FunctionArguments() #FuncArgs: {}
     [Expression() (<COMMA> Expression())* ]
 }
 
-void ParensExpression() #void: {}
+void ArrayAccess() #void: {}
 {
     Expression_LT() [<LSQPARENS> Expression() <RSQPARENS> #ArrayAccess(2)]
 }
