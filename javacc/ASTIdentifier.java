@@ -16,7 +16,7 @@ public class ASTIdentifier extends SimpleNode {
 
 	@Override
 	public String toString() {
-	  return super.toString() + " [ identifier=\'" + identifier + "\' ]";
+	  return super.toString() + " [ \'" + identifier + "\' ]";
 	}
 
 }
