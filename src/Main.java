@@ -10,7 +10,7 @@ public class Main {
         Parser myProgram = new Parser(openFile(filePath));
 
         SimpleNode root = myProgram.Start();
-        root.dump("");
+        root.dump("", 0);
         // Semantic analyser
         SemanticAnalyser semantic = new SemanticAnalyser(root);
         SymbolTable classTable = semantic.Start();
