@@ -84,16 +84,18 @@ public class SemanticAnalyser {
         if(node.jjtGetNumChildren() == 2){
             String equalsId;
             Object equalsVal;
+/*
             if(node.jjtGetChild(0) instanceof ASTEqualsId){
                 ASTEqualsId childNode = (ASTEqualsId) node.jjtGetChild(0);
                 equalsId = childNode.getIdentifier();
                 System.out.println(equalsId);
             }
-/*            if(node.jjtGetChild(1) instanceof ASTExpression){
+            if(node.jjtGetChild(1) instanceof ASTExpression){
                 ASTExpression expression = (ASTExpression) node.jjtGetChild(1);
                 equalsVal = processExpression(expression);
                 System.out.println(equalsVal);
-            } */
+            }
+*/
         } else{
             System.out.println(MyUtils.ANSI_RED + "Error num childs of equals node." + MyUtils.ANSI_RESET);
         }
