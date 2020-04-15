@@ -51,7 +51,7 @@ class Life {
         return lazy;
     }
 
-    public boolean quicksort2(int[] L) {
+    public boolean quicksort2(int[] L, String teste) {
         boolean lazy;
         if ( MathUtils.random(0, 5) < 4 ) {
             this.beLazy(L);

@@ -1,17 +1,21 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class ASTMethodDeclaration extends SimpleNode {
 
 	protected String methodName;
-	protected List<String> argumentTypes;
+	protected LinkedHashMap<String, String> arguments;
 	protected String returnType;
+	protected String key;
 
 	public ASTMethodDeclaration(int id) {
 		super(id);
 		this.returnType = "void";
 		this.methodName = null;
-		this.argumentTypes = new ArrayList<>();
+		this.arguments = new LinkedHashMap<String, String>();
+		this.key = null;
 	}
 
 	public ASTMethodDeclaration(Parser p, int id) {
@@ -23,8 +27,7 @@ public class ASTMethodDeclaration extends SimpleNode {
 	}
 
 	public void addArgument(String type, String name) {
-		final String argument = "{" + type + ", " + name + "}";
-		this.argumentTypes.add(argument);
+		this.arguments.put(name, type);
 	}
 
 	public void setReturnType(String returnType) {
@@ -39,14 +42,32 @@ public class ASTMethodDeclaration extends SimpleNode {
 		return methodName;
 	}
 
-	public List<String> getArgumentTypes() {
-		return argumentTypes;
+	public LinkedHashMap<String, String> getArguments() {
+		return arguments;
+	}
+
+	public String getKey() {
+		if (this.key == null) {
+			String key = this.methodName;
+
+			for (Map.Entry<String, String> entry : arguments.entrySet())
+				key += entry.getValue();
+
+			this.key = key;
+		}
+		return this.key;
 	}
 
 	@Override
 	public String toString() {
 		final String name = "name=\'" + methodName + "\'";
-		final String args = "arguments=" + argumentTypes;
+		String args = "arguments=[ ";
+
+		for (Map.Entry<String, String> entry : arguments.entrySet())
+			args += "{" + entry.getValue() + ", " + entry.getKey() + "} ";
+
+		args += "]";
+
 		final String returnInfo = "return=" + returnType;
 		return super.toString() + " [ " + name + "; " + args + "; " + returnInfo + " ]";
 	}

@@ -4,30 +4,35 @@ import java.util.Map;
 
 public class MethodTable extends SymbolTable {
 
-    private List<String> argumentTypes;
+    private LinkedHashMap<String, String> arguments; //name, type
     private String returnType;
     private String name;
 
 
-    public MethodTable(SymbolTable parentTable, String name, String returnType, List<String> argumentTypes) {
+    public MethodTable(SymbolTable parentTable, String name, String returnType, LinkedHashMap<String, String> arguments) {
         super(parentTable);
-        this.argumentTypes = argumentTypes;
+        this.arguments = arguments;
         this.returnType = returnType;
         this.name = name;
+
+        for (Map.Entry<String, String> entry : arguments.entrySet())
+            addVariable(entry.getValue(), entry.getKey());
+            
+        
     }
 
     public String toString() {
-        String variableInfo = MyUtils.ANSI_CYAN + "\n\tMethod" + MyUtils.ANSI_RESET + " name=" + this.name + ";return type=" + this.returnType + ";arguments=";
+        String variableInfo = MyUtils.ANSI_CYAN + "\n\t" + this.name + MyUtils.ANSI_YELLOW + "|" + MyUtils.ANSI_RESET + " Return Type = " + this.returnType + "; Arguments = { ";
 
-        for(int i = 0; i < argumentTypes.size(); i++) {
-            variableInfo += argumentTypes.get(i);
-        }
+        for (Map.Entry<String, String> entry : arguments.entrySet())
+            variableInfo += entry.getValue() + " ";
 
-        variableInfo += "\n";
+        variableInfo += "}\n";
         variableInfo += "\tLocal variables:\n";
-        for(Map.Entry<String, SymbolVar> entry : getVariables().entrySet()) {
+
+        for(Map.Entry<String, SymbolVar> entry : getVariables().entrySet()) 
             variableInfo += "\t\t" + entry.getValue() + "\n";
-        }
+        
 
         return variableInfo;
     }
