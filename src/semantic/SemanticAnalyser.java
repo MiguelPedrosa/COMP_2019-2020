@@ -5,7 +5,7 @@ public class SemanticAnalyser {
 
     private SimpleNode root;
     private SymbolTable ST;
-    
+
     public SemanticAnalyser(SimpleNode root) {
         this.root = root;
         this.ST = new SymbolTable(null);
@@ -13,38 +13,37 @@ public class SemanticAnalyser {
 
     public SymbolTable Start() {
         // Handle Imports
-        for(int i = 0; i < this.root.jjtGetNumChildren() -1; i++){
+        for (int i = 0; i < this.root.jjtGetNumChildren() - 1; i++) {
             // First childs are import
         }
         // class node
-        SimpleNode classNode = (SimpleNode) this.root.jjtGetChild(this.root.jjtGetNumChildren() -1);
-        
-        if(classNode instanceof ASTClassDeclaration){
+        SimpleNode classNode = (SimpleNode) this.root.jjtGetChild(this.root.jjtGetNumChildren() - 1);
+
+        if (classNode instanceof ASTClassDeclaration) {
 
             this.ST.addClasseName(((ASTClassDeclaration) classNode).getClassId());
             this.ST.addClassExtendsName(((ASTClassDeclaration) classNode).getExtendsId());
-            
+
             this.signFuntions(classNode);
             this.processClassNode(classNode);
-        } 
-        
-        
+        }
+
         return ST;
     }
 
     /* ---------------------------------SIGN FUNCTIONS--------------------------------------- */
 
     private void signFuntions(SimpleNode classNode) {
-        for(int i = 0; i < classNode.jjtGetNumChildren(); i++){
+        for (int i = 0; i < classNode.jjtGetNumChildren(); i++) {
 
             SimpleNode childNode = (SimpleNode) classNode.jjtGetChild(i);
 
             // Main declaration
-            if(childNode instanceof ASTMainDeclaration){
+            if (childNode instanceof ASTMainDeclaration) {
                 signMainNode((ASTMainDeclaration) childNode);
-            } 
+            }
             // Methods declarations
-            else if(childNode instanceof ASTMethodDeclaration){
+            else if (childNode instanceof ASTMethodDeclaration) {
                 signMethodNode((ASTMethodDeclaration) childNode);
             }
         }
@@ -65,20 +64,20 @@ public class SemanticAnalyser {
     /* ---------------------------------PROCESS NODES--------------------------------------- */
 
     private void processClassNode(SimpleNode classNode) {
-        for(int i = 0; i < classNode.jjtGetNumChildren(); i++){
+        for (int i = 0; i < classNode.jjtGetNumChildren(); i++) {
 
             final SimpleNode childNode = (SimpleNode) classNode.jjtGetChild(i);
 
             // First childs are variables
-            if(childNode instanceof ASTVarDeclaration) {
+            if (childNode instanceof ASTVarDeclaration) {
                 processVarNode((ASTVarDeclaration) childNode);
             }
             // Main declaration
-            else if(childNode instanceof ASTMainDeclaration){
+            else if (childNode instanceof ASTMainDeclaration) {
                 processMainNode((ASTMainDeclaration) childNode);
-            } 
+            }
             // Methods declarations
-            else if(childNode instanceof ASTMethodDeclaration){
+            else if (childNode instanceof ASTMethodDeclaration) {
                 processMethodNode((ASTMethodDeclaration) childNode);
             }
         }
@@ -91,26 +90,26 @@ public class SemanticAnalyser {
     }
 
     private void processMainNode(ASTMainDeclaration mainNode) {
-        for(int i = 0; i < mainNode.jjtGetNumChildren(); i++){
+        for (int i = 0; i < mainNode.jjtGetNumChildren(); i++) {
             final SimpleNode childNode = (SimpleNode) mainNode.jjtGetChild(i);
             // First childs are local variables
-            if(childNode instanceof ASTVarDeclaration) {
+            if (childNode instanceof ASTVarDeclaration) {
                 processLocalVarDeclaration("main", (ASTVarDeclaration) childNode);
-            } else if(childNode instanceof ASTEquals){
+            } else if (childNode instanceof ASTEquals) {
                 processEquals("main", (ASTEquals) childNode);
-            } 
+            }
         }
     }
 
     private void processMethodNode(ASTMethodDeclaration methodNode) {
         String key = methodNode.getKey();
 
-        for(int i = 0; i < methodNode.jjtGetNumChildren(); i++){
+        for (int i = 0; i < methodNode.jjtGetNumChildren(); i++) {
             final SimpleNode childNode = (SimpleNode) methodNode.jjtGetChild(i);
             // First childs are local variables
-            if(childNode instanceof ASTVarDeclaration) {
+            if (childNode instanceof ASTVarDeclaration) {
                 processLocalVarDeclaration(key, (ASTVarDeclaration) childNode);
-            } else if(childNode instanceof ASTEquals) {
+            } else if (childNode instanceof ASTEquals) {
                 processEquals(key, (ASTEquals) childNode);
             }
         }
@@ -123,59 +122,59 @@ public class SemanticAnalyser {
     }
 
     private void processEquals(String methodKey, ASTEquals node) {
-        if(node.jjtGetNumChildren() == 2){
+        if (node.jjtGetNumChildren() == 2) {
             String equalsId = null;
             String equalsIdType = null;
             String equalsValType;
 
-            if(node.jjtGetChild(0) instanceof ASTIdentifier){
+            if (node.jjtGetChild(0) instanceof ASTIdentifier) {
                 equalsId = ((ASTIdentifier) node.jjtGetChild(0)).getIdentifier();
                 equalsIdType = this.getVarType(methodKey, equalsId);
             }
-    
-            equalsValType = this.getExpressionType(methodKey, (SimpleNode) node.jjtGetChild(1));
-            
 
-            if(equalsIdType != null && equalsValType != null && equalsIdType.equals(equalsValType))
-                    this.ST.initializeVariable(methodKey, equalsId);
+            equalsValType = this.getExpressionType(methodKey, (SimpleNode) node.jjtGetChild(1));
+
+            if (equalsIdType != null && equalsValType != null && equalsIdType.equals(equalsValType))
+                this.ST.initializeVariable(methodKey, equalsId);
 
             // verifica se filho = pai então aceita apesar de tipos serem diferentes
-            else if(equalsIdType != null && equalsValType != null && equalsIdType.equals(this.ST.getClasseName()) && equalsValType.equals(this.ST.getClassExtendsName()))
+            else if (equalsIdType != null && equalsValType != null && equalsIdType.equals(this.ST.getClasseName())
+                    && equalsValType.equals(this.ST.getClassExtendsName()))
                 this.ST.initializeVariable(methodKey, equalsId);
-            
+
             else
                 System.out.println(MyUtils.ANSI_RED + equalsIdType + MyUtils.ANSI_RESET);
-            
 
         } else
-            System.out.println(MyUtils.ANSI_RED + "ERROR: Incorrect number of childs in equals node." + MyUtils.ANSI_RESET);
-        
+            System.out.println(
+                    MyUtils.ANSI_RED + "ERROR: Incorrect number of childs in equals node." + MyUtils.ANSI_RESET);
+
     }
 
     /* --------------------------------- EXTRA --------------------------------------- */
 
-    private String getVarType(String methodKey, String VarId){
-        if(this.ST.containsMethodVariable(methodKey, VarId))
-            return  this.ST.getMethodVariableType(methodKey, VarId);
-        else if(this.ST.containsVariable(VarId))
-            return  this.ST.getVariableType(VarId);
-                
-        System.out.println(MyUtils.ANSI_RED + "ERROR: Variable " + VarId + " undefined." + MyUtils.ANSI_RESET); 
+    private String getVarType(String methodKey, String VarId) {
+        if (this.ST.containsMethodVariable(methodKey, VarId))
+            return this.ST.getMethodVariableType(methodKey, VarId);
+        else if (this.ST.containsVariable(VarId))
+            return this.ST.getVariableType(VarId);
+
+        System.out.println(MyUtils.ANSI_RED + "ERROR: Variable " + VarId + " undefined." + MyUtils.ANSI_RESET);
         return null;
     }
 
-    private String getExpressionType(String methodKey, SimpleNode expression){
+    private String getExpressionType(String methodKey, SimpleNode expression) {
         String type = null;
 
-        if(expression instanceof ASTLiteral){
+        if (expression instanceof ASTLiteral) {
             type = ((ASTLiteral) expression).getLiteralType();
-            if(type.equals("this"))
+            if (type.equals("this"))
                 return this.ST.getClasseName();
             else
                 return type;
         }
 
-        else if(expression instanceof ASTIdentifier){
+        else if (expression instanceof ASTIdentifier) {
             type = getVarType(methodKey, ((ASTIdentifier) expression).getIdentifier());
         }
 
