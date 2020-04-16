@@ -1,7 +1,7 @@
 import static io.read() int;
 import static io.println() void;
 import static io.println(int) void;
-class Life {
+class Life extends Dead{
 
     int UNDERPOP_LIM;
     int OVERPOP_LIM;
@@ -15,11 +15,20 @@ class Life {
 
     public static void main(String[] a) {
 		Life l;
+        Life l2;
 		int unused;
         int xMax;
+        boolean teste;
+        Dead teste3;
 
-		l = new Life();
-        l = 1;
+
+		unused = 4;
+        teste = true;
+        teste = false;
+        l = this;
+    
+        l2 = teste3;
+
 		l.init();
 
         while (true) {

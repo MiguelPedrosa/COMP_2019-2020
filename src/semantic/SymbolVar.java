@@ -22,7 +22,7 @@ public class SymbolVar {
         return initialized;
     }
 
-    public void initialize(Boolean initialized){
+    public void setInitialize(Boolean initialized){
         this.initialized = initialized;
     }
 

@@ -19,8 +19,15 @@ public class SemanticAnalyser {
         // class node
         SimpleNode classNode = (SimpleNode) this.root.jjtGetChild(this.root.jjtGetNumChildren() -1);
         
-        this.signFuntions(classNode);
-        this.processClassNode(classNode);
+        if(classNode instanceof ASTClassDeclaration){
+
+            this.ST.addClasseName(((ASTClassDeclaration) classNode).getClassId());
+            this.ST.addClassExtendsName(((ASTClassDeclaration) classNode).getExtendsId());
+            
+            this.signFuntions(classNode);
+            this.processClassNode(classNode);
+        } 
+        
         
         return ST;
     }
@@ -90,7 +97,7 @@ public class SemanticAnalyser {
             if(childNode instanceof ASTVarDeclaration) {
                 processLocalVarDeclaration("main", (ASTVarDeclaration) childNode);
             } else if(childNode instanceof ASTEquals){
-                processEquals((ASTEquals) childNode);
+                processEquals("main", (ASTEquals) childNode);
             } 
         }
     }
@@ -104,7 +111,7 @@ public class SemanticAnalyser {
             if(childNode instanceof ASTVarDeclaration) {
                 processLocalVarDeclaration(key, (ASTVarDeclaration) childNode);
             } else if(childNode instanceof ASTEquals) {
-                processEquals((ASTEquals) childNode);
+                processEquals(key, (ASTEquals) childNode);
             }
         }
     }
@@ -115,39 +122,64 @@ public class SemanticAnalyser {
         this.ST.addLocalVariable(key, type, varID);
     }
 
-    private void processEquals(ASTEquals node) {
+    private void processEquals(String methodKey, ASTEquals node) {
         if(node.jjtGetNumChildren() == 2){
-            String equalsId;
-            Object equalsVal;
+            String equalsId = null;
+            String equalsIdType = null;
+            String equalsValType;
 
-/*
-            if(node.jjtGetChild(0) instanceof ASTEqualsId){
-                ASTEqualsId childNode = (ASTEqualsId) node.jjtGetChild(0);
-                equalsId = childNode.getIdentifier();
-                System.out.println(equalsId);
+            if(node.jjtGetChild(0) instanceof ASTIdentifier){
+                equalsId = ((ASTIdentifier) node.jjtGetChild(0)).getIdentifier();
+                equalsIdType = this.getVarType(methodKey, equalsId);
             }
-            if(node.jjtGetChild(1) instanceof ASTExpression){
-                ASTExpression expression = (ASTExpression) node.jjtGetChild(1);
-                equalsVal = processExpression(expression);
-                System.out.println(equalsVal);
-            }
-*/
-        } else{
-            System.out.println(MyUtils.ANSI_RED + "Error num childs of equals node." + MyUtils.ANSI_RESET);
-        }
+    
+            equalsValType = this.getExpressionType(methodKey, (SimpleNode) node.jjtGetChild(1));
+            
+
+            if(equalsIdType != null && equalsValType != null && equalsIdType.equals(equalsValType))
+                    this.ST.initializeVariable(methodKey, equalsId);
+
+            // verifica se filho = pai então aceita apesar de tipos serem diferentes
+            else if(equalsIdType != null && equalsValType != null && equalsIdType.equals(this.ST.getClasseName()) && equalsValType.equals(this.ST.getClassExtendsName()))
+                this.ST.initializeVariable(methodKey, equalsId);
+            
+            else
+                System.out.println(MyUtils.ANSI_RED + equalsIdType + MyUtils.ANSI_RESET);
+            
+
+        } else
+            System.out.println(MyUtils.ANSI_RED + "ERROR: Incorrect number of childs in equals node." + MyUtils.ANSI_RESET);
+        
     }
-/*
-    private Object processExpression(SimpleNode node) {
-        Object finalVal = null;
-        if(node instanceof ASTLiteral){
-            return ((ASTLiteral) node).getLiteral();
-        }
-        for(int i = 0; i < node.jjtGetNumChildren(); i++){
-            SimpleNode childNode = (SimpleNode) node.jjtGetChild(i);
-            finalVal = processExpression(childNode);
+
+    /* --------------------------------- EXTRA --------------------------------------- */
+
+    private String getVarType(String methodKey, String VarId){
+        if(this.ST.containsMethodVariable(methodKey, VarId))
+            return  this.ST.getMethodVariableType(methodKey, VarId);
+        else if(this.ST.containsVariable(VarId))
+            return  this.ST.getVariableType(VarId);
+                
+        System.out.println(MyUtils.ANSI_RED + "ERROR: Variable " + VarId + " undefined." + MyUtils.ANSI_RESET); 
+        return null;
+    }
+
+    private String getExpressionType(String methodKey, SimpleNode expression){
+        String type = null;
+
+        if(expression instanceof ASTLiteral){
+            type = ((ASTLiteral) expression).getLiteralType();
+            if(type.equals("this"))
+                return this.ST.getClasseName();
+            else
+                return type;
         }
 
-        return finalVal;
+        else if(expression instanceof ASTIdentifier){
+            type = getVarType(methodKey, ((ASTIdentifier) expression).getIdentifier());
+        }
+
+        return type;
     }
-*/
+
 }
