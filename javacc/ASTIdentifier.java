@@ -14,6 +14,10 @@ public class ASTIdentifier extends SimpleNode {
 		this.identifier = identifier;
 	}
 
+	public String getIdentifier() {
+		return this.identifier;
+	}
+
 	@Override
 	public String toString() {
 	  return super.toString() + " [ \'" + identifier + "\' ]";

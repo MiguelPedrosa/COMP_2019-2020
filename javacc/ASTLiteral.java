@@ -14,6 +14,16 @@ public class ASTLiteral extends SimpleNode {
     return literal;
   }
 
+  public String getLiteralType() {
+    if(literal.equals("this"))
+      return literal;
+    else if(literal.equals("true") || literal.equals("false"))
+      return "boolean";
+    else
+      return "int";
+
+  }
+
   @Override
   public String toString() {
     return super.toString() + " [ " + literal + " ]";

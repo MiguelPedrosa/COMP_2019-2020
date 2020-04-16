@@ -2,12 +2,12 @@ public class SymbolVar {
 
     private String name;
     private String type;
-    private Object value;
+    private Boolean initialized;
 
     public SymbolVar(String name, String type) {
         this.name = name;
         this.type = type;
-        this.value = null;
+        this.initialized = false;
     }
 
     public String getName(){
@@ -18,18 +18,16 @@ public class SymbolVar {
         return type;
     }
 
-    public Object getValue(){
-        return value;
+    public Boolean getInitialized(){
+        return initialized;
     }
 
-    public void setValue(Object value){
-        this.value = value;
+    public void setInitialize(Boolean initialized){
+        this.initialized = initialized;
     }
 
     public String toString(){
-        String variableInfo = "name = " + getName() + "; type = " + getType() + ";";
-        if(getValue() != null)
-            variableInfo += " value = " + getValue() + ";";
+        String variableInfo = "name = " + getName() + "; type = " + getType() + "; initialized = " + getInitialized() + ";";
         return variableInfo;
     }
 }
