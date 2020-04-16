@@ -18,7 +18,7 @@ class Life extends Dead{
         Life l2;
 		int unused;
         int xMax;
-        int teste;
+        boolean teste;
         Dead teste3;
 
         teste[0] = 4;

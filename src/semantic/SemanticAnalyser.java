@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -123,15 +124,15 @@ public class SemanticAnalyser {
 
     private void processEquals(String methodKey, ASTEquals node) {
         if (node.jjtGetNumChildren() == 2) {
+            
             String equalsId = null;
             String equalsIdType = null;
-            String equalsValType;
+            String equalsValType = null;
 
-            if (node.jjtGetChild(0) instanceof ASTIdentifier) {
-                equalsId = ((ASTIdentifier) node.jjtGetChild(0)).getIdentifier();
-                equalsIdType = this.getVarType(methodKey, equalsId);
-            }
-
+            ArrayList<String> list = getEqualsIdType(methodKey, (SimpleNode) node.jjtGetChild(0));
+            
+            equalsId = list.get(0);
+            equalsIdType = list.get(1);
             equalsValType = this.getExpressionType(methodKey, (SimpleNode) node.jjtGetChild(1));
 
             if (equalsIdType != null && equalsValType != null && equalsIdType.equals(equalsValType))
@@ -143,7 +144,7 @@ public class SemanticAnalyser {
                 this.ST.initializeVariable(methodKey, equalsId);
 
             else
-                System.out.println(MyUtils.ANSI_RED + equalsIdType + MyUtils.ANSI_RESET);
+                System.out.println(MyUtils.ANSI_RED + "ERROR: Incorrect types." + MyUtils.ANSI_RESET);
 
         } else
             System.out.println(
@@ -153,14 +154,22 @@ public class SemanticAnalyser {
 
     /* --------------------------------- EXTRA --------------------------------------- */
 
-    private String getVarType(String methodKey, String VarId) {
-        if (this.ST.containsMethodVariable(methodKey, VarId))
-            return this.ST.getMethodVariableType(methodKey, VarId);
-        else if (this.ST.containsVariable(VarId))
-            return this.ST.getVariableType(VarId);
+    private ArrayList<String> getEqualsIdType(String methodKey, SimpleNode equalsIdNode) {
+        ArrayList<String> list = new ArrayList<String>();
+        String equalsId = null;
+        String equalsIdType = null;
 
-        System.out.println(MyUtils.ANSI_RED + "ERROR: Variable " + VarId + " undefined." + MyUtils.ANSI_RESET);
-        return null;
+        if (equalsIdNode instanceof ASTIdentifier) {
+            equalsId = ((ASTIdentifier) equalsIdNode).getIdentifier();
+            equalsIdType = this.getVarType(methodKey, equalsId);
+        }
+        else if (equalsIdNode instanceof ASTArrayAccess) {
+            // TODO: when equalsId is an array
+        }
+
+        list.add(equalsId);
+        list.add(equalsIdType);
+        return list;
     }
 
     private String getExpressionType(String methodKey, SimpleNode expression) {
@@ -181,4 +190,13 @@ public class SemanticAnalyser {
         return type;
     }
 
+    private String getVarType(String methodKey, String VarId) {
+        if (this.ST.containsMethodVariable(methodKey, VarId))
+            return this.ST.getMethodVariableType(methodKey, VarId);
+        else if (this.ST.containsVariable(VarId))
+            return this.ST.getVariableType(VarId);
+
+        System.out.println(MyUtils.ANSI_RED + "ERROR: Variable " + VarId + " undefined." + MyUtils.ANSI_RESET);
+        return null;
+    }
 }
