@@ -145,13 +145,13 @@ void ImportDeclaration() #ImportDeclaration: {Token name; String argument, retur
 void ClassDeclaration() #ClassDeclaration: {Token classId,extendsId;} 
 {
     <CLASS> classId=<IDENTIFIER> { jjtThis.classId = classId.image; } [ <EXTENDS> extendsId=<IDENTIFIER> { jjtThis.extendsId = extendsId.image; } ] <LBRACKET>
-    (VarDeclaration())* (FunctionDeclaration())*
+    (LOOKAHEAD(2) VarDeclaration())*
+    (FunctionDeclaration())*
     <RBRACKET>
 }
 
 void VarDeclaration() #VarDeclaration: {Token varId;String type;}
-{ 
-    LOOKAHEAD({ getToken(2).kind == IDENTIFIER || getToken(2).kind == LSQPARENS } )
+{
     type=Type() { jjtThis.type=type; } varId=<IDENTIFIER> { jjtThis.varId = varId.image; } <SEMICOLON>
 }
 
@@ -174,7 +174,7 @@ void MethodDeclaration() #MethodDeclaration: {Token methodId, argName; String ar
     [ argType=Type() argName=<IDENTIFIER> {jjtThis.addArgument(argType, argName.image);}
         ( <COMMA> argType=Type() argName=<IDENTIFIER> {jjtThis.addArgument(argType, argName.image);} )* ]
     <RPARENS> <LBRACKET>
-    (VarDeclaration())*
+    (LOOKAHEAD(2) VarDeclaration())*
     (Statement())*
     Return() <RBRACKET>
 }
@@ -188,7 +188,7 @@ void MainDeclaration() #MainDeclaration: {}
 {
     <STATIC> <VOID> <MAIN> <LPARENS> <STRING> <LSQPARENS> <RSQPARENS> <IDENTIFIER> <RPARENS>
     <LBRACKET>
-    (VarDeclaration())*
+    (LOOKAHEAD(2) VarDeclaration())*
     (Statement())*
     <RBRACKET>
 }
