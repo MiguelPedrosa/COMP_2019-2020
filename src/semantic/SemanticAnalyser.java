@@ -30,6 +30,8 @@ public class SemanticAnalyser {
             this.processClassNode(classNode);
         }
 
+        ErrorHandler.printErrors();
+        ErrorHandler.printWarnings();
         return ST;
     }
 
