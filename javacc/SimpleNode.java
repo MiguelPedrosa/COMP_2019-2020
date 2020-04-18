@@ -5,9 +5,13 @@ public class SimpleNode implements Node {
   protected int id;
   protected Object value;
   protected Parser parser;
+  private int tokenLine;
+  private int tokenColumn;
 
   public SimpleNode(int i) {
     id = i;
+    tokenLine = 0;
+    tokenColumn = 0;
   }
 
   public SimpleNode(Parser p, int i) {
@@ -76,4 +80,16 @@ public class SimpleNode implements Node {
   public int getId() {
     return id;
   }
+
+  public int getLine() {
+    return this.tokenLine;
+  }
+  public int getColumn() {
+    return this.tokenColumn;
+  }
+  public setPosition(Token token) {
+    this.tokenLine = token.beginLine;
+    this.tokenColumn = token.beginColumn;
+  }
+
 }
