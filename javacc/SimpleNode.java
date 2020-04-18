@@ -87,7 +87,7 @@ public class SimpleNode implements Node {
   public int getColumn() {
     return this.tokenColumn;
   }
-  public setPosition(Token token) {
+  public void setPosition(Token token) {
     this.tokenLine = token.beginLine;
     this.tokenColumn = token.beginColumn;
   }
