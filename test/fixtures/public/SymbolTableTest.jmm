@@ -20,8 +20,9 @@ class Life extends Dead{
         int a;
         
         
-        teste = new int[b];
-        teste2[b] = new ola();
+        //teste = new int[b][0];
+        a = b[0];
+        teste2[a] = new ola();
 
     }
 

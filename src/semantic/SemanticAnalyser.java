@@ -66,7 +66,7 @@ public class SemanticAnalyser {
         LinkedHashMap<String, String> arguments = methodNode.getArguments();
         String key = this.getMethodKey(methodName, arguments);
         if (!this.ST.addMethod(key, methodName, arguments, returnType)) {
-            System.out.println(MyUtils.ANSI_RED + "ERROR: Repeted method:" + methodName + MyUtils.ANSI_RESET);
+            ErrorHandler.addError("Repeted method:" + methodName);
         }
 
     }
@@ -161,12 +161,10 @@ public class SemanticAnalyser {
                 this.ST.initializeVariable(methodKey, equalsId);
 
             else
-                System.out.println(MyUtils.ANSI_RED + "ERROR: Incorrect types." + MyUtils.ANSI_RESET + equalsId
-                        + equalsIdType + equalsValType);
+                ErrorHandler.addError("Incorrect types.");
 
         } else
-            System.out.println(
-                    MyUtils.ANSI_RED + "ERROR: Incorrect number of childs in equals node." + MyUtils.ANSI_RESET);
+            ErrorHandler.addError("Incorrect number of childs in equals node.");
 
     }
 
@@ -209,8 +207,8 @@ public class SemanticAnalyser {
             // dealing with second child
             String indexType = this.getExpressionType(methodKey, secondChild);
             if (indexType == null || !indexType.equals("int")) {
-                System.out.println(MyUtils.ANSI_RED + "ERROR: Expected int for index in \"" + MyUtils.ANSI_RESET
-                        + equalsId + MyUtils.ANSI_RED + "\" array." + MyUtils.ANSI_RESET);
+
+                ErrorHandler.addError("Expected int for index in \"" + equalsId + "\" array.");
                 list.add(null);
                 list.add(null);
                 return list;
@@ -258,19 +256,29 @@ public class SemanticAnalyser {
         }
 
         else if (expression instanceof ASTArrayAccess) {
-            /* SimpleNode firstChild = (SimpleNode) expression.jjtGetChild(0);
+            SimpleNode firstChild = (SimpleNode) expression.jjtGetChild(0);
             SimpleNode secondChild = (SimpleNode) expression.jjtGetChild(1);
 
-            type = this.getExpressionType(methodKey, firstChild);
             String indexType = this.getExpressionType(methodKey, secondChild);
+            String identifier = null;
+
+            //primeiro filho tem que ser um identifier
+            if (firstChild instanceof ASTIdentifier) {
+                identifier = ((ASTIdentifier) firstChild).getIdentifier();
+                //Verifica se o identifier é uma var array
+                if(this.isArrayVar(methodKey, identifier)){
+                    type = this.getExpressionType(methodKey, firstChild);
+                    type = this.getSimpleArrayType(type);
+                }
+                else
+                    ErrorHandler.addError("Variable \"" + identifier + "\" is not an array.");
+            }
+
+            //segundo filho tem que ser um int
             if (indexType == null || !indexType.equals("int")) {
-                System.out.println(MyUtils.ANSI_RED + "ERROR: Expected int for index in \"" + MyUtils.ANSI_RESET
-                        + equalsId + MyUtils.ANSI_RED + "\" array." + MyUtils.ANSI_RESET);
-                return list;
-            } else
-                equalsIdType = this.getSimpleArrayType(equalsIdType);
- */
-        }
+                ErrorHandler.addError("Expected int for index in \"" + identifier + "\" array.");
+            }   
+         }
 
         return type;
     }
@@ -281,7 +289,7 @@ public class SemanticAnalyser {
         else if (this.ST.containsVariable(VarId))
             return this.ST.getVariableType(VarId);
 
-        System.out.println(MyUtils.ANSI_RED + "ERROR: Variable " + VarId + " undefined." + MyUtils.ANSI_RESET);
+        ErrorHandler.addError("Variable " + VarId + " undefined.");
         return null;
     }
 
@@ -297,6 +305,29 @@ public class SemanticAnalyser {
         }
 
         return result;
+    }
+
+    private Boolean isArrayVar(String methodKey, String VarId) {
+        String type = null;
+        if (this.ST.containsMethodVariable(methodKey, VarId)){
+            type = this.ST.getMethodVariableType(methodKey, VarId);
+            for (int i = 0; i < type.length(); i++) {
+                if (type.charAt(i) == '[') {
+                    return true;
+                }
+            }
+        }
+        else if (this.ST.containsVariable(VarId)){
+            type = this.ST.getVariableType(VarId);
+            for (int i = 0; i < type.length(); i++) {
+                if (type.charAt(i) == '[') {
+                    return true;
+                }
+            }
+        } else {
+            ErrorHandler.addError("Variable " + VarId + " undefined.");
+        }
+        return false;
     }
 
 }
