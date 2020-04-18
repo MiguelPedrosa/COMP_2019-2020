@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SemanticAnalyser {
 
@@ -32,7 +33,10 @@ public class SemanticAnalyser {
         return ST;
     }
 
-    /* ---------------------------------SIGN FUNCTIONS--------------------------------------- */
+    /*
+     * ---------------------------------SIGN
+     * FUNCTIONS---------------------------------------
+     */
 
     private void signFuntions(SimpleNode classNode) {
         for (int i = 0; i < classNode.jjtGetNumChildren(); i++) {
@@ -55,18 +59,20 @@ public class SemanticAnalyser {
     }
 
     private void signMethodNode(ASTMethodDeclaration methodNode) {
-        String key = methodNode.getKey();
         String returnType = methodNode.getReturnType();
         String methodName = methodNode.getMethodName();
         LinkedHashMap<String, String> arguments = methodNode.getArguments();
-
+        String key = this.getMethodKey(methodName, arguments);
         if(! this.ST.addMethod(key, methodName, arguments, returnType) ) {
             System.out.println(MyUtils.ANSI_RED + "ERROR: Repeted method:" + methodName + MyUtils.ANSI_RESET);
         }
 
     }
 
-    /* ---------------------------------PROCESS NODES--------------------------------------- */
+    /*
+     * ---------------------------------PROCESS
+     * NODES---------------------------------------
+     */
 
     private void processClassNode(SimpleNode classNode) {
         for (int i = 0; i < classNode.jjtGetNumChildren(); i++) {
@@ -107,7 +113,9 @@ public class SemanticAnalyser {
     }
 
     private void processMethodNode(ASTMethodDeclaration methodNode) {
-        String key = methodNode.getKey();
+        String methodName = methodNode.getMethodName();
+        LinkedHashMap<String, String> arguments = methodNode.getArguments();
+        String key = this.getMethodKey(methodName, arguments);
 
         for (int i = 0; i < methodNode.jjtGetNumChildren(); i++) {
             final SimpleNode childNode = (SimpleNode) methodNode.jjtGetChild(i);
@@ -128,15 +136,18 @@ public class SemanticAnalyser {
 
     private void processEquals(String methodKey, ASTEquals node) {
         if (node.jjtGetNumChildren() == 2) {
-            
+
             String equalsId = null;
             String equalsIdType = null;
             String equalsValType = null;
 
             ArrayList<String> list = getEqualsIdType(methodKey, (SimpleNode) node.jjtGetChild(0));
-            
-            equalsId = list.get(0);
-            equalsIdType = list.get(1);
+
+            if (list.size() == 2) {
+                equalsId = list.get(0);
+                equalsIdType = list.get(1);
+            }
+
             equalsValType = this.getExpressionType(methodKey, (SimpleNode) node.jjtGetChild(1));
 
             if (equalsIdType != null && equalsValType != null && equalsIdType.equals(equalsValType))
@@ -156,7 +167,19 @@ public class SemanticAnalyser {
 
     }
 
-    /* --------------------------------- EXTRA --------------------------------------- */
+    /*
+     * --------------------------------- EXTRA
+     * ---------------------------------------
+     */
+
+    public String getMethodKey(String methodName, LinkedHashMap<String, String> arguments) {
+        String key = methodName;
+
+        for (Map.Entry<String, String> entry : arguments.entrySet())
+            key += entry.getValue();
+
+        return key;
+    }
 
     private ArrayList<String> getEqualsIdType(String methodKey, SimpleNode equalsIdNode) {
         ArrayList<String> list = new ArrayList<String>();
@@ -166,9 +189,34 @@ public class SemanticAnalyser {
         if (equalsIdNode instanceof ASTIdentifier) {
             equalsId = ((ASTIdentifier) equalsIdNode).getIdentifier();
             equalsIdType = this.getVarType(methodKey, equalsId);
-        }
-        else if (equalsIdNode instanceof ASTArrayAccess) {
-            // TODO: when equalsId is an array
+        } else if (equalsIdNode instanceof ASTArrayAccess) {
+            SimpleNode firstChild = (SimpleNode) equalsIdNode.jjtGetChild(0);
+            SimpleNode secondChild = (SimpleNode) equalsIdNode.jjtGetChild(1);
+
+            // dealing with first child
+            /*
+                TODO: verificar se os outros passam na gramatica
+             * -> Literal 
+             * -> identifier DONE
+             * -> expressionNew 
+             * -> (expression)
+             */
+            if (firstChild instanceof ASTIdentifier) {
+                equalsId = ((ASTIdentifier) firstChild).getIdentifier();
+                equalsIdType = this.getVarType(methodKey, equalsId);
+            }
+
+            // dealing with second child
+            String indexType = this.getExpressionType(methodKey, secondChild);
+            if (indexType == null || !indexType.equals("int")) {
+                System.out.println(MyUtils.ANSI_RED + "ERROR: Expected int for index in \"" + MyUtils.ANSI_RESET
+                        + equalsId + MyUtils.ANSI_RED + "\" array." + MyUtils.ANSI_RESET);
+                list.add(null);
+                list.add(null);
+                return list;
+            } else 
+                equalsIdType = this.getSimpleArrayType(equalsIdType);
+            
         }
 
         list.add(equalsId);
@@ -203,4 +251,19 @@ public class SemanticAnalyser {
         System.out.println(MyUtils.ANSI_RED + "ERROR: Variable " + VarId + " undefined." + MyUtils.ANSI_RESET);
         return null;
     }
+
+    private String getSimpleArrayType(String ArrayType) {
+        String result = "";
+
+        for (int i = 0; i < ArrayType.length(); i++) {
+            if (ArrayType.charAt(i) == '[') {
+                break;
+            } else {
+                result += ArrayType.charAt(i);
+            }
+        }
+
+        return result;
+    }
+
 }

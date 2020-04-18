@@ -14,33 +14,16 @@ class Life extends Dead{
     int[] field;
 
     public static void main(String[] a) {
-		Life l;
-        Life l2;
-		int unused;
-        int xMax;
-        boolean teste;
-        Dead teste3;
-
-        teste[0] = 4;
-
-		unused = 4;
-        teste = true;
-        teste = false;
-        l = this;
-    
-        l2 = teste3;
-
-		l.init();
-
-        while (true) {
-            l.printField();
-            l.update();
-            unused = io.read();
-        }
+		int[] teste;
+        int b;
+        int a;
+        
+        
+        teste[b] = a;
 
     }
 
-    public boolean quicksort(int[] L) {
+ /*   public boolean quicksort(int[] L) {
         int xMax;
         boolean lazy;
         if ( MathUtils.random(0, 5) < 4 ) {
@@ -61,7 +44,7 @@ class Life extends Dead{
         return lazy;
     }
 
-    public boolean quicksort2(int[] L, String teste) {
+    public boolean quicksort(int[] L, String teste) {
         boolean lazy;
         if ( MathUtils.random(0, 5) < 4 ) {
             this.beLazy(L);
@@ -79,5 +62,5 @@ class Life extends Dead{
         }
         
         return lazy;
-    }
+    }*/
 }
