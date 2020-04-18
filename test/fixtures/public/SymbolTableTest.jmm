@@ -21,8 +21,7 @@ class Life extends Dead{
         
         
         teste = new int[b];
-        teste2 = new ola();
-        b = 1;
+        teste2[b] = new ola();
 
     }
 

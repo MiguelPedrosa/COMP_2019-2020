@@ -252,8 +252,22 @@ public class SemanticAnalyser {
                 }
             }
             else if (childNode instanceof ASTIdentifier) 
-                type = ((ASTIdentifier) childNode).getIdentifier();
-            
+                type = ((ASTIdentifier) childNode).getIdentifier();    
+        }
+
+        else if (expression instanceof ASTArrayAccess) {
+            /* SimpleNode firstChild = (SimpleNode) expression.jjtGetChild(0);
+            SimpleNode secondChild = (SimpleNode) expression.jjtGetChild(1);
+
+            type = this.getExpressionType(methodKey, firstChild);
+            String indexType = this.getExpressionType(methodKey, secondChild);
+            if (indexType == null || !indexType.equals("int")) {
+                System.out.println(MyUtils.ANSI_RED + "ERROR: Expected int for index in \"" + MyUtils.ANSI_RESET
+                        + equalsId + MyUtils.ANSI_RED + "\" array." + MyUtils.ANSI_RESET);
+                return list;
+            } else
+                equalsIdType = this.getSimpleArrayType(equalsIdType);
+ */
         }
 
         return type;
