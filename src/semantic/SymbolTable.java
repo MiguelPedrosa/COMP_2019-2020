@@ -48,9 +48,12 @@ public class SymbolTable {
         this.main = new MainTable(this);
     }
 
-    public void addMethod(String key, String name, LinkedHashMap<String, String> arguments, String returnType){
+    public boolean addMethod(String key, String name, LinkedHashMap<String, String> arguments, String returnType){
         MethodTable method = new MethodTable(this, name, returnType, arguments);
+        if(methods.containsKey(key))
+            return false;
         methods.put(key, method);
+        return true;
     }
 
     /* ------------------------------------------- GETTERS ------------------------------------------------- */
