@@ -322,7 +322,10 @@ void Literal() #Literal: {Token literal;}
         | literal=<TRUE>
         | literal=<FALSE>
         | literal=<THIS>
-    ) {jjtThis.literal = literal.image;}
+    ) {
+        jjtThis.literal = literal.image;
+        jjtThis.setPosition(literal);
+    }
 }
 
 void Expr_NEW() #New: {}
@@ -342,5 +345,6 @@ void Identifier() #Identifier: {Token identifier;}
 {
     identifier=<IDENTIFIER> {
         jjtThis.setIdentifier(identifier.image);
+        jjtThis.setPosition(identifier);
     }
 }
