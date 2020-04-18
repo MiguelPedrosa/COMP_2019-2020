@@ -15,11 +15,13 @@ class Life extends Dead{
 
     public static void main(String[] a) {
 		int[] teste;
+        ola teste2;
         int b;
         int a;
         
         
-        teste[b] = a;
+        teste = new int[b];
+        teste2 = new ola();
 
     }
 

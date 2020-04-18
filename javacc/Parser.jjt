@@ -328,8 +328,8 @@ void Literal() #Literal: {Token literal;}
 void Expr_NEW() #New: {}
 {
     <NEW> (
-          <INT> <LSQPARENS> Expression() <RSQPARENS>
-        | Identifier() <LPARENS> <RPARENS>
+          <INT> <LSQPARENS> Expression() <RSQPARENS> {jjtThis.setType("int[]");}
+        | Identifier() <LPARENS> <RPARENS> 
     )
 }
 

@@ -156,7 +156,7 @@ public class SemanticAnalyser {
                 this.ST.initializeVariable(methodKey, equalsId);
 
             else
-                System.out.println(MyUtils.ANSI_RED + "ERROR: Incorrect types." + MyUtils.ANSI_RESET);
+                System.out.println(MyUtils.ANSI_RED + "ERROR: Incorrect types." + MyUtils.ANSI_RESET + equalsId + equalsIdType + equalsValType);
 
         } else
             System.out.println(
@@ -234,6 +234,21 @@ public class SemanticAnalyser {
 
         else if (expression instanceof ASTIdentifier) {
             type = getVarType(methodKey, ((ASTIdentifier) expression).getIdentifier());
+        }
+
+        else if (expression instanceof ASTNew) {
+            SimpleNode childNode = (SimpleNode) expression.jjtGetChild(0);
+
+            //if else mal, procurar por expressão ou por identifier instead
+            if (expression instanceof ASTIdentifier) {
+                type = ((ASTIdentifier) childNode).getIdentifier();
+            } else {
+                String indexType = getExpressionType(methodKey, childNode);
+                if(indexType != null && indexType.equals("int")){
+                    type = ((ASTNew) expression).getType();
+                }
+            }
+            
         }
 
         return type;
