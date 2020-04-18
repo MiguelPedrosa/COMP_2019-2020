@@ -65,7 +65,7 @@ public class SemanticAnalyser {
         String methodName = methodNode.getMethodName();
         LinkedHashMap<String, String> arguments = methodNode.getArguments();
         String key = this.getMethodKey(methodName, arguments);
-        if(! this.ST.addMethod(key, methodName, arguments, returnType) ) {
+        if (!this.ST.addMethod(key, methodName, arguments, returnType)) {
             System.out.println(MyUtils.ANSI_RED + "ERROR: Repeted method:" + methodName + MyUtils.ANSI_RESET);
         }
 
@@ -161,7 +161,8 @@ public class SemanticAnalyser {
                 this.ST.initializeVariable(methodKey, equalsId);
 
             else
-                System.out.println(MyUtils.ANSI_RED + "ERROR: Incorrect types." + MyUtils.ANSI_RESET);
+                System.out.println(MyUtils.ANSI_RED + "ERROR: Incorrect types." + MyUtils.ANSI_RESET + equalsId
+                        + equalsIdType + equalsValType);
 
         } else
             System.out.println(
@@ -197,11 +198,8 @@ public class SemanticAnalyser {
 
             // dealing with first child
             /*
-                TODO: verificar se os outros passam na gramatica
-             * -> Literal 
-             * -> identifier DONE
-             * -> expressionNew 
-             * -> (expression)
+             * TODO: verificar se os outros passam na gramatica -> Literal -> identifier
+             * DONE -> expressionNew -> (expression)
              */
             if (firstChild instanceof ASTIdentifier) {
                 equalsId = ((ASTIdentifier) firstChild).getIdentifier();
@@ -216,9 +214,9 @@ public class SemanticAnalyser {
                 list.add(null);
                 list.add(null);
                 return list;
-            } else 
+            } else
                 equalsIdType = this.getSimpleArrayType(equalsIdType);
-            
+
         }
 
         list.add(equalsId);
@@ -228,6 +226,11 @@ public class SemanticAnalyser {
 
     private String getExpressionType(String methodKey, SimpleNode expression) {
         String type = null;
+
+        if (expression instanceof ASTExpression) {
+            SimpleNode childNode = (SimpleNode) expression.jjtGetChild(0);
+            type = getExpressionType(methodKey, childNode);
+        }
 
         if (expression instanceof ASTLiteral) {
             type = ((ASTLiteral) expression).getLiteralType();
@@ -239,6 +242,20 @@ public class SemanticAnalyser {
 
         else if (expression instanceof ASTIdentifier) {
             type = getVarType(methodKey, ((ASTIdentifier) expression).getIdentifier());
+        }
+
+        else if (expression instanceof ASTNew) {
+            SimpleNode childNode = (SimpleNode) expression.jjtGetChild(0);
+
+            if (childNode instanceof ASTExpression) {
+                String indexType = getExpressionType(methodKey, childNode);
+                if (indexType != null && indexType.equals("int")) {
+                    type = ((ASTNew) expression).getType();
+                }
+            }
+            else if (childNode instanceof ASTIdentifier) 
+                type = ((ASTIdentifier) childNode).getIdentifier();
+            
         }
 
         return type;
