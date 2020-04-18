@@ -59,7 +59,11 @@ public class SemanticAnalyser {
         String returnType = methodNode.getReturnType();
         String methodName = methodNode.getMethodName();
         LinkedHashMap<String, String> arguments = methodNode.getArguments();
-        this.ST.addMethod(key, methodName, arguments, returnType);
+
+        if(! this.ST.addMethod(key, methodName, arguments, returnType) ) {
+            System.out.println(MyUtils.ANSI_RED + "ERROR: Repeted method:" + methodName + MyUtils.ANSI_RESET);
+        }
+
     }
 
     /* ---------------------------------PROCESS NODES--------------------------------------- */
