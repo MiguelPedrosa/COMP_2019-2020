@@ -88,8 +88,17 @@ public class SymbolTable {
         return var.getType();
     }
 
+    public String getMethodReturn(String methodKey){
+        MethodTable method = methods.get(methodKey);
+        return method.getReturnType();
+    }
+
     /* ------------------------------------------- CHECKERS ------------------------------------------------ */
     
+    public Boolean containsMethod(String methodKey) {        
+        return methods.containsKey(methodKey);
+    }
+
     public Boolean containsVariable(String VarId) {        
         return variables.containsKey(VarId);
     }

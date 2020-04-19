@@ -182,6 +182,15 @@ public class SemanticAnalyser {
         return key;
     }
 
+    public String getMethodKey(String methodName, ArrayList<String> arguments) {
+        String key = methodName;
+
+        for(int i = 0; i < arguments.size(); i++)
+            key += arguments.get(i);
+
+        return key;
+    }
+
     private ArrayList<String> getEqualsIdType(String methodKey, SimpleNode equalsIdNode) {
         ArrayList<String> list = new ArrayList<String>();
         String equalsId = null;
@@ -201,7 +210,7 @@ public class SemanticAnalyser {
              */
             if (firstChild instanceof ASTIdentifier) {
                 equalsId = ((ASTIdentifier) firstChild).getIdentifier();
-                equalsIdType = this.getVarType(methodKey, equalsId);
+
             }
 
             // dealing with second child
@@ -212,8 +221,13 @@ public class SemanticAnalyser {
                 list.add(null);
                 list.add(null);
                 return list;
-            } else
-                equalsIdType = this.getSimpleArrayType(equalsIdType);
+            } else {
+                if (isArrayVar(methodKey, equalsId)) {
+                    equalsIdType = this.getVarType(methodKey, equalsId);
+                    equalsIdType = this.getSimpleArrayType(equalsIdType);
+                } else
+                    ErrorHandler.addError("Variable \"" + equalsId + "\" is not an array.");
+            }
 
         }
 
@@ -250,9 +264,8 @@ public class SemanticAnalyser {
                 if (indexType != null && indexType.equals("int")) {
                     type = ((ASTNew) expression).getType();
                 }
-            }
-            else if (childNode instanceof ASTIdentifier) 
-                type = ((ASTIdentifier) childNode).getIdentifier();    
+            } else if (childNode instanceof ASTIdentifier)
+                type = ((ASTIdentifier) childNode).getIdentifier();
         }
 
         else if (expression instanceof ASTArrayAccess) {
@@ -262,23 +275,69 @@ public class SemanticAnalyser {
             String indexType = this.getExpressionType(methodKey, secondChild);
             String identifier = null;
 
-            //primeiro filho tem que ser um identifier
+            // primeiro filho tem que ser um identifier
             if (firstChild instanceof ASTIdentifier) {
                 identifier = ((ASTIdentifier) firstChild).getIdentifier();
-                //Verifica se o identifier é uma var array
-                if(this.isArrayVar(methodKey, identifier)){
+                // Verifica se o identifier é uma var array
+                if (this.isArrayVar(methodKey, identifier)) {
                     type = this.getExpressionType(methodKey, firstChild);
                     type = this.getSimpleArrayType(type);
-                }
-                else
+                } else
                     ErrorHandler.addError("Variable \"" + identifier + "\" is not an array.");
             }
 
-            //segundo filho tem que ser um int
+            // segundo filho tem que ser um int
             if (indexType == null || !indexType.equals("int")) {
                 ErrorHandler.addError("Expected int for index in \"" + identifier + "\" array.");
-            }   
-         }
+            }
+        }
+
+        else if (expression instanceof ASTFuncCall) {
+            // 3 filhos
+            SimpleNode firstChild = (SimpleNode) expression.jjtGetChild(0);
+            SimpleNode secondChild = (SimpleNode) expression.jjtGetChild(1);
+            SimpleNode thirdChild = (SimpleNode) expression.jjtGetChild(2);
+
+            String classType = this.getExpressionType(methodKey, firstChild);
+
+            //nome do método
+            if (secondChild instanceof ASTIdentifier) {
+                String methodName = ((ASTIdentifier) secondChild).getIdentifier();
+                
+                //verificar se existe método em classe (imports e minha classe)
+                ArrayList<String> argsTypes = new ArrayList<String>();
+
+                if (thirdChild instanceof ASTFuncArgs) {
+                    argsTypes = this.getArgsTypes(methodKey, (ASTFuncArgs) thirdChild);
+                    String method = this.getMethodKey(methodName, argsTypes);
+
+                    // If is this class check if methods exists
+                    if(classType != null && classType.equals(this.ST.getClasseName())){
+                        if(this.ST.containsMethod(method))
+                            type = this.ST.getMethodReturn(method);
+                        else
+                            ErrorHandler.addError("Method " + methodName + argsTypes + " undefined in class " + classType );
+                    }
+                    // check if method is in imports
+                    else{
+                        //TODO: check if method is in imports
+                        ErrorHandler.addError("Method " + methodName + argsTypes + " undefined in class " + classType );
+                    }
+                    
+                }
+            }
+
+        }
+
+        else if (expression instanceof ASTLength) {
+            SimpleNode childNode = (SimpleNode) expression.jjtGetChild(0);
+            String childType = this.getExpressionType(methodKey, childNode);
+            if (childType != null && this.isArrayType(childType))
+                type = "int";
+            else
+                ErrorHandler.addError("Final variable legnth is undefined.");
+
+        }
 
         return type;
     }
@@ -309,15 +368,14 @@ public class SemanticAnalyser {
 
     private Boolean isArrayVar(String methodKey, String VarId) {
         String type = null;
-        if (this.ST.containsMethodVariable(methodKey, VarId)){
+        if (this.ST.containsMethodVariable(methodKey, VarId)) {
             type = this.ST.getMethodVariableType(methodKey, VarId);
             for (int i = 0; i < type.length(); i++) {
                 if (type.charAt(i) == '[') {
                     return true;
                 }
             }
-        }
-        else if (this.ST.containsVariable(VarId)){
+        } else if (this.ST.containsVariable(VarId)) {
             type = this.ST.getVariableType(VarId);
             for (int i = 0; i < type.length(); i++) {
                 if (type.charAt(i) == '[') {
@@ -328,6 +386,27 @@ public class SemanticAnalyser {
             ErrorHandler.addError("Variable " + VarId + " undefined.");
         }
         return false;
+    }
+
+    private Boolean isArrayType(String type) {
+        for (int i = 0; i < type.length(); i++) {
+            if (type.charAt(i) == '[') {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private ArrayList<String> getArgsTypes(String methodKey, ASTFuncArgs argsNode) {
+        ArrayList<String> argsTypes = new ArrayList<String>();
+
+        for (int i = 0; i < argsNode.jjtGetNumChildren(); i++) {
+            final SimpleNode childNode = (SimpleNode) argsNode.jjtGetChild(i);
+            
+            argsTypes.add(this.getExpressionType(methodKey, childNode));
+        }
+        
+        return argsTypes;
     }
 
 }
