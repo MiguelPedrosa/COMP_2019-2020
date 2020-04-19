@@ -29,7 +29,8 @@ public class SymbolTable {
 
     public void addVariable(String type, String name) {
         if(containsVariable(name)){
-            System.out.println(MyUtils.ANSI_RED + "ERROR: Variable (" + name + ") declaration repeated" + MyUtils.ANSI_RESET);
+            ErrorHandler.addError("Variable (" + name + ") declaration repeated");
+
             return;
         }
         final SymbolVar var = new SymbolVar(name, type);
@@ -37,6 +38,9 @@ public class SymbolTable {
     }
 
     public void addLocalVariable(String methodKey, String type, String name) {
+        if(containsVariable(name))
+            ErrorHandler.addWarning("Variable '" + name + "' already defined in class.");
+
         if(methodKey.equals("main"))
             this.main.addVariable(type, name);
         else

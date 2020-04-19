@@ -7,6 +7,8 @@ public class SemanticAnalyser {
 
     private SimpleNode root;
     private SymbolTable ST;
+    private String intType = "int";
+    private String booleanType = "boolean";
 
     public SemanticAnalyser(SimpleNode root) {
         this.root = root;
@@ -30,8 +32,8 @@ public class SemanticAnalyser {
             this.processClassNode(classNode);
         }
 
-        ErrorHandler.printErrors();
         ErrorHandler.printWarnings();
+        ErrorHandler.printErrors();
         return ST;
     }
 
@@ -156,9 +158,9 @@ public class SemanticAnalyser {
                 this.ST.initializeVariable(methodKey, equalsId);
 
             // verifica se filho = pai então aceita apesar de tipos serem diferentes
-            else if (equalsIdType != null && equalsValType != null && equalsIdType.equals(this.ST.getClasseName())
+            /* else if (equalsIdType != null && equalsValType != null && equalsIdType.equals(this.ST.getClasseName())
                     && equalsValType.equals(this.ST.getClassExtendsName()))
-                this.ST.initializeVariable(methodKey, equalsId);
+                this.ST.initializeVariable(methodKey, equalsId); */
 
             else
                 ErrorHandler.addError("Incorrect types.");
@@ -215,7 +217,7 @@ public class SemanticAnalyser {
 
             // dealing with second child
             String indexType = this.getExpressionType(methodKey, secondChild);
-            if (indexType == null || !indexType.equals("int")) {
+            if (indexType == null || !indexType.equals(intType)) {
 
                 ErrorHandler.addError("Expected int for index in \"" + equalsId + "\" array.");
                 list.add(null);
@@ -246,9 +248,12 @@ public class SemanticAnalyser {
 
         if (expression instanceof ASTLiteral) {
             type = ((ASTLiteral) expression).getLiteralType();
-            if (type.equals("this"))
-                return this.ST.getClasseName();
-            else
+            if (type.equals("this")) {
+                if (methodKey.equals("main"))
+                    ErrorHandler.addError("Impossible to use 'this' in static method main.");
+                else
+                    return this.ST.getClasseName();
+            } else
                 return type;
         }
 
@@ -261,7 +266,7 @@ public class SemanticAnalyser {
 
             if (childNode instanceof ASTExpression) {
                 String indexType = getExpressionType(methodKey, childNode);
-                if (indexType != null && indexType.equals("int")) {
+                if (indexType != null && indexType.equals(intType)) {
                     type = ((ASTNew) expression).getType();
                 }
             } else if (childNode instanceof ASTIdentifier)
@@ -287,7 +292,7 @@ public class SemanticAnalyser {
             }
 
             // segundo filho tem que ser um int
-            if (indexType == null || !indexType.equals("int")) {
+            if (indexType == null || !indexType.equals(intType)) {
                 ErrorHandler.addError("Expected int for index in \"" + identifier + "\" array.");
             }
         }
@@ -334,7 +339,7 @@ public class SemanticAnalyser {
             SimpleNode childNode = (SimpleNode) expression.jjtGetChild(0);
             String childType = this.getExpressionType(methodKey, childNode);
             if (childType != null && this.isArrayType(childType))
-                type = "int";
+                type = intType;
             else
                 ErrorHandler.addError("Final variable legnth is undefined.");
         }
@@ -342,8 +347,8 @@ public class SemanticAnalyser {
         else if (expression instanceof ASTNot) {
             SimpleNode child = (SimpleNode) expression.jjtGetChild(0);
             String childType = this.getExpressionType(methodKey, child);
-            if (childType != null && childType.equals("boolean"))
-                type = "boolean";
+            if (childType != null && childType.equals(booleanType))
+                type = booleanType;
             else
                 ErrorHandler.addError("Expected boolean to use '!' operator");
         }
@@ -356,8 +361,8 @@ public class SemanticAnalyser {
             String firstChildType = this.getExpressionType(methodKey, firstChild);
             String secondChildType = this.getExpressionType(methodKey, secondChild);
 
-            if (firstChildType == null || secondChildType == null || !firstChildType.equals("int")
-                    || !secondChildType.equals("int")) {
+            if (firstChildType == null || secondChildType == null || !firstChildType.equals(intType)
+                    || !secondChildType.equals(intType)) {
                 if (expression instanceof ASTTimes)
                     ErrorHandler.addError("Expected the use of ints for the operand '*'.");
                 else if (expression instanceof ASTDividor)
@@ -369,9 +374,9 @@ public class SemanticAnalyser {
                 else if (expression instanceof ASTLessThan)
                     ErrorHandler.addError("Expected the use of ints for the operand '<'.");
             } else if (expression instanceof ASTLessThan)
-                type = "boolean";
+                type = booleanType;
             else
-                type = "int";
+                type = intType;
         }
 
         else if (expression instanceof ASTAnd) {
@@ -381,11 +386,11 @@ public class SemanticAnalyser {
             String firstChildType = this.getExpressionType(methodKey, firstChild);
             String secondChildType = this.getExpressionType(methodKey, secondChild);
 
-            if (firstChildType == null || secondChildType == null || !firstChildType.equals("boolean")
-                    || !secondChildType.equals("boolean"))
+            if (firstChildType == null || secondChildType == null || !firstChildType.equals(booleanType)
+                    || !secondChildType.equals(booleanType))
                 ErrorHandler.addError("Expected the use of booleans for the operand '&&'.");
             else
-                type = "boolean";
+                type = booleanType;
         }
 
         return type;
