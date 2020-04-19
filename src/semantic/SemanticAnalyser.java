@@ -185,7 +185,7 @@ public class SemanticAnalyser {
     public String getMethodKey(String methodName, ArrayList<String> arguments) {
         String key = methodName;
 
-        for(int i = 0; i < arguments.size(); i++)
+        for (int i = 0; i < arguments.size(); i++)
             key += arguments.get(i);
 
         return key;
@@ -300,11 +300,11 @@ public class SemanticAnalyser {
 
             String classType = this.getExpressionType(methodKey, firstChild);
 
-            //nome do método
+            // nome do método
             if (secondChild instanceof ASTIdentifier) {
                 String methodName = ((ASTIdentifier) secondChild).getIdentifier();
-                
-                //verificar se existe método em classe (imports e minha classe)
+
+                // verificar se existe método em classe (imports e minha classe)
                 ArrayList<String> argsTypes = new ArrayList<String>();
 
                 if (thirdChild instanceof ASTFuncArgs) {
@@ -312,18 +312,19 @@ public class SemanticAnalyser {
                     String method = this.getMethodKey(methodName, argsTypes);
 
                     // If is this class check if methods exists
-                    if(classType != null && classType.equals(this.ST.getClasseName())){
-                        if(this.ST.containsMethod(method))
+                    if (classType != null && classType.equals(this.ST.getClasseName())) {
+                        if (this.ST.containsMethod(method))
                             type = this.ST.getMethodReturn(method);
                         else
-                            ErrorHandler.addError("Method " + methodName + argsTypes + " undefined in class " + classType );
+                            ErrorHandler
+                                    .addError("Method " + methodName + argsTypes + " undefined in class " + classType);
                     }
                     // check if method is in imports
-                    else{
-                        //TODO: check if method is in imports
-                        ErrorHandler.addError("Method " + methodName + argsTypes + " undefined in class " + classType );
+                    else {
+                        // TODO: check if method is in imports
+                        ErrorHandler.addError("Method " + methodName + argsTypes + " undefined in class " + classType);
                     }
-                    
+
                 }
             }
 
@@ -336,7 +337,55 @@ public class SemanticAnalyser {
                 type = "int";
             else
                 ErrorHandler.addError("Final variable legnth is undefined.");
+        }
 
+        else if (expression instanceof ASTNot) {
+            SimpleNode child = (SimpleNode) expression.jjtGetChild(0);
+            String childType = this.getExpressionType(methodKey, child);
+            if (childType != null && childType.equals("boolean"))
+                type = "boolean";
+            else
+                ErrorHandler.addError("Expected boolean to use '!' operator");
+        }
+
+        else if (expression instanceof ASTTimes || expression instanceof ASTDividor || expression instanceof ASTPlus
+                || expression instanceof ASTMinus || expression instanceof ASTLessThan) {
+            SimpleNode firstChild = (SimpleNode) expression.jjtGetChild(0);
+            SimpleNode secondChild = (SimpleNode) expression.jjtGetChild(1);
+
+            String firstChildType = this.getExpressionType(methodKey, firstChild);
+            String secondChildType = this.getExpressionType(methodKey, secondChild);
+
+            if (firstChildType == null || secondChildType == null || !firstChildType.equals("int")
+                    || !secondChildType.equals("int")) {
+                if (expression instanceof ASTTimes)
+                    ErrorHandler.addError("Expected the use of ints for the operand '*'.");
+                else if (expression instanceof ASTDividor)
+                    ErrorHandler.addError("Expected the use of ints for the operand '/'.");
+                else if (expression instanceof ASTPlus)
+                    ErrorHandler.addError("Expected the use of ints for the operand '+'.");
+                else if (expression instanceof ASTMinus)
+                    ErrorHandler.addError("Expected the use of ints for the operand '-'.");
+                else if (expression instanceof ASTLessThan)
+                    ErrorHandler.addError("Expected the use of ints for the operand '<'.");
+            } else if (expression instanceof ASTLessThan)
+                type = "boolean";
+            else
+                type = "int";
+        }
+
+        else if (expression instanceof ASTAnd) {
+            SimpleNode firstChild = (SimpleNode) expression.jjtGetChild(0);
+            SimpleNode secondChild = (SimpleNode) expression.jjtGetChild(1);
+
+            String firstChildType = this.getExpressionType(methodKey, firstChild);
+            String secondChildType = this.getExpressionType(methodKey, secondChild);
+
+            if (firstChildType == null || secondChildType == null || !firstChildType.equals("boolean")
+                    || !secondChildType.equals("boolean"))
+                ErrorHandler.addError("Expected the use of booleans for the operand '&&'.");
+            else
+                type = "boolean";
         }
 
         return type;
@@ -402,10 +451,10 @@ public class SemanticAnalyser {
 
         for (int i = 0; i < argsNode.jjtGetNumChildren(); i++) {
             final SimpleNode childNode = (SimpleNode) argsNode.jjtGetChild(i);
-            
+
             argsTypes.add(this.getExpressionType(methodKey, childNode));
         }
-        
+
         return argsTypes;
     }
 
