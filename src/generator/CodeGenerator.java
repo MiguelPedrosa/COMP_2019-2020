@@ -35,7 +35,9 @@ public class CodeGenerator {
      * @return
      */
     public boolean start() {
+        System.out.println("Code generation started...\n\n");
         if (!generateFile()) {
+            System.out.println("Failed to generate file!\n\n");
             return false;
         }
         
@@ -98,8 +100,11 @@ public class CodeGenerator {
      * @param classNode
      */
     public void writeClass(SimpleNode classNode, int scope) {
-        String className;
+        String className = "";
         writeCode(".class public " + className + "\n", scope);
+        writeCode(".super java/lang/Object", scope);
+
+        writeInitializer(scope);
     }
 
 }
