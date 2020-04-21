@@ -9,6 +9,12 @@ import java.io.IOException;
 public class CodeGenerator {
 
     private static final String fileExtension = ".j";
+    private static final char space = ' ';
+    private static final char tab = '\t';
+
+    //Identation settings (can be changed later)
+    private String identation = space;
+    private int identationSize = 2;
 
     private FileOutputStream jFile;
     private SimpleNode rootNode;
