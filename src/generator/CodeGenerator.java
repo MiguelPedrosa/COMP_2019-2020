@@ -2,6 +2,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.FileSystem;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -13,8 +14,9 @@ public class CodeGenerator {
     private static final String fileExtension = ".j";
     private static final char space = ' ';
     private static final char tab = '\t';
+    private static final String fileSeparator = System.getProperty("file.separator");
 
-    //Identation settings (can be changed later)
+    // Identation settings (can be changed later)
     private String identation = Character.toString(space);
     private int identationSize = 2;
 
@@ -37,21 +39,53 @@ public class CodeGenerator {
     public boolean start() {
         System.out.println("Code generation started...\n\n");
         if (!generateFile()) {
-            System.out.println("Failed to generate file!\n\n");
             return false;
         }
-        
+
+        readNodes(rootNode, 0);
+
         return true;
+    }
+
+    private void readNodes(SimpleNode node, int scope) {
+        int numChildren = node.jjtGetNumChildren();
+
+        if (numChildren == 0)
+            return;
+
+        for (int i = 0; i < numChildren; i++) {
+            SimpleNode child = (SimpleNode) node.jjtGetChild(i);
+            String nodeType = child.getClass().getSimpleName();
+
+            switch (nodeType) {
+                case "ASTStart":
+                    readNodes(child, scope);
+                    break;
+                case "ASTClassDeclaration":
+                    writeClass(child, scope);
+                    break;
+                case "ASTMethodDeclaration":
+                    
+                    break;
+                case "ASTMainDeclaration":
+                    
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     /**
      * Method to generate code file
      */
-    public boolean generateFile() {
+    private boolean generateFile() {
+        System.out.println("Generating code file...\n\n");
         try {
-            jFile = new FileOutputStream(filePath + fileName + fileExtension);
+            jFile = new FileOutputStream(filePath + fileSeparator + fileName + fileExtension);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            System.out.println("Failed to generate code file!\n\n");
             return false;
         }
         return true;
@@ -64,7 +98,8 @@ public class CodeGenerator {
      * @param scope
      */
     private void writeCode(String code, int scope) {
-        String identedCode = IntStream.range(0, scope*identationSize).mapToObj(i -> identation).collect(Collectors.joining(""));
+        String identedCode = IntStream.range(0, scope * identationSize).mapToObj(i -> identation)
+                .collect(Collectors.joining(""));
         identedCode += code;
         try {
             jFile.write(identedCode.getBytes());
@@ -99,7 +134,8 @@ public class CodeGenerator {
      * 
      * @param classNode
      */
-    public void writeClass(SimpleNode classNode, int scope) {
+    private void writeClass(SimpleNode classNode, int scope) {
+        System.out.println("Writing class...");
         String className = "";
         writeCode(".class public " + className + "\n", scope);
         writeCode(".super java/lang/Object", scope);
