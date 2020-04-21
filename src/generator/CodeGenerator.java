@@ -141,6 +141,8 @@ public class CodeGenerator {
         writeCode(".super java/lang/Object\n\n", scope);
 
         writeInitializer(scope);
+
+        readNodes(classNode, scope);
     }
 
 }
