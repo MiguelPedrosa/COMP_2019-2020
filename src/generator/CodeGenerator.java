@@ -62,13 +62,13 @@ public class CodeGenerator {
                     readNodes(child, scope);
                     break;
                 case "ASTClassDeclaration":
-                    writeClass(child, scope);
+                    writeClass((ASTClassDeclaration) child, scope);
                     break;
                 case "ASTMethodDeclaration":
-                    
+
                     break;
                 case "ASTMainDeclaration":
-                    
+
                     break;
                 default:
                     break;
@@ -122,10 +122,10 @@ public class CodeGenerator {
      */
     private void writeInitializer(int scope) {
         writeCode("; standard initializer\n", scope);
-        writeCode(".method public <init>()V\n", scope);
-        writeCode("aload_0\n", scope);
-        writeCode("invokenonvirtual java/lang/Object/<init>()V\n", scope);
-        writeCode("return\n", scope);
+        writeCode(".method public <init>()V\n", scope + 1);
+        writeCode("aload_0\n", scope + 1);
+        writeCode("invokenonvirtual java/lang/Object/<init>()V\n", scope + 1);
+        writeCode("return\n", scope + 1);
         endMethod(scope);
     }
 
@@ -134,11 +134,11 @@ public class CodeGenerator {
      * 
      * @param classNode
      */
-    private void writeClass(SimpleNode classNode, int scope) {
+    private void writeClass(ASTClassDeclaration classNode, int scope) {
         System.out.println("Writing class...");
-        String className = "";
+        String className = classNode.getClassId();
         writeCode(".class public " + className + "\n", scope);
-        writeCode(".super java/lang/Object", scope);
+        writeCode(".super java/lang/Object\n\n", scope);
 
         writeInitializer(scope);
     }
