@@ -17,6 +17,7 @@ public class Main {
         System.out.println(classTable);
 
         CodeGenerator codeGenerator = new CodeGenerator(root, "testFileName");
+        codeGenerator.start();
     }
 
     public static InputStream openFile(String filePath) {
