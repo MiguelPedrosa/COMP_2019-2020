@@ -26,6 +26,7 @@ public class CodeGenerator {
     public CodeGenerator(SimpleNode root, String fileName) {
         this.rootNode = root;
         this.fileName = fileName;
+        this.filePath = System.getProperty("user.dir");
     }
 
     /**
