@@ -2,6 +2,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * CodeGenerator
@@ -13,7 +15,7 @@ public class CodeGenerator {
     private static final char tab = '\t';
 
     //Identation settings (can be changed later)
-    private String identation = space;
+    private String identation = Character.toString(space);
     private int identationSize = 2;
 
     private FileOutputStream jFile;
@@ -56,13 +58,47 @@ public class CodeGenerator {
      * Method to write code into file
      * 
      * @param code
+     * @param scope
      */
-    private void writeCode(String code) {
+    private void writeCode(String code, int scope) {
+        String identedCode = IntStream.range(0, scope*identationSize).mapToObj(i -> identation).collect(Collectors.joining(""));
+        identedCode += code;
         try {
-            jFile.write(code.getBytes());
+            jFile.write(identedCode.getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Method to write the end of a method to the file
+     * 
+     */
+    private void endMethod(int scope) {
+        writeCode(".end method\n\n", scope);
+    }
+
+    /**
+     * Method to write class initializer
+     * 
+     */
+    private void writeInitializer(int scope) {
+        writeCode("; standard initializer\n", scope);
+        writeCode(".method public <init>()V\n", scope);
+        writeCode("aload_0\n", scope);
+        writeCode("invokenonvirtual java/lang/Object/<init>()V\n", scope);
+        writeCode("return\n", scope);
+        endMethod(scope);
+    }
+
+    /**
+     * Method to write a class into the file
+     * 
+     * @param classNode
+     */
+    public void writeClass(SimpleNode classNode, int scope) {
+        String className;
+        writeCode(".class public " + className + "\n", scope);
     }
 
 }
