@@ -15,6 +15,8 @@ public class Main {
         SemanticAnalyser semantic = new SemanticAnalyser(root);
         SymbolTable classTable = semantic.Start();
         System.out.println(classTable);
+
+        CodeGenerator codeGenerator = new CodeGenerator(root, "testFileName");
     }
 
     public static InputStream openFile(String filePath) {
