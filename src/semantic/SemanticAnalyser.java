@@ -105,15 +105,7 @@ public class SemanticAnalyser {
     }
 
     private void processMainNode(ASTMainDeclaration mainNode) {
-        for (int i = 0; i < mainNode.jjtGetNumChildren(); i++) {
-            final SimpleNode childNode = (SimpleNode) mainNode.jjtGetChild(i);
-            // First childs are local variables
-            if (childNode instanceof ASTVarDeclaration) {
-                processLocalVarDeclaration("main", (ASTVarDeclaration) childNode);
-            } else if (childNode instanceof ASTEquals) {
-                processEquals("main", (ASTEquals) childNode);
-            }
-        }
+        this.processNodes("main", (SimpleNode) mainNode, true);
     }
 
     private void processMethodNode(ASTMethodDeclaration methodNode) {
@@ -121,13 +113,23 @@ public class SemanticAnalyser {
         LinkedHashMap<String, String> arguments = methodNode.getArguments();
         String key = this.getMethodKey(methodName, arguments);
 
-        for (int i = 0; i < methodNode.jjtGetNumChildren(); i++) {
-            final SimpleNode childNode = (SimpleNode) methodNode.jjtGetChild(i);
+        this.processNodes(key, (SimpleNode) methodNode, true);
+    }
+
+    private void processNodes(String methodKey, SimpleNode node, boolean initialize) {
+        for (int i = 0; i < node.jjtGetNumChildren(); i++) {
+            SimpleNode childNode = (SimpleNode) node.jjtGetChild(i);
             // First childs are local variables
             if (childNode instanceof ASTVarDeclaration) {
-                processLocalVarDeclaration(key, (ASTVarDeclaration) childNode);
+                processLocalVarDeclaration(methodKey, (ASTVarDeclaration) childNode);
             } else if (childNode instanceof ASTEquals) {
-                processEquals(key, (ASTEquals) childNode);
+                processEquals(methodKey, (ASTEquals) childNode, initialize);
+            } else if (childNode instanceof ASTWhile) {
+                processWhile(methodKey, (ASTWhile) childNode);
+            } else if (childNode instanceof ASTScope) {
+                this.processNodes(methodKey, childNode, initialize);
+            } else if (childNode instanceof ASTIF) {
+                this.processIf(methodKey, (ASTIF) childNode);
             }
         }
     }
@@ -138,7 +140,7 @@ public class SemanticAnalyser {
         this.ST.addLocalVariable(key, type, varID);
     }
 
-    private void processEquals(String methodKey, ASTEquals node) {
+    private void processEquals(String methodKey, ASTEquals node, boolean initialize) {
         if (node.jjtGetNumChildren() == 2) {
 
             String equalsId = null;
@@ -154,13 +156,17 @@ public class SemanticAnalyser {
 
             equalsValType = this.getExpressionType(methodKey, (SimpleNode) node.jjtGetChild(1));
 
-            if (equalsIdType != null && equalsValType != null && equalsIdType.equals(equalsValType))
-                this.ST.initializeVariable(methodKey, equalsId);
-
+            if (equalsIdType != null && equalsValType != null && equalsIdType.equals(equalsValType)) {
+                if (initialize)
+                    this.ST.initializeVariable(methodKey, equalsId);
+            }
             // verifica se filho = pai então aceita apesar de tipos serem diferentes
-            /* else if (equalsIdType != null && equalsValType != null && equalsIdType.equals(this.ST.getClasseName())
-                    && equalsValType.equals(this.ST.getClassExtendsName()))
-                this.ST.initializeVariable(methodKey, equalsId); */
+            /*
+             * else if (equalsIdType != null && equalsValType != null &&
+             * equalsIdType.equals(this.ST.getClasseName()) &&
+             * equalsValType.equals(this.ST.getClassExtendsName()))
+             * this.ST.initializeVariable(methodKey, equalsId);
+             */
 
             else
                 ErrorHandler.addError("Incorrect types.");
@@ -168,6 +174,38 @@ public class SemanticAnalyser {
         } else
             ErrorHandler.addError("Incorrect number of childs in equals node.");
 
+    }
+
+    private void processWhile(String methodKey, ASTWhile node) {
+        if (node.jjtGetNumChildren() == 2) {
+            String conditionType = this.getExpressionType(methodKey, (SimpleNode) node.jjtGetChild(0));
+            if (conditionType == null || !conditionType.equals("boolean"))
+                ErrorHandler.addError("Condition type in while must be a boolean.");
+
+            SimpleNode scope = (SimpleNode) node.jjtGetChild(1);
+            if (scope instanceof ASTScope)
+                this.processNodes(methodKey, (ASTScope) scope, false);
+
+        } else
+            ErrorHandler.addError("Incorrect number of childs in while node.");
+    }
+
+    private void processIf(String methodKey, ASTIF node) {
+        if (node.jjtGetNumChildren() == 3) {
+            String conditionType = this.getExpressionType(methodKey, (SimpleNode) node.jjtGetChild(0));
+            if (conditionType == null || !conditionType.equals("boolean"))
+                ErrorHandler.addError("Condition type in if must be a boolean.");
+
+            SimpleNode ifScope = (SimpleNode) node.jjtGetChild(1);
+            if (ifScope instanceof ASTScope)
+                this.processNodes(methodKey, (ASTScope) ifScope, false);
+
+            SimpleNode elseScope = (SimpleNode) node.jjtGetChild(2);
+            if (elseScope instanceof ASTScope)
+                this.processNodes(methodKey, (ASTScope) elseScope, false);
+
+        } else
+            ErrorHandler.addError("Incorrect number of childs in if node.");
     }
 
     /*
