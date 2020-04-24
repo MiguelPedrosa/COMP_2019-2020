@@ -17,7 +17,10 @@ public class SymbolTable {
         methods = new LinkedHashMap<>();
     }
 
-    /* ------------------------------------------ ADD TO TABLE ---------------------------------------------- */
+    /*
+     * ------------------------------------------ ADD TO TABLE
+     * ----------------------------------------------
+     */
 
     public void addClasseName(String name) {
         this.className = name;
@@ -28,7 +31,7 @@ public class SymbolTable {
     }
 
     public void addVariable(String type, String name) {
-        if(containsVariable(name)){
+        if (containsVariable(name)) {
             ErrorHandler.addError("Variable (" + name + ") declaration repeated");
 
             return;
@@ -38,29 +41,32 @@ public class SymbolTable {
     }
 
     public void addLocalVariable(String methodKey, String type, String name) {
-        if(containsVariable(name))
+        if (containsVariable(name))
             ErrorHandler.addWarning("Variable '" + name + "' already defined in class.");
 
-        if(methodKey.equals("main"))
+        if (methodKey.equals("main"))
             this.main.addVariable(type, name);
         else
             methods.get(methodKey).addVariable(type, name);
-        
+
     }
 
-    public void addMain(){
+    public void addMain() {
         this.main = new MainTable(this);
     }
 
-    public boolean addMethod(String key, String name, LinkedHashMap<String, String> arguments, String returnType){
+    public boolean addMethod(String key, String name, LinkedHashMap<String, String> arguments, String returnType) {
         MethodTable method = new MethodTable(this, name, returnType, arguments);
-        if(methods.containsKey(key))
+        if (methods.containsKey(key))
             return false;
         methods.put(key, method);
         return true;
     }
 
-    /* ------------------------------------------- GETTERS ------------------------------------------------- */
+    /*
+     * ------------------------------------------- GETTERS
+     * -------------------------------------------------
+     */
 
     public String getClasseName() {
         return this.className;
@@ -70,21 +76,21 @@ public class SymbolTable {
         return this.classExtendsName;
     }
 
-    public Map<String, SymbolVar> getVariables(){
+    public Map<String, SymbolVar> getVariables() {
         return variables;
     }
 
-    public String getVariableType(String VarId){
-        SymbolVar var =  variables.get(VarId);
+    public String getVariableType(String VarId) {
+        SymbolVar var = variables.get(VarId);
         return var.getType();
     }
 
-    public String getMethodVariableType(String methodKey, String VarId){
+    public String getMethodVariableType(String methodKey, String VarId) {
         SymbolVar var;
 
-        if(methodKey.equals("main"))
+        if (methodKey.equals("main"))
             var = this.main.getVariables().get(VarId);
-        else{
+        else {
             MethodTable method = methods.get(methodKey);
             var = method.getVariables().get(VarId);
         }
@@ -92,42 +98,48 @@ public class SymbolTable {
         return var.getType();
     }
 
-    public String getMethodReturn(String methodKey){
+    public String getMethodReturn(String methodKey) {
         MethodTable method = methods.get(methodKey);
         return method.getReturnType();
     }
 
-    /* ------------------------------------------- CHECKERS ------------------------------------------------ */
-    
-    public Boolean containsMethod(String methodKey) {        
+    /*
+     * ------------------------------------------- CHECKERS
+     * ------------------------------------------------
+     */
+
+    public Boolean containsMethod(String methodKey) {
         return methods.containsKey(methodKey);
     }
 
-    public Boolean containsVariable(String VarId) {        
+    public Boolean containsVariable(String VarId) {
         return variables.containsKey(VarId);
     }
 
     public Boolean containsMethodVariable(String methodKey, String VarId) {
-        if(methodKey.equals("main") && this.main != null)
+        if (methodKey.equals("main") && this.main != null)
             return this.main.containsVariable(VarId);
 
-        if(methods.containsKey(methodKey))
+        if (methods.containsKey(methodKey))
             return methods.get(methodKey).containsVariable(VarId);
-        
-            return false;
+
+        return false;
     }
 
-    /* ------------------------------------------- EXTRA --------------------------------------------------- */
+    /*
+     * ------------------------------------------- EXTRA
+     * ---------------------------------------------------
+     */
 
     public void initializeVariable(String methodKey, String VarId) {
-        if(containsMethodVariable(methodKey, VarId)){
-            if(methodKey.equals("main") && this.main != null)
+        if (containsMethodVariable(methodKey, VarId)) {
+            if (methodKey.equals("main") && this.main != null)
                 this.main.getVariables().get(VarId).setInitialize(true);
-            else if(methods.containsKey(methodKey))
+            else if (methods.containsKey(methodKey))
                 methods.get(methodKey).getVariables().get(VarId).setInitialize(true);
 
             return;
-        } else if(containsVariable(VarId))
+        } else if (containsVariable(VarId))
             getVariables().get(VarId).setInitialize(true);
         else
             return;
@@ -136,15 +148,15 @@ public class SymbolTable {
     public String toString() {
 
         String variableInfo = MyUtils.ANSI_CYAN + "Class\n" + MyUtils.ANSI_RESET + "Variables:\n";
-        
-        for(Map.Entry<String, SymbolVar> entry : variables.entrySet()) 
+
+        for (Map.Entry<String, SymbolVar> entry : variables.entrySet())
             variableInfo += "\t" + entry.getValue() + "\n";
 
         variableInfo += this.main;
 
-        for(Map.Entry<String, MethodTable> entry : methods.entrySet())
+        for (Map.Entry<String, MethodTable> entry : methods.entrySet())
             variableInfo += "\t" + entry.getValue() + "\n";
-        
+
         return variableInfo;
     }
 }

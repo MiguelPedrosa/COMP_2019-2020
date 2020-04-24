@@ -101,7 +101,14 @@ public class SemanticAnalyser {
     private void processVarNode(ASTVarDeclaration childNode) {
         String type = childNode.getType();
         String varID = childNode.getVarId();
-        this.ST.addVariable(type, varID);
+        if(classExists(this.getSimpleArrayType(type))){
+            if(!type.equals("void"))
+                this.ST.addVariable(type, varID);
+            else
+                ErrorHandler.addError("Variable " + varID + " cant be type void");
+        }
+        else
+            ErrorHandler.addError("Class " + type + " is undefined.");
     }
 
     private void processMainNode(ASTMainDeclaration mainNode) {
@@ -130,6 +137,8 @@ public class SemanticAnalyser {
                 this.processNodes(methodKey, childNode, initialize);
             } else if (childNode instanceof ASTIF) {
                 this.processIf(methodKey, (ASTIF) childNode);
+            } else if (childNode instanceof ASTExpression) {
+                this.getExpressionType(methodKey, childNode);
             }
         }
     }
@@ -137,7 +146,14 @@ public class SemanticAnalyser {
     private void processLocalVarDeclaration(String key, ASTVarDeclaration childNode) {
         String type = childNode.getType();
         String varID = childNode.getVarId();
-        this.ST.addLocalVariable(key, type, varID);
+        if(classExists(this.getSimpleArrayType(type))){
+            if(!type.equals("void"))
+                this.ST.addLocalVariable(key, type, varID);
+            else
+                ErrorHandler.addError("Variable " + varID + " cant be type void");
+        }
+        else
+            ErrorHandler.addError("Class " + type + " is undefined.");
     }
 
     private void processEquals(String methodKey, ASTEquals node, boolean initialize) {
@@ -307,8 +323,16 @@ public class SemanticAnalyser {
                 if (indexType != null && indexType.equals(intType)) {
                     type = ((ASTNew) expression).getType();
                 }
-            } else if (childNode instanceof ASTIdentifier)
+            } else if (childNode instanceof ASTIdentifier){
                 type = ((ASTIdentifier) childNode).getIdentifier();
+
+                if(classExists(this.getSimpleArrayType(type))){
+                    if(type.equals("void"))
+                        ErrorHandler.addError("New usage can't be type void");
+                }
+                else
+                    ErrorHandler.addError("Class " + type + " is undefined.");
+            }
         }
 
         else if (expression instanceof ASTArrayAccess) {
@@ -341,7 +365,22 @@ public class SemanticAnalyser {
             SimpleNode secondChild = (SimpleNode) expression.jjtGetChild(1);
             SimpleNode thirdChild = (SimpleNode) expression.jjtGetChild(2);
 
-            String classType = this.getExpressionType(methodKey, firstChild);
+            String classType = null;
+
+            if (firstChild instanceof ASTIdentifier) {
+                String name = ((ASTIdentifier) firstChild).getIdentifier();
+                if (this.classExists(name))
+                    classType = name;
+                else
+                    classType = this.getExpressionType(methodKey, firstChild);
+            } else {
+                String name = this.getExpressionType(methodKey, firstChild);
+                if (this.classExists(name))
+                    classType = name;
+                else
+                    ErrorHandler
+                    .addError("Undefined class " + classType);
+            }
 
             // nome do método
             if (secondChild instanceof ASTIdentifier) {
@@ -353,7 +392,6 @@ public class SemanticAnalyser {
                 if (thirdChild instanceof ASTFuncArgs) {
                     argsTypes = this.getArgsTypes(methodKey, (ASTFuncArgs) thirdChild);
                     String method = this.getMethodKey(methodName, argsTypes);
-
                     // If is this class check if methods exists
                     if (classType != null && classType.equals(this.ST.getClasseName())) {
                         if (this.ST.containsMethod(method))
@@ -363,11 +401,10 @@ public class SemanticAnalyser {
                                     .addError("Method " + methodName + argsTypes + " undefined in class " + classType);
                     }
                     // check if method is in imports
-                    else {
+                    else if(classType != null){
                         // TODO: check if method is in imports
                         ErrorHandler.addError("Method " + methodName + argsTypes + " undefined in class " + classType);
                     }
-
                 }
             }
 
@@ -440,7 +477,7 @@ public class SemanticAnalyser {
         else if (this.ST.containsVariable(VarId))
             return this.ST.getVariableType(VarId);
 
-        ErrorHandler.addError("Variable " + VarId + " undefined.");
+        ErrorHandler.addError(VarId + " is undefined.");
         return null;
     }
 
@@ -501,4 +538,18 @@ public class SemanticAnalyser {
         return argsTypes;
     }
 
+    private boolean classExists(String className) {
+
+        //TODO: verificar em imports
+        if(className.equals(this.ST.getClasseName()) 
+        || className.equals(this.ST.getClassExtendsName())
+        || className.equals(intType)
+        || className.equals("boolean")
+        || className.equals("String")
+        || className.equals("void")
+        )
+            return true;
+
+        return false;
+    }
 }

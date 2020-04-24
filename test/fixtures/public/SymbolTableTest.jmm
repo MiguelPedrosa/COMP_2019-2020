@@ -15,28 +15,30 @@ class Life extends Dead{
 
     public static void main(String[] a) {
 		int[] teste;
-        ola teste2;
+        String teste2;
         Life teste3;
         int[] b;
+        
         int a;
         boolean c;
         
         
         //teste = new int[b][0];
-        c = (b[0]/4 * a * a + 3 *2/b[4] - (4*5)) < a && teste3.quicksort(teste2) < 3;
-        b[teste3.quicksort(teste2)] = a;
+        c = (b[0]/4 * a * a + 3 *2/b[4] - (4*5)) < a && 4 < 3;
+        teste3 = new Life();
         //a = teste3.quicksort(b, teste2);
         //a = b.length;
 
     }
 
-    public int quicksort(ola z) {
+    public boolean quicksort(int[] L) {
         int xMax;
         boolean lazy;
         Life p;
         p = this;
-        if ( MathUtils.random(0, 5) < 4 ) {
-            this.beLazy(L);
+        
+        if ( 5 < 4 ) {
+            //this.beLazy(L);
             lazy = true;
         }
         else {
@@ -47,9 +49,10 @@ class Life extends Dead{
             lazy = !lazy;
         }
         else {
-            lazy = this.quicksort(L, 0, L.length - 1);
+            lazy = this.quicksort(L);
         }
         
+        this.quicksort(L);
         return lazy;
     }
 /*
@@ -67,7 +70,7 @@ class Life extends Dead{
             lazy = !lazy;
         }
         else {
-            lazy = this.quicksort(L, 0, L.length - 1);
+            lazy = int.quicksort(L, 0, L.length - 1);
         }
         
         return lazy;
