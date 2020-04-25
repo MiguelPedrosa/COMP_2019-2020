@@ -242,7 +242,7 @@ public class SemanticAnalyser {
         String key = methodName;
 
         for (int i = 0; i < arguments.size(); i++)
-            key += arguments.get(i);
+            key += ";" + arguments.get(i);
 
         return key;
     }
