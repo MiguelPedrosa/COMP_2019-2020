@@ -131,9 +131,9 @@ void ImportDeclaration() #ImportDeclaration: {Token name; String argument, retur
     /* Static is optional */
     [<STATIC> {jjtThis.setStatic();}]
     /* Grab full function name and store it*/
-    name=<IDENTIFIER> {jjtThis.buildMethodName(name.image);}
+    name=<IDENTIFIER> {jjtThis.setClass(name.image);}
     //Multiple class espefiers, last one will be function name
-    (<DOT> name=<IDENTIFIER> { jjtThis.buildMethodName(name.image); } )*
+    [<DOT> name=<IDENTIFIER> { jjtThis.setMethodName(name.image); } ]
     /* Store all arguments' info */
     [<LPARENS> [argument=Type() { jjtThis.addArgument(argument); } (<COMMA> argument=Type() {jjtThis.addArgument(argument);} )*
         | <VOID>] <RPARENS>]
