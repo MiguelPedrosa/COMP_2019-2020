@@ -34,7 +34,6 @@ public class ErrorHandler {
     private List<Warning> warningList;
 
     private ErrorHandler() {
-        System.out.println("Handle created");
         this.errorList = new ArrayList<>();
         this.warningList = new ArrayList<>();
     }
