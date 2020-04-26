@@ -19,6 +19,9 @@ public class SemanticAnalyser {
         // Handle Imports
         for (int i = 0; i < this.root.jjtGetNumChildren() - 1; i++) {
             // First childs are import
+            if (this.root.jjtGetChild(i) instanceof ASTImportDeclaration) {
+                this.ST.addImport((ASTImportDeclaration) this.root.jjtGetChild(i));
+            }
         }
         // class node
         SimpleNode classNode = (SimpleNode) this.root.jjtGetChild(this.root.jjtGetNumChildren() - 1);
@@ -233,7 +236,7 @@ public class SemanticAnalyser {
         String key = methodName;
 
         for (Map.Entry<String, String> entry : arguments.entrySet())
-            key += entry.getValue();
+            key += ";" + entry.getValue();
 
         return key;
     }
