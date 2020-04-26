@@ -27,21 +27,36 @@ public class ASTImportDeclaration extends SimpleNode {
 	public void setClass(String className) {
 		this.className = className;
 	}
+	public String getClassName() {
+		return this.className;
+	}
 
 	public void setMethodName(String methodName) {
 		this.methodName = methodName;
+	}
+	public String getMethodName() {
+		return this.methodName;
 	}
 
 	public void addArgument(String arg) {
 		this.argumentTypes.add(arg);
 	}
+	public List<String> getArguments() {
+		return this.argumentTypes;
+	}
 
 	public void setStatic() {
 		this.isStatic = true;
 	}
+	public Boolean isStatic() {
+		return this.isStatic;
+	}
 
 	public void setReturnType(String returnType) {
 		this.returnType = returnType;
+	}
+	public String getReturnType() {
+		return this.returnType;
 	}
 
 	@Override
