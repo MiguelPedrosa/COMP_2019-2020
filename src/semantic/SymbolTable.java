@@ -10,11 +10,13 @@ public class SymbolTable {
     private LinkedHashMap<String, SymbolVar> variables;
     private LinkedHashMap<String, MethodTable> methods;
     private MainTable main;
+    private ImportTable importTable;
 
     public SymbolTable(SymbolTable parentTable) {
         this.parentTable = parentTable;
         variables = new LinkedHashMap<>();
         methods = new LinkedHashMap<>();
+        importTable = new ImportTable();
     }
 
     /*
@@ -61,6 +63,10 @@ public class SymbolTable {
             return false;
         methods.put(key, method);
         return true;
+    }
+
+    public void addImport(ASTImportDeclaration node) {
+        this.importTable.addImport(node);
     }
 
     /*
@@ -156,6 +162,8 @@ public class SymbolTable {
 
         for (Map.Entry<String, MethodTable> entry : methods.entrySet())
             variableInfo += "\t" + entry.getValue() + "\n";
+
+        variableInfo += this.importTable;
 
         return variableInfo;
     }
