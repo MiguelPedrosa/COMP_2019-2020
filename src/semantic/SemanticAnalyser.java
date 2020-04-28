@@ -36,6 +36,32 @@ public class SemanticAnalyser {
             this.processClassNode(classNode);
         }
 
+        // check variables initialized
+
+        // global variables
+        for (Map.Entry<String, SymbolVar> entry : this.ST.getVariables().entrySet())
+            if (entry.getValue().getInitialized() == 0)
+                ErrorHandler.addError("Variable " + entry.getValue().getName() + " was not initialized.");
+            else if (entry.getValue().getInitialized() == 1)
+                ErrorHandler.addWarning("Variable " + entry.getValue().getName() + " might not be initialized.");
+
+        // main variables
+        for (Map.Entry<String, SymbolVar> entry2 : this.ST.getMain().getVariables().entrySet())
+            if (entry2.getValue().getInitialized() == 0)
+                ErrorHandler.addError("Variable " + entry2.getValue().getName() + " in main was not initialized.");
+            else if (entry2.getValue().getInitialized() == 1)
+                ErrorHandler.addWarning("Variable " + entry2.getValue().getName() + " in main might not be initialized.");
+
+        //method variables
+        for (Map.Entry<String, MethodTable> entry : this.ST.getMethods().entrySet())
+            for (Map.Entry<String, SymbolVar> entry2 : entry.getValue().getVariables().entrySet())
+                if (entry2.getValue().getInitialized() == 0)
+                    ErrorHandler.addError("Variable " + entry2.getValue().getName() + " in method "
+                            + entry.getValue().getName() + " was not initialized.");
+                else if (entry2.getValue().getInitialized() == 1)
+                    ErrorHandler.addWarning("Variable " + entry2.getValue().getName() + " in method "
+                            + entry.getValue().getName() + " might not be initialized.");
+
         return ST;
     }
 
@@ -183,15 +209,10 @@ public class SemanticAnalyser {
 
             if (equalsIdType != null && equalsValType != null && equalsIdType.equals(equalsValType)) {
                 if (initialize)
-                    this.ST.initializeVariable(methodKey, equalsId);
+                    this.ST.initializeVariable(methodKey, equalsId, 2);
+                if (!initialize)
+                    this.ST.initializeVariable(methodKey, equalsId, 1);
             }
-            // verifica se filho = pai então aceita apesar de tipos serem diferentes
-            /*
-             * else if (equalsIdType != null && equalsValType != null &&
-             * equalsIdType.equals(this.ST.getClasseName()) &&
-             * equalsValType.equals(this.ST.getClassExtendsName()))
-             * this.ST.initializeVariable(methodKey, equalsId);
-             */
 
             else
                 ErrorHandler.addError("Incorrect types.", node.getLine());
@@ -222,12 +243,10 @@ public class SemanticAnalyser {
                 ErrorHandler.addError("Condition type in if must be a boolean.", node.getLine());
 
             SimpleNode ifScope = (SimpleNode) node.jjtGetChild(1);
-            if (ifScope instanceof ASTScope)
-                this.processNodes(methodKey, (ASTScope) ifScope, false);
+            this.processNodes(methodKey, ifScope, false);
 
             SimpleNode elseScope = (SimpleNode) node.jjtGetChild(2);
-            if (elseScope instanceof ASTScope)
-                this.processNodes(methodKey, (ASTScope) elseScope, false);
+            this.processNodes(methodKey, elseScope, false);
 
         } else
             ErrorHandler.addError("Incorrect number of childs in if node.", node.getLine());
@@ -407,7 +426,14 @@ public class SemanticAnalyser {
                     if (classType != null && classType.equals(this.ST.getClasseName())) {
                         if (this.ST.containsMethod(method))
                             type = this.ST.getMethodReturn(method);
-                        else
+                        else if (this.isMethodInImports(this.ST.getClassExtendsName(), method, isStatic)) {
+                            System.out.println(method);
+                            if (isStatic)
+                                type = this.ST.getImports().get(this.ST.getClassExtendsName())
+                                        .getStaticMethodType(method);
+                            else
+                                type = this.ST.getImports().get(this.ST.getClassExtendsName()).getMethodType(method);
+                        } else
                             ErrorHandler
                                     .addError("Method " + methodName + argsTypes + " undefined in class " + classType, secondChild.getLine());
                     }

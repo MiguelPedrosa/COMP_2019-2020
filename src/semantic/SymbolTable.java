@@ -114,6 +114,14 @@ public class SymbolTable {
         return method.getName();
     }
 
+    public LinkedHashMap<String,MethodTable> getMethods() {
+        return this.methods;
+    }
+
+    public MainTable getMain() {
+        return this.main;
+    }
+
     public HashMap<String, SymbolImport> getImports() {
         return this.importTable.getClasses();
     }
@@ -146,16 +154,16 @@ public class SymbolTable {
      * ---------------------------------------------------
      */
 
-    public void initializeVariable(String methodKey, String VarId) {
+    public void initializeVariable(String methodKey, String VarId, int initializationLevel) {
         if (containsMethodVariable(methodKey, VarId)) {
             if (methodKey.equals("main") && this.main != null)
-                this.main.getVariables().get(VarId).setInitialize(true);
+                this.main.getVariables().get(VarId).setInitialize(initializationLevel);
             else if (methods.containsKey(methodKey))
-                methods.get(methodKey).getVariables().get(VarId).setInitialize(true);
+                methods.get(methodKey).getVariables().get(VarId).setInitialize(initializationLevel);
 
             return;
         } else if (containsVariable(VarId))
-            getVariables().get(VarId).setInitialize(true);
+            getVariables().get(VarId).setInitialize(initializationLevel);
         else
             return;
     }
