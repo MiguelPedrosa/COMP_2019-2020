@@ -192,9 +192,11 @@ void Return() #Return: {Token returnToken;}
     } Expression() <SEMICOLON>
 }
 
-void MainDeclaration() #MainDeclaration: {}
+void MainDeclaration() #MainDeclaration: {Token mainToken;}
 {
-    <STATIC> <VOID> <MAIN> <LPARENS> <STRING> <LSQPARENS> <RSQPARENS> <IDENTIFIER> <RPARENS>
+    <STATIC> <VOID> mainToken=<MAIN> {
+        jjtThis.setPosition(mainToken);
+    } <LPARENS> <STRING> <LSQPARENS> <RSQPARENS> <IDENTIFIER> <RPARENS>
     <LBRACKET>
     (LOOKAHEAD(2) VarDeclaration())*
     (Statement())*
