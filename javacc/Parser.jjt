@@ -220,9 +220,11 @@ void Scope() #Scope: {}
     <LBRACKET> (Statement())* <RBRACKET>
 }
 
-void EqualsStatement() #Equals(): {}
+void EqualsStatement() #Equals(): {Token equals;}
 {
-    ComplexIdentifier() <EQUALS> Expression() <SEMICOLON>
+    ComplexIdentifier() equals=<EQUALS> Expression() <SEMICOLON> {
+        jjtThis.setPosition(equals);
+    }
 }
 
 void IfStatement() #IF: {}
