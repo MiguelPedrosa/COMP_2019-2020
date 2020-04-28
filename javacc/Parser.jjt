@@ -152,7 +152,10 @@ void ClassDeclaration() #ClassDeclaration: {Token classId,extendsId;}
 
 void VarDeclaration() #VarDeclaration: {Token varId;String type;}
 {
-    type=Type() { jjtThis.type=type; } varId=<IDENTIFIER> { jjtThis.varId = varId.image; } <SEMICOLON>
+    type=Type() { jjtThis.type=type; } varId=<IDENTIFIER> {
+        jjtThis.varId = varId.image;
+        jjtThis.setPosition(varId);
+    } <SEMICOLON>
 }
 
 void FunctionDeclaration() #void: {}
@@ -168,7 +171,10 @@ void MethodDeclaration() #MethodDeclaration: {Token methodId, argName; String ar
     /* Store function return type*/
     returnType=Type() {jjtThis.setReturnType(returnType);}
     /* Store function name */
-    methodId=<IDENTIFIER>  {jjtThis.buildMethodName(methodId.image);}
+    methodId=<IDENTIFIER>  {
+        jjtThis.setPosition(methodId);
+        jjtThis.buildMethodName(methodId.image);
+    }
     <LPARENS>
     /* Store arguments' type and name */
     [ argType=Type() argName=<IDENTIFIER> {jjtThis.addArgument(argType, argName.image);}
@@ -179,9 +185,11 @@ void MethodDeclaration() #MethodDeclaration: {Token methodId, argName; String ar
     Return() <RBRACKET>
 }
 
-void Return() #Return: {}
+void Return() #Return: {Token returnToken;}
 {
-    <RETURN> Expression() <SEMICOLON>
+    returnToken=<RETURN> {
+        jjtThis.setPosition(returnToken);
+    } Expression() <SEMICOLON>
 }
 
 void MainDeclaration() #MainDeclaration: {}
@@ -227,15 +235,19 @@ void EqualsStatement() #Equals(): {Token equals;}
     }
 }
 
-void IfStatement() #IF: {}
+void IfStatement() #IF: {Token ifToken;}
 {
-    <IF> <LPARENS> Expression() <RPARENS> Statement() <ELSE> Statement()
+    ifToken=<IF> {
+        jjtThis.setPosition(ifToken);
+    } <LPARENS> Expression() <RPARENS> Statement() <ELSE> Statement()
 }
 
-void WhileStatement() #While: {}
+void WhileStatement() #While: {Token whileToken;}
 {
     try {
-        <WHILE> <LPARENS> Expression() <RPARENS>
+        whileToken=<WHILE> {
+            jjtThis.setPosition(whileToken);
+        } <LPARENS> Expression() <RPARENS>
     }
     catch (ParseException e) {
         SkipTo(LBRACKET, "while statement");
@@ -248,49 +260,61 @@ void Expression() #Expression: {}
     AndExpression()
 }
 
-void AndExpression() #void: {}
+void AndExpression() #void: {Token and;}
 {
     LessExpression() [
-        <AND> AndExpression() #And(2)
+        and=<AND> AndExpression() {
+            jjtThis.setPosition(and);
+        } #And(2)
     ]
 }
 
-void LessExpression() #void: {}
+void LessExpression() #void: {Token lessThan;}
 {
     SumSubExpression() [
-        <LESSTHAN> LessExpression() #LessThan(2)
+        lessThan=<LESSTHAN> LessExpression() {
+            jjtThis.setPosition(lessThan);
+        } #LessThan(2)
     ]
 }
 
-void SumSubExpression() #void: {}
+void SumSubExpression() #void: {Token plus, minus;}
 {
     MulDivExpression() [
-          <PLUS>  SumSubExpression() #Plus(2)
-        | <MINUS> SumSubExpression() #Minus(2)
+          plus=<PLUS>  SumSubExpression() {
+            jjtThis.setPosition(plus);
+        } #Plus(2)
+        | minus=<MINUS> SumSubExpression() {
+            jjtThis.setPosition(minus);
+        } #Minus(2)
     ]
 }
 
-void MulDivExpression() #void: {}
+void MulDivExpression() #void: {Token times, dividor;}
 {
     NotExpression() [
-          <TIMES>   MulDivExpression() #Times(2)
-        | <DIVIDOR> MulDivExpression() #Dividor(2)
+          times=<TIMES> MulDivExpression() {
+            jjtThis.setPosition(times);
+        } #Times(2)
+        | dividor=<DIVIDOR> MulDivExpression() {
+            jjtThis.setPosition(dividor);
+        } #Dividor(2)
     ]
 }
 
-void NotExpression() #Not(addNot) : {boolean addNot=false;}
+void NotExpression() #Not(addNot) : {Token not; boolean addNot=false;}
 {
-    <NOT> {addNot=true;} NotExpression()
+    not=<NOT> {addNot=true; jjtThis.setPosition(not);} NotExpression()
     | DotExpression()
 }
 
-void DotExpression() #void: {}
+void DotExpression() #void: {Token dot;}
 {
     ArrayAccess() (
-        <DOT> (
+        dot=<DOT> (
             // Function call has 3 children: class name, method name and arguments
-            <LENGTH> #Length(1)
-            | FunctionCall() #FuncCall(3)
+            <LENGTH> {jjtThis.setPosition(dot);} #Length(1)
+            | FunctionCall() {jjtThis.setPosition(dot);} #FuncCall(3)
         )
     )*
 }
@@ -306,9 +330,13 @@ void FunctionArguments() #FuncArgs: {}
     [Expression() (<COMMA> Expression())* ]
 }
 
-void ArrayAccess() #void: {}
+void ArrayAccess() #void: {Token arrayToken;}
 {
-    Expression_LT() [<LSQPARENS> Expression() <RSQPARENS> #ArrayAccess(2)]
+    Expression_LT() [
+        arrayToken=<LSQPARENS> Expression() <RSQPARENS> {
+            jjtThis.setPosition(arrayToken);
+        } #ArrayAccess(2)
+    ]
 }
 
 void Expression_LT() #void: {}
