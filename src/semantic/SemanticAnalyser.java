@@ -32,8 +32,8 @@ public class SemanticAnalyser {
             this.ST.addClasseName(((ASTClassDeclaration) classNode).getClassId());
             this.ST.addClassExtendsName(((ASTClassDeclaration) classNode).getExtendsId());
 
-            this.signFuntions(classNode);
-            this.processClassNode(classNode);
+            List<Integer> list = this.signFuntions(classNode);
+            this.processClassNode(classNode, list);
         }
 
         // check variables initialized
@@ -71,35 +71,50 @@ public class SemanticAnalyser {
      * FUNCTIONS---------------------------------------
      */
 
-    private void signFuntions(SimpleNode classNode) {
+    private List<Integer> signFuntions(SimpleNode classNode) {
+
+        List<Integer> list = new ArrayList<Integer>();
         for (int i = 0; i < classNode.jjtGetNumChildren(); i++) {
 
             SimpleNode childNode = (SimpleNode) classNode.jjtGetChild(i);
 
+            // First childs are variables
+            if (childNode instanceof ASTVarDeclaration) {
+                list.add(i);
+            }
             // Main declaration
             if (childNode instanceof ASTMainDeclaration) {
-                signMainNode((ASTMainDeclaration) childNode);
+                if(signMainNode((ASTMainDeclaration) childNode))
+                    list.add(i);
             }
             // Methods declarations
             else if (childNode instanceof ASTMethodDeclaration) {
-                signMethodNode((ASTMethodDeclaration) childNode);
+                if(signMethodNode((ASTMethodDeclaration) childNode))
+                    list.add(i);
             }
         }
+
+        return list;
     }
 
-    private void signMainNode(ASTMainDeclaration mainNode) {
-        this.ST.addMain();
+    private boolean signMainNode(ASTMainDeclaration mainNode) {
+        if(this.ST.addMain())
+            return true;
+        
+        ErrorHandler.addError("Repeated main method.", mainNode.getLine());
+        return false;
     }
 
-    private void signMethodNode(ASTMethodDeclaration methodNode) {
+    private boolean signMethodNode(ASTMethodDeclaration methodNode) {
         String returnType = methodNode.getReturnType();
         String methodName = methodNode.getMethodName();
         LinkedHashMap<String, String> arguments = methodNode.getArguments();
         String key = this.getMethodKey(methodName, arguments);
         if (!this.ST.addMethod(key, methodName, arguments, returnType)) {
-            ErrorHandler.addError("Repeted method:" + methodName, methodNode.getLine());
+            ErrorHandler.addError("Repeated method:" + methodName, methodNode.getLine());
+            return false;
         }
-
+        return true;
     }
 
     /*
@@ -107,9 +122,9 @@ public class SemanticAnalyser {
      * NODES---------------------------------------
      */
 
-    private void processClassNode(SimpleNode classNode) {
-        for (int i = 0; i < classNode.jjtGetNumChildren(); i++) {
+    private void processClassNode(SimpleNode classNode, List<Integer> list) {
 
+        for (Integer i: list){
             final SimpleNode childNode = (SimpleNode) classNode.jjtGetChild(i);
 
             // First childs are variables

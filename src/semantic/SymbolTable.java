@@ -53,8 +53,13 @@ public class SymbolTable {
 
     }
 
-    public void addMain() {
+    public boolean addMain() {
+        if(this.main != null)
+            return false;
+        
         this.main = new MainTable(this);
+        return true;
+        
     }
 
     public boolean addMethod(String key, String name, LinkedHashMap<String, String> arguments, String returnType) {

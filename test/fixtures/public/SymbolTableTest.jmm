@@ -13,8 +13,13 @@ class Life extends Dead{
 
     }
 
+    public static void main(String[] a) {
+		
+
+    }
+
     public boolean inbounds(int row, int column) {
-        boolean in;
+        a = 4;
         if (row < 0)
             in =  false;
         else if (column < 0)
@@ -28,6 +33,23 @@ class Life extends Dead{
             
         return in;
     }
+
+    public boolean inbounds(int row, int column) {
+        a = 4;
+        if (row < 0)
+            in =  false;
+        else if (column < 0)
+            in =  false;
+        else if (2 < row) 
+            in =  false;
+        else if (2 < column) 
+            in = false;
+        else 
+            in = true;
+            
+        return in;
+    }
+
 /*
     public boolean quicksort(int[] L) {
         int xMax;
