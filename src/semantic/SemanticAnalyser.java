@@ -70,7 +70,7 @@ public class SemanticAnalyser {
         LinkedHashMap<String, String> arguments = methodNode.getArguments();
         String key = this.getMethodKey(methodName, arguments);
         if (!this.ST.addMethod(key, methodName, arguments, returnType)) {
-            ErrorHandler.addError("Repeted method:" + methodName);
+            ErrorHandler.addError("Repeted method:" + methodName, methodNode.getLine());
         }
 
     }
@@ -108,9 +108,9 @@ public class SemanticAnalyser {
             if (!type.equals("void"))
                 this.ST.addVariable(type, varID);
             else
-                ErrorHandler.addError("Variable " + varID + " cant be type void");
+                ErrorHandler.addError("Variable " + varID + " cant be type void", childNode.getLine());
         } else
-            ErrorHandler.addError("Class " + type + " is undefined.");
+            ErrorHandler.addError("Class " + type + " is undefined.", childNode.getLine());
     }
 
     private void processMainNode(ASTMainDeclaration mainNode) {
@@ -147,7 +147,7 @@ public class SemanticAnalyser {
                 String expectedType = this.ST.getMethodReturn(methodKey);
                 if (foundType == null || !foundType.equals(expectedType))
                     ErrorHandler.addError("Found return type of " + foundType + ". Expected type of " + expectedType
-                            + " in method " + this.ST.getMethodName(methodKey));
+                            + " in method " + this.ST.getMethodName(methodKey), childNode.getLine());
             }
         }
     }
@@ -160,9 +160,9 @@ public class SemanticAnalyser {
             if (!type.equals("void"))
                 this.ST.addLocalVariable(key, type, varID);
             else
-                ErrorHandler.addError("Variable " + varID + " cant be type void");
+                ErrorHandler.addError("Variable " + varID + " cant be type void", childNode.getLine());
         } else
-            ErrorHandler.addError("Class " + type + " is undefined.");
+            ErrorHandler.addError("Class " + type + " is undefined.", childNode.getLine());
     }
 
     private void processEquals(String methodKey, ASTEquals node, boolean initialize) {
@@ -194,10 +194,10 @@ public class SemanticAnalyser {
              */
 
             else
-                ErrorHandler.addError("Incorrect types.");
+                ErrorHandler.addError("Incorrect types.", node.getLine());
 
         } else
-            ErrorHandler.addError("Incorrect number of childs in equals node.");
+            ErrorHandler.addError("Incorrect number of childs in equals node.", node.getLine());
 
     }
 
@@ -205,21 +205,21 @@ public class SemanticAnalyser {
         if (node.jjtGetNumChildren() == 2) {
             String conditionType = this.getExpressionType(methodKey, (SimpleNode) node.jjtGetChild(0));
             if (conditionType == null || !conditionType.equals("boolean"))
-                ErrorHandler.addError("Condition type in while must be a boolean.");
+                ErrorHandler.addError("Condition type in while must be a boolean.", node.getLine());
 
             SimpleNode scope = (SimpleNode) node.jjtGetChild(1);
             if (scope instanceof ASTScope)
                 this.processNodes(methodKey, (ASTScope) scope, false);
 
         } else
-            ErrorHandler.addError("Incorrect number of childs in while node.");
+            ErrorHandler.addError("Incorrect number of childs in while node.", node.getLine());
     }
 
     private void processIf(String methodKey, ASTIF node) {
         if (node.jjtGetNumChildren() == 3) {
             String conditionType = this.getExpressionType(methodKey, (SimpleNode) node.jjtGetChild(0));
             if (conditionType == null || !conditionType.equals("boolean"))
-                ErrorHandler.addError("Condition type in if must be a boolean.");
+                ErrorHandler.addError("Condition type in if must be a boolean.", node.getLine());
 
             SimpleNode ifScope = (SimpleNode) node.jjtGetChild(1);
             if (ifScope instanceof ASTScope)
@@ -230,7 +230,7 @@ public class SemanticAnalyser {
                 this.processNodes(methodKey, (ASTScope) elseScope, false);
 
         } else
-            ErrorHandler.addError("Incorrect number of childs in if node.");
+            ErrorHandler.addError("Incorrect number of childs in if node.", node.getLine());
     }
 
     /*
