@@ -13,6 +13,7 @@ public class Main {
         SimpleNode root = myProgram.Start();
         root.dump("", 0);
         // Semantic analyser
+        ErrorHandler.resetHandler();
         SemanticAnalyser semantic = new SemanticAnalyser(root);
         SymbolTable classTable = semantic.Start();
         System.out.println(classTable);
