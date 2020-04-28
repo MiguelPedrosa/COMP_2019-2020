@@ -298,7 +298,7 @@ public class SemanticAnalyser {
             String indexType = this.getExpressionType(methodKey, secondChild);
             if (indexType == null || !indexType.equals(intType)) {
 
-                ErrorHandler.addError("Expected int for index in \"" + equalsId + "\" array.");
+                ErrorHandler.addError("Expected int for index in \"" + equalsId + "\" array.", equalsIdNode.getLine());
                 list.add(null);
                 list.add(null);
                 return list;
@@ -307,7 +307,7 @@ public class SemanticAnalyser {
                     equalsIdType = this.getVarType(methodKey, equalsId);
                     equalsIdType = this.getSimpleArrayType(equalsIdType);
                 } else
-                    ErrorHandler.addError("Variable \"" + equalsId + "\" is not an array.");
+                    ErrorHandler.addError("Variable \"" + equalsId + "\" is not an array.", equalsIdNode.getLine());
             }
 
         }
@@ -329,7 +329,7 @@ public class SemanticAnalyser {
             type = ((ASTLiteral) expression).getLiteralType();
             if (type.equals("this")) {
                 if (methodKey.equals("main"))
-                    ErrorHandler.addError("Impossible to use 'this' in static method main.");
+                    ErrorHandler.addError("Impossible to use 'this' in static method main.", expression.getLine());
                 else
                     return this.ST.getClasseName();
             } else
@@ -353,9 +353,9 @@ public class SemanticAnalyser {
 
                 if (classExists(this.getSimpleArrayType(type), true)) {
                     if (type.equals("void"))
-                        ErrorHandler.addError("New usage can't be type void");
+                        ErrorHandler.addError("New usage can't be type void", childNode.getLine());
                 } else
-                    ErrorHandler.addError("Class " + type + " is undefined.");
+                    ErrorHandler.addError("Class " + type + " is undefined.", childNode.getLine());
             }
         }
 
@@ -374,12 +374,12 @@ public class SemanticAnalyser {
                     type = this.getExpressionType(methodKey, firstChild);
                     type = this.getSimpleArrayType(type);
                 } else
-                    ErrorHandler.addError("Variable \"" + identifier + "\" is not an array.");
+                    ErrorHandler.addError("Variable \"" + identifier + "\" is not an array.", expression.getLine());
             }
 
             // segundo filho tem que ser um int
             if (indexType == null || !indexType.equals(intType)) {
-                ErrorHandler.addError("Expected int for index in \"" + identifier + "\" array.");
+                ErrorHandler.addError("Expected int for index in \"" + identifier + "\" array.", expression.getLine());
             }
         }
 
@@ -410,7 +410,7 @@ public class SemanticAnalyser {
                 if (this.classExists(name, true))
                     classType = name;
                 else
-                    ErrorHandler.addError("Undefined class " + classType);
+                    ErrorHandler.addError("Undefined class " + classType, expression.getLine());
             }
 
             // nome do método
@@ -436,7 +436,7 @@ public class SemanticAnalyser {
                                 type = this.ST.getImports().get(this.ST.getClassExtendsName()).getMethodType(method);
                         } else
                             ErrorHandler
-                                    .addError("Method " + methodName + argsTypes + " undefined in class " + classType);
+                                    .addError("Method " + methodName + argsTypes + " undefined in class " + classType, secondChild.getLine());
                     }
                     // check if method is in imports
                     else if (classType != null) {
@@ -450,7 +450,7 @@ public class SemanticAnalyser {
 
                         else
                             ErrorHandler
-                                    .addError("Method " + methodName + argsTypes + " undefined in class " + classType);
+                                    .addError("Method " + methodName + argsTypes + " undefined in class " + classType, secondChild.getLine());
 
                     }
                 }
@@ -464,7 +464,7 @@ public class SemanticAnalyser {
             if (childType != null && this.isArrayType(childType))
                 type = intType;
             else
-                ErrorHandler.addError("Final variable legnth is undefined.");
+                ErrorHandler.addError("Final variable legnth is undefined.", expression.getLine());
         }
 
         else if (expression instanceof ASTNot) {
@@ -473,7 +473,7 @@ public class SemanticAnalyser {
             if (childType != null && childType.equals(booleanType))
                 type = booleanType;
             else
-                ErrorHandler.addError("Expected boolean to use '!' operator");
+                ErrorHandler.addError("Expected boolean to use '!' operator", expression.getLine());
         }
 
         else if (expression instanceof ASTTimes || expression instanceof ASTDividor || expression instanceof ASTPlus
@@ -487,15 +487,15 @@ public class SemanticAnalyser {
             if (firstChildType == null || secondChildType == null || !firstChildType.equals(intType)
                     || !secondChildType.equals(intType)) {
                 if (expression instanceof ASTTimes)
-                    ErrorHandler.addError("Expected the use of ints for the operand '*'.");
+                    ErrorHandler.addError("Expected the use of ints for the operand '*'.", expression.getLine());
                 else if (expression instanceof ASTDividor)
-                    ErrorHandler.addError("Expected the use of ints for the operand '/'.");
+                    ErrorHandler.addError("Expected the use of ints for the operand '/'.", expression.getLine());
                 else if (expression instanceof ASTPlus)
-                    ErrorHandler.addError("Expected the use of ints for the operand '+'.");
+                    ErrorHandler.addError("Expected the use of ints for the operand '+'.", expression.getLine());
                 else if (expression instanceof ASTMinus)
-                    ErrorHandler.addError("Expected the use of ints for the operand '-'.");
+                    ErrorHandler.addError("Expected the use of ints for the operand '-'.", expression.getLine());
                 else if (expression instanceof ASTLessThan)
-                    ErrorHandler.addError("Expected the use of ints for the operand '<'.");
+                    ErrorHandler.addError("Expected the use of ints for the operand '<'.", expression.getLine());
             } else if (expression instanceof ASTLessThan)
                 type = booleanType;
             else
@@ -511,7 +511,7 @@ public class SemanticAnalyser {
 
             if (firstChildType == null || secondChildType == null || !firstChildType.equals(booleanType)
                     || !secondChildType.equals(booleanType))
-                ErrorHandler.addError("Expected the use of booleans for the operand '&&'.");
+                ErrorHandler.addError("Expected the use of booleans for the operand '&&'.", expression.getLine());
             else
                 type = booleanType;
         }
