@@ -46,6 +46,7 @@ public class SemanticAnalyser {
                 ErrorHandler.addWarning("Variable " + entry.getValue().getName() + " might not be initialized.");
 
         // main variables
+        if(this.ST.getMain() != null)
         for (Map.Entry<String, SymbolVar> entry2 : this.ST.getMain().getVariables().entrySet())
             if (entry2.getValue().getInitialized() == 0)
                 ErrorHandler.addError("Variable " + entry2.getValue().getName() + " in main was not initialized.");
