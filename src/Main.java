@@ -2,9 +2,10 @@ import java.io.InputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class Main {
-    public static void main(String args[]) throws ParseException {
+    public static void main(String args[]) throws IOException, ParseException {
 
         final String filePath = args[0];
         Parser myProgram = new Parser(openFile(filePath));
@@ -12,9 +13,17 @@ public class Main {
         SimpleNode root = myProgram.Start();
         root.dump("", 0);
         // Semantic analyser
+        ErrorHandler.resetHandler();
         SemanticAnalyser semantic = new SemanticAnalyser(root);
         SymbolTable classTable = semantic.Start();
         System.out.println(classTable);
+
+        ErrorHandler.printWarnings();
+        ErrorHandler.printErrors();
+        if(ErrorHandler.hasErrors()) {
+            System.err.println("Compilation cannot continue because of erros");
+            throw new IOException();
+        }
 
         CodeGenerator codeGenerator = new CodeGenerator(root, "testFileName");
         codeGenerator.start();

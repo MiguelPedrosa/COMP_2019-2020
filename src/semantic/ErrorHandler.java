@@ -28,6 +28,18 @@ public class ErrorHandler {
         handler.printWarningList();
     }
 
+    public static Boolean hasErrors() {
+        return !handler.errorList.isEmpty();
+    }
+    public static Boolean hasWarnings() {
+        return !handler.warningList.isEmpty();
+    }
+
+    public static void resetHandler() {
+        handler.errorList.clear();
+        handler.warningList.clear();
+    }
+
     /* Private non-static methods necessary to implement public interface */
     
     private List<Error> errorList;
