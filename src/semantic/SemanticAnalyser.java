@@ -105,13 +105,13 @@ public class SemanticAnalyser {
     private void processVarNode(ASTVarDeclaration childNode) {
         String type = childNode.getType();
         String varID = childNode.getVarId();
-        if(classExists(this.getSimpleArrayType(type))){
-            if(!type.equals("void"))
+        // warning: might not need true
+        if (classExists(this.getSimpleArrayType(type), true)) {
+            if (!type.equals("void"))
                 this.ST.addVariable(type, varID);
             else
                 ErrorHandler.addError("Variable " + varID + " cant be type void");
-        }
-        else
+        } else
             ErrorHandler.addError("Class " + type + " is undefined.");
     }
 
@@ -147,8 +147,9 @@ public class SemanticAnalyser {
                 SimpleNode returnExpression = (SimpleNode) childNode.jjtGetChild(0);
                 String foundType = this.getExpressionType(methodKey, returnExpression);
                 String expectedType = this.ST.getMethodReturn(methodKey);
-                if(!foundType.equals(expectedType))
-                    ErrorHandler.addError("Found return type of " + foundType + ". Expected type of " + expectedType + " in method " + this.ST.getMethodName(methodKey));
+                if (foundType == null || !foundType.equals(expectedType))
+                    ErrorHandler.addError("Found return type of " + foundType + ". Expected type of " + expectedType
+                            + " in method " + this.ST.getMethodName(methodKey));
             }
         }
     }
@@ -156,13 +157,13 @@ public class SemanticAnalyser {
     private void processLocalVarDeclaration(String key, ASTVarDeclaration childNode) {
         String type = childNode.getType();
         String varID = childNode.getVarId();
-        if(classExists(this.getSimpleArrayType(type))){
-            if(!type.equals("void"))
+        // warning: might not need true
+        if (classExists(this.getSimpleArrayType(type), true)) {
+            if (!type.equals("void"))
                 this.ST.addLocalVariable(key, type, varID);
             else
                 ErrorHandler.addError("Variable " + varID + " cant be type void");
-        }
-        else
+        } else
             ErrorHandler.addError("Class " + type + " is undefined.");
     }
 
@@ -270,10 +271,6 @@ public class SemanticAnalyser {
             SimpleNode secondChild = (SimpleNode) equalsIdNode.jjtGetChild(1);
 
             // dealing with first child
-            /*
-             * TODO: verificar se os outros passam na gramatica -> Literal -> identifier
-             * DONE -> expressionNew -> (expression)
-             */
             if (firstChild instanceof ASTIdentifier) {
                 equalsId = ((ASTIdentifier) firstChild).getIdentifier();
 
@@ -333,14 +330,13 @@ public class SemanticAnalyser {
                 if (indexType != null && indexType.equals(intType)) {
                     type = ((ASTNew) expression).getType();
                 }
-            } else if (childNode instanceof ASTIdentifier){
+            } else if (childNode instanceof ASTIdentifier) {
                 type = ((ASTIdentifier) childNode).getIdentifier();
 
-                if(classExists(this.getSimpleArrayType(type))){
-                    if(type.equals("void"))
+                if (classExists(this.getSimpleArrayType(type), true)) {
+                    if (type.equals("void"))
                         ErrorHandler.addError("New usage can't be type void");
-                }
-                else
+                } else
                     ErrorHandler.addError("Class " + type + " is undefined.");
             }
         }
@@ -376,20 +372,26 @@ public class SemanticAnalyser {
             SimpleNode thirdChild = (SimpleNode) expression.jjtGetChild(2);
 
             String classType = null;
+            boolean isStatic = false;
 
             if (firstChild instanceof ASTIdentifier) {
                 String name = ((ASTIdentifier) firstChild).getIdentifier();
-                if (this.classExists(name))
+
+                // checks if it's a var and its type
+                classType = this.getExpressionType(methodKey, firstChild);
+
+                // check if is a static class
+                if (classType == null && this.classExists(name, false)) {
+                    isStatic = true;
                     classType = name;
-                else
-                    classType = this.getExpressionType(methodKey, firstChild);
+                }
             } else {
                 String name = this.getExpressionType(methodKey, firstChild);
-                if (this.classExists(name))
+                // warning: might not need true
+                if (this.classExists(name, true))
                     classType = name;
                 else
-                    ErrorHandler
-                    .addError("Undefined class " + classType);
+                    ErrorHandler.addError("Undefined class " + classType);
             }
 
             // nome do método
@@ -411,9 +413,19 @@ public class SemanticAnalyser {
                                     .addError("Method " + methodName + argsTypes + " undefined in class " + classType);
                     }
                     // check if method is in imports
-                    else if(classType != null){
-                        // TODO: check if method is in imports
-                        ErrorHandler.addError("Method " + methodName + argsTypes + " undefined in class " + classType);
+                    else if (classType != null) {
+
+                        if (this.isMethodInImports(classType, method, isStatic)) {
+                            if (isStatic)
+                                type = this.ST.getImports().get(classType).getStaticMethodType(method);
+                            else
+                                type = this.ST.getImports().get(classType).getMethodType(method);
+                        }
+
+                        else
+                            ErrorHandler
+                                    .addError("Method " + methodName + argsTypes + " undefined in class " + classType);
+
                     }
                 }
             }
@@ -548,23 +560,36 @@ public class SemanticAnalyser {
         return argsTypes;
     }
 
-    private boolean classExists(String className) {
+    private boolean classExists(String className, boolean needsConstructor) {
 
-        //TODO: verificar em imports
-        HashMap<String, SymbolImport> classes = this.ST.getImports();
-        for (Map.Entry<String, SymbolImport> entry : classes.entrySet())
-            if(entry.getKey().equals(className))
+        if (!needsConstructor) {
+            if (this.ST.getImports().containsKey(className))
                 return true;
+        }
 
-        if(className.equals(this.ST.getClasseName()) 
-        || className.equals(this.ST.getClassExtendsName())
-        || className.equals(intType)
-        || className.equals("boolean")
-        || className.equals("String")
-        || className.equals("void")
-        )
+        if (needsConstructor && this.ST.canObjectBeCreated(className))
+            return true;
+
+        if (className.equals(this.ST.getClasseName()) || className.equals(this.ST.getClassExtendsName())
+                || className.equals(intType) || className.equals("boolean") || className.equals("String")
+                || className.equals("void"))
             return true;
 
         return false;
     }
+
+    private boolean isMethodInImports(String className, String methodKey, boolean isStatic) {
+
+        if (!this.ST.getImports().containsKey(className))
+            return false;
+
+        if (isStatic && this.ST.getImports().get(className).hasStaticMethod(methodKey))
+            return true;
+
+        if (!isStatic && this.ST.getImports().get(className).hasMethod(methodKey))
+            return true;
+
+        return false;
+    }
+
 }

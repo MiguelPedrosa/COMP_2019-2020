@@ -1,6 +1,9 @@
 import static io.read() int;
 import static io.println() void;
 import static io.println(int) void;
+
+import static Math.sort() int;
+
 class Life extends Dead{
 
     int UNDERPOP_LIM;
@@ -35,8 +38,9 @@ class Life extends Dead{
         int xMax;
         boolean lazy;
         Life p;
+
         p = this;
-        
+
         if ( 5 < 4 ) {
             //this.beLazy(L);
             lazy = true;

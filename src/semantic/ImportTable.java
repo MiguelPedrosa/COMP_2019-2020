@@ -48,6 +48,8 @@ public class ImportTable {
     }
     
     public Boolean canObjectBeCreated(String className) {
+        if(!this.classes.containsKey(className))
+            return false;
         final SymbolImport importObj = this.classes.get(className);
         return importObj != null && importObj.hasDefaultConstructor();
     }

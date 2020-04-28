@@ -34,6 +34,22 @@ public class SymbolImport {
         return this.hasDefaultConstructor;
     }
 
+    public Boolean hasMethod(String methodKey) {
+        return this.methods.containsKey(methodKey);
+    }
+
+    public String getMethodType(String methodKey) {
+        return this.methods.get(methodKey).getReturnType();
+    }
+    
+    public String getStaticMethodType(String methodKey) {
+        return this.staticMethods.get(methodKey).getReturnType();
+    }
+
+    public Boolean hasStaticMethod(String methodKey) {
+        return this.staticMethods.containsKey(methodKey);
+    }
+
     public void addDefaultConstructor() {
         this.hasDefaultConstructor = true;
     }
@@ -83,6 +99,10 @@ public class SymbolImport {
             this.returnType = returnType;
             this.arguments = arguments;
             this.name = name;
+        }
+
+        public String getReturnType(){
+            return returnType;
         }
 
         public String getSignature() {
