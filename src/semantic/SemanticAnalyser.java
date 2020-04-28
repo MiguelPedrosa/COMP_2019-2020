@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -142,6 +143,12 @@ public class SemanticAnalyser {
                 this.processIf(methodKey, (ASTIF) childNode);
             } else if (childNode instanceof ASTExpression) {
                 this.getExpressionType(methodKey, childNode);
+            } else if (childNode instanceof ASTReturn) {
+                SimpleNode returnExpression = (SimpleNode) childNode.jjtGetChild(0);
+                String foundType = this.getExpressionType(methodKey, returnExpression);
+                String expectedType = this.ST.getMethodReturn(methodKey);
+                if(!foundType.equals(expectedType))
+                    ErrorHandler.addError("Found return type of " + foundType + ". Expected type of " + expectedType + " in method " + this.ST.getMethodName(methodKey));
             }
         }
     }
@@ -544,6 +551,11 @@ public class SemanticAnalyser {
     private boolean classExists(String className) {
 
         //TODO: verificar em imports
+        HashMap<String, SymbolImport> classes = this.ST.getImports();
+        for (Map.Entry<String, SymbolImport> entry : classes.entrySet())
+            if(entry.getKey().equals(className))
+                return true;
+
         if(className.equals(this.ST.getClasseName()) 
         || className.equals(this.ST.getClassExtendsName())
         || className.equals(intType)

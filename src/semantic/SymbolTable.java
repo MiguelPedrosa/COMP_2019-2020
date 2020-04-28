@@ -109,6 +109,15 @@ public class SymbolTable {
         return method.getReturnType();
     }
 
+    public String getMethodName(String methodKey) {
+        MethodTable method = methods.get(methodKey);
+        return method.getName();
+    }
+
+    public HashMap<String, SymbolImport> getImports() {
+        return this.importTable.getClasses();
+    }
+
     /*
      * ------------------------------------------- CHECKERS
      * ------------------------------------------------

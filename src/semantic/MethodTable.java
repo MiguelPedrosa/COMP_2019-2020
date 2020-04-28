@@ -28,6 +28,10 @@ public class MethodTable extends SymbolTable {
         return returnType;
     }
 
+    public String getName(){
+        return name;
+    }
+
     public String toString() {
         String variableInfo = MyUtils.ANSI_CYAN + "\n\t" + this.name + MyUtils.ANSI_YELLOW + "|" + MyUtils.ANSI_RESET + " Return Type = " + this.returnType + "; Arguments = { ";
 

@@ -155,7 +155,7 @@ public class CodeGenerator {
 
     private String transformType(String type) {
 
-        String typeString;
+        String typeString = null;
 
         switch (type) {
             case "int":
@@ -222,7 +222,7 @@ public class CodeGenerator {
     /**
      * Method to write a Method (or function) into the file
      */
-    private void writeMethod(ASTmethodDeclaration methodNode, int scope) {
+    private void writeMethod(ASTMethodDeclaration methodNode, int scope) {
         System.out.println("Writing function...");
         String methodName = methodNode.getMethodName();
         String methodType = transformType(methodNode.getReturnType());

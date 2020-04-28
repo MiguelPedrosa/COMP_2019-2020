@@ -43,6 +43,10 @@ public class ImportTable {
         }
     }
 
+    public HashMap<String, SymbolImport> getClasses() {
+        return classes;
+    }
+    
     public String toString() {
         String returnInfo = "";
         for (Map.Entry<String, SymbolImport> entry : classes.entrySet()) {
