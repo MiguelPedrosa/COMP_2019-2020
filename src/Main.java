@@ -15,6 +15,8 @@ public class Main {
         SemanticAnalyser semantic = new SemanticAnalyser(root);
         SymbolTable classTable = semantic.Start();
         System.out.println(classTable);
+        ErrorHandler.printWarnings();
+        ErrorHandler.printErrors();
 
         CodeGenerator codeGenerator = new CodeGenerator(root, "testFileName");
         codeGenerator.start();
