@@ -151,6 +151,10 @@ public class SymbolTable {
             return;
     }
 
+    public Boolean canObjectBeCreated(String className) {
+        return this.importTable.canObjectBeCreated(className);
+    }
+
     public String toString() {
 
         String variableInfo = MyUtils.ANSI_CYAN + "Class\n" + MyUtils.ANSI_RESET + "Variables:\n";
