@@ -409,7 +409,7 @@ public class SemanticAnalyser {
                             type = this.ST.getMethodReturn(method);
                         else
                             ErrorHandler
-                                    .addError("Method " + methodName + argsTypes + " undefined in class " + classType, thirdChild.getLine());
+                                    .addError("Method " + methodName + argsTypes + " undefined in class " + classType, secondChild.getLine());
                     }
                     // check if method is in imports
                     else if (classType != null) {
@@ -423,7 +423,7 @@ public class SemanticAnalyser {
 
                         else
                             ErrorHandler
-                                    .addError("Method " + methodName + argsTypes + " undefined in class " + classType, thirdChild.getLine());
+                                    .addError("Method " + methodName + argsTypes + " undefined in class " + classType, secondChild.getLine());
 
                     }
                 }
