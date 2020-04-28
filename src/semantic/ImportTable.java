@@ -47,6 +47,11 @@ public class ImportTable {
         return classes;
     }
     
+    public Boolean canObjectBeCreated(String className) {
+        final SymbolImport importObj = this.classes.get(className);
+        return importObj != null && importObj.hasDefaultConstructor();
+    }
+
     public String toString() {
         String returnInfo = "";
         for (Map.Entry<String, SymbolImport> entry : classes.entrySet()) {
