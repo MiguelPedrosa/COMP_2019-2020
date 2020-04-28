@@ -35,6 +35,13 @@ public class ErrorHandler {
         return !handler.warningList.isEmpty();
     }
 
+    public static void removeLastError() {
+        final int size = handler.errorList.size();
+        if(size < 1)
+            return;
+        handler.errorList.remove(size -1);
+    } 
+
     public static void resetHandler() {
         handler.errorList.clear();
         handler.warningList.clear();

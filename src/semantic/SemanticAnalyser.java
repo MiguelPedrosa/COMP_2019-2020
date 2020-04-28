@@ -380,6 +380,7 @@ public class SemanticAnalyser {
 
                 // check if is a static class
                 if (classType == null && this.classExists(name, false)) {
+                    ErrorHandler.removeLastError();
                     isStatic = true;
                     classType = name;
                 }
