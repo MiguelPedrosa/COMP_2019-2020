@@ -35,6 +35,11 @@ public class ErrorHandler {
         return !handler.warningList.isEmpty();
     }
 
+    public static void resetHandler() {
+        handler.errorList.clear();
+        handler.warningList.clear();
+    }
+
     /* Private non-static methods necessary to implement public interface */
     
     private List<Error> errorList;
