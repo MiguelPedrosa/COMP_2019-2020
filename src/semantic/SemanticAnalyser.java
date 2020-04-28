@@ -36,33 +36,6 @@ public class SemanticAnalyser {
             this.processClassNode(classNode, list);
         }
 
-        // check variables initialized
-
-        // global variables
-        for (Map.Entry<String, SymbolVar> entry : this.ST.getVariables().entrySet())
-            if (entry.getValue().getInitialized() == 0)
-                ErrorHandler.addError("Variable " + entry.getValue().getName() + " was not initialized.");
-            else if (entry.getValue().getInitialized() == 1)
-                ErrorHandler.addWarning("Variable " + entry.getValue().getName() + " might not be initialized.");
-
-        // main variables
-        if(this.ST.getMain() != null)
-        for (Map.Entry<String, SymbolVar> entry2 : this.ST.getMain().getVariables().entrySet())
-            if (entry2.getValue().getInitialized() == 0)
-                ErrorHandler.addError("Variable " + entry2.getValue().getName() + " in main was not initialized.");
-            else if (entry2.getValue().getInitialized() == 1)
-                ErrorHandler.addWarning("Variable " + entry2.getValue().getName() + " in main might not be initialized.");
-
-        //method variables
-        for (Map.Entry<String, MethodTable> entry : this.ST.getMethods().entrySet())
-            for (Map.Entry<String, SymbolVar> entry2 : entry.getValue().getVariables().entrySet())
-                if (entry2.getValue().getInitialized() == 0)
-                    ErrorHandler.addError("Variable " + entry2.getValue().getName() + " in method "
-                            + entry.getValue().getName() + " was not initialized.");
-                else if (entry2.getValue().getInitialized() == 1)
-                    ErrorHandler.addWarning("Variable " + entry2.getValue().getName() + " in method "
-                            + entry.getValue().getName() + " might not be initialized.");
-
         return ST;
     }
 
@@ -84,12 +57,12 @@ public class SemanticAnalyser {
             }
             // Main declaration
             if (childNode instanceof ASTMainDeclaration) {
-                if(signMainNode((ASTMainDeclaration) childNode))
+                if (signMainNode((ASTMainDeclaration) childNode))
                     list.add(i);
             }
             // Methods declarations
             else if (childNode instanceof ASTMethodDeclaration) {
-                if(signMethodNode((ASTMethodDeclaration) childNode))
+                if (signMethodNode((ASTMethodDeclaration) childNode))
                     list.add(i);
             }
         }
@@ -98,9 +71,9 @@ public class SemanticAnalyser {
     }
 
     private boolean signMainNode(ASTMainDeclaration mainNode) {
-        if(this.ST.addMain())
+        if (this.ST.addMain())
             return true;
-        
+
         ErrorHandler.addError("Repeated main method.", mainNode.getLine());
         return false;
     }
@@ -124,7 +97,7 @@ public class SemanticAnalyser {
 
     private void processClassNode(SimpleNode classNode, List<Integer> list) {
 
-        for (Integer i: list){
+        for (Integer i : list) {
             final SimpleNode childNode = (SimpleNode) classNode.jjtGetChild(i);
 
             // First childs are variables
@@ -352,6 +325,7 @@ public class SemanticAnalyser {
         }
 
         else if (expression instanceof ASTIdentifier) {
+            checkVarInitialized(methodKey, (ASTIdentifier) expression);
             type = getVarType(methodKey, ((ASTIdentifier) expression).getIdentifier());
         }
 
@@ -450,8 +424,9 @@ public class SemanticAnalyser {
                             else
                                 type = this.ST.getImports().get(this.ST.getClassExtendsName()).getMethodType(method);
                         } else
-                            ErrorHandler
-                                    .addError("Method " + methodName + argsTypes + " undefined in class " + classType, secondChild.getLine());
+                            ErrorHandler.addError(
+                                    "Method " + methodName + argsTypes + " undefined in class " + classType,
+                                    secondChild.getLine());
                     }
                     // check if method is in imports
                     else if (classType != null) {
@@ -464,8 +439,9 @@ public class SemanticAnalyser {
                         }
 
                         else
-                            ErrorHandler
-                                    .addError("Method " + methodName + argsTypes + " undefined in class " + classType, secondChild.getLine());
+                            ErrorHandler.addError(
+                                    "Method " + methodName + argsTypes + " undefined in class " + classType,
+                                    secondChild.getLine());
 
                     }
                 }
@@ -535,13 +511,36 @@ public class SemanticAnalyser {
     }
 
     private String getVarType(String methodKey, String VarId) {
-        if (this.ST.containsMethodVariable(methodKey, VarId))
+        
+        if (this.ST.containsMethodVariable(methodKey, VarId)) 
             return this.ST.getMethodVariableType(methodKey, VarId);
-        else if (this.ST.containsVariable(VarId))
+        else if (this.ST.containsVariable(VarId)) 
             return this.ST.getVariableType(VarId);
+    
 
         ErrorHandler.addError(VarId + " is undefined.");
         return null;
+    }
+
+    private void checkVarInitialized(String methodKey, ASTIdentifier var) {
+        String varId = ((ASTIdentifier) var).getIdentifier();
+        if (this.ST.containsMethodVariable(methodKey, varId)) {
+            if (this.ST.getMethodVariable(methodKey, varId).getInitialized() == 0)
+                ErrorHandler.addError(
+                        "Variable " + this.ST.getMethodVariable(methodKey, varId).getName() + " was not initialized.", var.getLine());
+            else if (this.ST.getMethodVariable(methodKey, varId).getInitialized() == 1)
+                ErrorHandler.addWarning("Variable " + this.ST.getMethodVariable(methodKey, varId).getName()
+                        + " might not be initialized.", var.getLine());
+
+        } else if (this.ST.containsVariable(varId)) {
+            if (this.ST.getVariable(varId).getInitialized() == 0)
+                ErrorHandler.addError(
+                        "Variable " + this.ST.getVariable(varId).getName() + " was not initialized.", var.getLine());
+            else if (this.ST.getVariable(varId).getInitialized() == 1)
+                ErrorHandler.addWarning("Variable " + this.ST.getVariable(varId).getName()
+                        + " might not be initialized.", var.getLine());
+
+        }
     }
 
     private String getSimpleArrayType(String ArrayType) {

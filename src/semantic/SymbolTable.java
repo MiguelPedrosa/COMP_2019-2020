@@ -96,6 +96,11 @@ public class SymbolTable {
         return var.getType();
     }
 
+    public SymbolVar getVariable(String VarId) {
+        SymbolVar var = variables.get(VarId);
+        return var;
+    }
+
     public String getMethodVariableType(String methodKey, String VarId) {
         SymbolVar var;
 
@@ -107,6 +112,19 @@ public class SymbolTable {
         }
 
         return var.getType();
+    }
+
+    public SymbolVar getMethodVariable(String methodKey, String VarId) {
+        SymbolVar var;
+
+        if (methodKey.equals("main"))
+            var = this.main.getVariables().get(VarId);
+        else {
+            MethodTable method = methods.get(methodKey);
+            var = method.getVariables().get(VarId);
+        }
+
+        return var;
     }
 
     public String getMethodReturn(String methodKey) {
@@ -161,9 +179,9 @@ public class SymbolTable {
 
     public void initializeVariable(String methodKey, String VarId, int initializationLevel) {
         if (containsMethodVariable(methodKey, VarId)) {
-            if (methodKey.equals("main") && this.main != null)
+            if (this.main != null && methodKey.equals("main") && this.main.getVariables().get(VarId).getInitialized() != 2 )
                 this.main.getVariables().get(VarId).setInitialize(initializationLevel);
-            else if (methods.containsKey(methodKey))
+            else if (methods.containsKey(methodKey) && methods.get(methodKey).getVariables().get(VarId).getInitialized() != 2)
                 methods.get(methodKey).getVariables().get(VarId).setInitialize(initializationLevel);
 
             return;
