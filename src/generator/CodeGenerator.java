@@ -261,7 +261,7 @@ public class CodeGenerator {
     private void writeMain(ASTMainDeclaration mainMethodNode, int scope) {
         writeCode(".method public static main([Ljava/lang/String;)V\n", scope);
         writeStack(scope);
-        writeLocals();
+        writeLocals(scope);
         readNodes(mainMethodNode, scope+1);
         endMethod(scope);
     }
