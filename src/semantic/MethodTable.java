@@ -16,7 +16,7 @@ public class MethodTable extends SymbolTable {
         this.name = name;
 
         for (Map.Entry<String, String> entry : arguments.entrySet())
-            addVariable(entry.getValue(), entry.getKey());
+            addVariable(entry.getValue(), entry.getKey(), -1);
         
         for (Map.Entry<String, SymbolVar> entry : getVariables().entrySet())
             entry.getValue().setInitialize(2);

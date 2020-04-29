@@ -32,9 +32,9 @@ public class SymbolTable {
         this.classExtendsName = name;
     }
 
-    public void addVariable(String type, String name) {
+    public void addVariable(String type, String name, int tokenLine) {
         if (containsVariable(name)) {
-            ErrorHandler.addError("Variable (" + name + ") declaration repeated");
+            ErrorHandler.addError("Variable (" + name + ") declaration repeated", tokenLine);
 
             return;
         }
@@ -42,14 +42,14 @@ public class SymbolTable {
         variables.put(name, var);
     }
 
-    public void addLocalVariable(String methodKey, String type, String name) {
+    public void addLocalVariable(String methodKey, String type, String name, int tokenLine) {
         if (containsVariable(name))
-            ErrorHandler.addWarning("Variable '" + name + "' already defined in class.");
+            ErrorHandler.addWarning("Variable '" + name + "' already defined in class.", tokenLine);
 
         if (methodKey.equals("main"))
-            this.main.addVariable(type, name);
+            this.main.addVariable(type, name, tokenLine);
         else
-            methods.get(methodKey).addVariable(type, name);
+            methods.get(methodKey).addVariable(type, name, tokenLine);
 
     }
 

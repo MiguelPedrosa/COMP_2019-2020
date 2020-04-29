@@ -121,7 +121,7 @@ public class SemanticAnalyser {
         // warning: might not need true
         if (classExists(this.getSimpleArrayType(type), true)) {
             if (!type.equals("void"))
-                this.ST.addVariable(type, varID);
+                this.ST.addVariable(type, varID, childNode.getLine());
             else
                 ErrorHandler.addError("Variable " + varID + " cant be type void", childNode.getLine());
         } else
@@ -173,7 +173,7 @@ public class SemanticAnalyser {
         // warning: might not need true
         if (classExists(this.getSimpleArrayType(type), true)) {
             if (!type.equals("void"))
-                this.ST.addLocalVariable(key, type, varID);
+                this.ST.addLocalVariable(key, type, varID, childNode.getLine());
             else
                 ErrorHandler.addError("Variable " + varID + " cant be type void", childNode.getLine());
         } else
@@ -336,15 +336,17 @@ public class SemanticAnalyser {
                 String indexType = getExpressionType(methodKey, childNode);
                 if (indexType != null && indexType.equals(intType)) {
                     type = ((ASTNew) expression).getType();
+                } else {
+                    ErrorHandler.addError("Expected integer on array index.", expression.getLine());                    
                 }
             } else if (childNode instanceof ASTIdentifier) {
                 type = ((ASTIdentifier) childNode).getIdentifier();
 
                 if (classExists(this.getSimpleArrayType(type), true)) {
                     if (type.equals("void"))
-                        ErrorHandler.addError("New usage can't be type void", childNode.getLine());
+                        ErrorHandler.addError("New usage can't be type void", expression.getLine());
                 } else
-                    ErrorHandler.addError("Class " + type + " is undefined.", childNode.getLine());
+                    ErrorHandler.addError("Class " + type + " is undefined.", expression.getLine());
             }
         }
 
