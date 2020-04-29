@@ -20,12 +20,12 @@ public class Main {
 
         ErrorHandler.printWarnings();
         ErrorHandler.printErrors();
-        if(ErrorHandler.hasErrors()) {
+        if (ErrorHandler.hasErrors()) {
             System.err.println("Compilation cannot continue because of erros");
             throw new IOException();
         }
 
-        CodeGenerator codeGenerator = new CodeGenerator(root, "testFileName");
+        CodeGenerator codeGenerator = new CodeGenerator(root, classTable, "testFileName");
         codeGenerator.start();
     }
 
@@ -33,7 +33,7 @@ public class Main {
         final File file = new File(filePath);
         try {
             return new FileInputStream(file);
-        } catch(FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             System.out.println("No file given.");
             return null;
         }

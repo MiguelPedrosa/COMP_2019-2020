@@ -29,8 +29,11 @@ public class CodeGenerator {
     private String fileName;
     private String filePath;
 
-    public CodeGenerator(SimpleNode root, String fileName) {
+    private SymbolTable symbolTable;
+
+    public CodeGenerator(SimpleNode root, SymbolTable symbolTable, String fileName) {
         this.rootNode = root;
+        this.symbolTable = symbolTable;
         this.fileName = fileName;
         this.filePath = System.getProperty("user.dir");
     }
@@ -156,7 +159,6 @@ public class CodeGenerator {
     /**
      * Method to transform a type string into a type for Jasmin
      */
-
     private String transformType(String type) {
 
         String typeString = null;
@@ -270,12 +272,16 @@ public class CodeGenerator {
         writeStack(scope + 1);
         writeLocals(scope + 1);
         readNodes(mainMethodNode, scope + 1);
-        writeCode("return\n", scope);
+        writeCode("return\n", scope + 1);
         endMethod(scope);
     }
 
     private void writeReturn(ASTReturn returnNode, int scope) {
         writeCode("ireturn\n", scope);
+    }
+
+    private void writeVarDeclaration(ASTVarDeclaration varDecNode, int scope) {
+        writeCode("\n", scope);
     }
 
 }
