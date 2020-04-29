@@ -81,12 +81,26 @@ public class SemanticAnalyser {
     private boolean signMethodNode(ASTMethodDeclaration methodNode) {
         String returnType = methodNode.getReturnType();
         String methodName = methodNode.getMethodName();
-        LinkedHashMap<String, String> arguments = methodNode.getArguments();
+        List<String[]> arguments = methodNode.getArguments();
         String key = this.getMethodKey(methodName, arguments);
+
         if (!this.ST.addMethod(key, methodName, arguments, returnType)) {
             ErrorHandler.addError("Repeated method:" + methodName, methodNode.getLine());
             return false;
         }
+        else {
+            for (String[] argument: arguments)        
+                if (classExists(this.getSimpleArrayType(argument[1]), true)) {
+                    if (!argument[1].equals("void"))
+                        this.ST.addLocalVariable(key, argument[1], argument[0], -1);
+                    else
+                        ErrorHandler.addError("Variable " + argument[0] + " cant be type void");
+                } else
+                    ErrorHandler.addError("Class " + argument[1] + " is undefined.");
+        }
+
+        this.ST.initializeAllVariables(key);
+
         return true;
     }
 
@@ -134,7 +148,7 @@ public class SemanticAnalyser {
 
     private void processMethodNode(ASTMethodDeclaration methodNode) {
         String methodName = methodNode.getMethodName();
-        LinkedHashMap<String, String> arguments = methodNode.getArguments();
+        List<String[]> arguments = methodNode.getArguments();
         String key = this.getMethodKey(methodName, arguments);
 
         this.processNodes(key, (SimpleNode) methodNode, true);
@@ -246,11 +260,11 @@ public class SemanticAnalyser {
      * ---------------------------------------
      */
 
-    public String getMethodKey(String methodName, LinkedHashMap<String, String> arguments) {
+    public String getMethodKey(String methodName, List<String[]> arguments) {
         String key = methodName;
 
-        for (Map.Entry<String, String> entry : arguments.entrySet())
-            key += ";" + entry.getValue();
+        for(String[] argument: arguments)
+            key += ";" + argument[1];
 
         return key;
     }
@@ -390,10 +404,13 @@ public class SemanticAnalyser {
                 classType = this.getExpressionType(methodKey, firstChild);
 
                 // check if is a static class
-                if (classType == null && this.classExists(name, false)) {
+                if (classType == null && !name.equals(this.ST.getClasseName()) && this.classExists(name, false)) {
                     ErrorHandler.removeLastError();
                     isStatic = true;
                     classType = name;
+                } else if(classType == null && name.equals(this.ST.getClasseName())){
+                    ErrorHandler.removeLastError();
+                    ErrorHandler.addError(name + " does not have static methods.", expression.getLine());
                 }
             } else {
                 String name = this.getExpressionType(methodKey, firstChild);

@@ -62,7 +62,7 @@ public class SymbolTable {
         
     }
 
-    public boolean addMethod(String key, String name, LinkedHashMap<String, String> arguments, String returnType) {
+    public boolean addMethod(String key, String name, List<String[]> arguments, String returnType) {
         MethodTable method = new MethodTable(this, name, returnType, arguments);
         if (methods.containsKey(key))
             return false;
@@ -189,6 +189,11 @@ public class SymbolTable {
             getVariables().get(VarId).setInitialize(initializationLevel);
         else
             return;
+    }
+
+    public void initializeAllVariables(String methodKey) {
+        if(this.getMethods().containsKey(methodKey))
+            this.getMethods().get(methodKey).initializeAllVariables();
     }
 
     public Boolean canObjectBeCreated(String className) {
