@@ -74,7 +74,11 @@ public class CodeGenerator {
                 case "ASTMainDeclaration":
                     writeMain((ASTMainDeclaration) child, scope);
                     break;
+                case "ASTReturn":
+                    writeReturn((ASTReturn) child, scope);
+                    break;
                 default:
+                    readNodes(child, scope);
                     break;
             }
         }
@@ -266,7 +270,12 @@ public class CodeGenerator {
         writeStack(scope + 1);
         writeLocals(scope + 1);
         readNodes(mainMethodNode, scope + 1);
+        writeCode("return\n", scope);
         endMethod(scope);
+    }
+
+    private void writeReturn(ASTReturn returnNode, int scope) {
+        writeCode("ireturn\n", scope);
     }
 
 }
