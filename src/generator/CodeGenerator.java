@@ -256,7 +256,7 @@ public class CodeGenerator {
             argsInJasmin = argsInJasmin.concat(argType);
         }
 
-        writeCode(".method public static " + methodName + "(" + argsInJasmin + ")" + methodType, scope);
+        writeCode(".method public static " + methodName + "(" + argsInJasmin + ")" + methodType + "\n", scope);
 
         writeStack(scope + 1);
         writeLocals(scope + 1);
@@ -271,6 +271,7 @@ public class CodeGenerator {
         writeCode(".method public static main([Ljava/lang/String;)V\n", scope);
         writeStack(scope + 1);
         writeLocals(scope + 1);
+        writeCode("\n", scope);
         readNodes(mainMethodNode, scope + 1);
         writeCode("return\n", scope + 1);
         endMethod(scope);
@@ -282,6 +283,10 @@ public class CodeGenerator {
 
     private void writeVarDeclaration(ASTVarDeclaration varDecNode, int scope) {
         writeCode("\n", scope);
+    }
+
+    private void writeNewLine() {
+
     }
 
 }
