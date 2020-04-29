@@ -126,7 +126,7 @@ public class CodeGenerator {
      */
     private void writeInitializer(int scope) {
         writeCode("; standard initializer\n", scope);
-        writeCode(".method public <init>()V\n", scope + 1);
+        writeCode(".method public <init>()V\n", scope);
         writeCode("aload_0\n", scope + 1);
         writeCode("invokenonvirtual java/lang/Object/<init>()V\n", scope + 1);
         writeCode("return\n", scope + 1);
