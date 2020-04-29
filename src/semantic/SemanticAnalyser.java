@@ -71,7 +71,7 @@ public class SemanticAnalyser {
     }
 
     private boolean signMainNode(ASTMainDeclaration mainNode) {
-        if (this.ST.addMain())
+        if (this.ST.addMain(mainNode.argumentName))
             return true;
 
         ErrorHandler.addError("Repeated main method.", mainNode.getLine());

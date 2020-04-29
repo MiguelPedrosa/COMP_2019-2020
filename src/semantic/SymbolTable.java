@@ -53,11 +53,11 @@ public class SymbolTable {
 
     }
 
-    public boolean addMain() {
+    public boolean addMain(String argumentName) {
         if(this.main != null)
             return false;
         
-        this.main = new MainTable(this);
+        this.main = new MainTable(this, argumentName);
         return true;
         
     }

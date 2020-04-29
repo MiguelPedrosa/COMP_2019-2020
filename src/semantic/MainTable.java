@@ -2,8 +2,12 @@ import java.util.Map;
 
 public class MainTable extends SymbolTable {
 
-    public MainTable(SymbolTable parentTable) {
+    public MainTable(SymbolTable parentTable, String argumentName) {
         super(parentTable);
+        addVariable("String[]", argumentName, -1);
+
+        for (Map.Entry<String, SymbolVar> entry : getVariables().entrySet())
+            entry.getValue().setInitialize(2);
     }
     
     public String toString() {

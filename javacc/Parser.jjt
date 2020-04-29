@@ -192,11 +192,12 @@ void Return() #Return: {Token returnToken;}
     } Expression() <SEMICOLON>
 }
 
-void MainDeclaration() #MainDeclaration: {Token mainToken;}
+void MainDeclaration() #MainDeclaration: {Token mainToken, argumentName; }
 {
     <STATIC> <VOID> mainToken=<MAIN> {
         jjtThis.setPosition(mainToken);
-    } <LPARENS> <STRING> <LSQPARENS> <RSQPARENS> <IDENTIFIER> <RPARENS>
+    } <LPARENS> <STRING> <LSQPARENS> <RSQPARENS> argumentName=<IDENTIFIER> <RPARENS>
+    {jjtThis.argumentName = argumentName.image;}
     <LBRACKET>
     (LOOKAHEAD(2) VarDeclaration())*
     (Statement())*
