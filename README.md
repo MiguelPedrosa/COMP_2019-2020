@@ -35,13 +35,13 @@ For this project, you need to [install Gradle](https://gradle.org/install/)
 	* [x] verificar se o tipo dos parâmetros coincide com o tipo dos argumentos
 	    - [x] não esquecer que existe method overloading
 * Code Generation
-    * estrutura básica de classe (incluindo construtor <init>)
-	* estrutura básica de fields
-	* estrutura básica de métodos (podem desconsiderar os limites neste checkpoint: limit_stack 99, limit_locals 99)
-	* assignments
-	* operações aritméticas (com prioridade de operações correta)
-		- neste checkpoint não é necessário a seleção das operações mais eficientes mas isto será considerado no CP3 e versão final
-	* invocação de métodos
+    * [x] estrutura básica de classe (incluindo construtor <init>)
+	* [ ] estrutura básica de fields
+	* [x] estrutura básica de métodos (podem desconsiderar os limites neste checkpoint: limit_stack 99, limit_locals 99)
+	* [ ] assignments
+	* [ ] operações aritméticas (com prioridade de operações correta)
+		- [ ] neste checkpoint não é necessário a seleção das operações mais eficientes mas isto será considerado no CP3 e versão final
+	* [ ] invocação de métodos
   
 
 ## Project setup
