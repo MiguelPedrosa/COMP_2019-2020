@@ -272,7 +272,7 @@ public class CodeGenerator {
         writeStack(scope + 1);
         writeLocals(scope + 1);
         readNodes(mainMethodNode, scope + 1);
-        writeCode("return\n", scope);
+        writeCode("return\n", scope + 1);
         endMethod(scope);
     }
 
@@ -281,7 +281,7 @@ public class CodeGenerator {
     }
 
     private void writeVarDeclaration(ASTVarDeclaration varDecNode, int scope) {
-        writeCode("\n",scope);
+        writeCode("\n", scope);
     }
 
 }
