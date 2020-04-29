@@ -361,12 +361,14 @@ void Literal() #Literal: {Token literal;}
     }
 }
 
-void Expr_NEW() #New: {}
+void Expr_NEW() #New: {Token newToken;}
 {
-    <NEW> (
+    newToken=<NEW> (
           <INT> <LSQPARENS> Expression() <RSQPARENS> {jjtThis.setType("int[]");}
         | Identifier() <LPARENS> <RPARENS> 
-    )
+    ) {
+        jjtThis.setPosition(newToken);
+    }
 }
 
 void ComplexIdentifier() #void: {}
