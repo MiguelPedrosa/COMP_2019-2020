@@ -69,10 +69,10 @@ public class CodeGenerator {
                     writeClass((ASTClassDeclaration) child, scope);
                     break;
                 case "ASTMethodDeclaration":
-
+                    writeMethod((ASTMethodDeclaration) child, scope);
                     break;
                 case "ASTMainDeclaration":
-
+                    writeMain((ASTMainDeclaration) child, scope);
                     break;
                 default:
                     break;
@@ -126,7 +126,7 @@ public class CodeGenerator {
      */
     private void writeInitializer(int scope) {
         writeCode("; standard initializer\n", scope);
-        writeCode(".method public <init>()V\n", scope + 1);
+        writeCode(".method public <init>()V\n", scope);
         writeCode("aload_0\n", scope + 1);
         writeCode("invokenonvirtual java/lang/Object/<init>()V\n", scope + 1);
         writeCode("return\n", scope + 1);
@@ -219,6 +219,16 @@ public class CodeGenerator {
 
     }
 
+    private void writeStack(int scope) {
+        int value = 99;
+        writeCode(".limit stack " + value + "\n", scope);
+    }
+
+    private void writeLocals(int scope) {
+        int value = 99;
+        writeCode(".limit locals " + value + "\n", scope);
+    }
+
     /**
      * Method to write a Method (or function) into the file
      */
@@ -242,10 +252,21 @@ public class CodeGenerator {
 
         writeCode(".method public static " + methodName + "(" + argsInJasmin + ")" + methodType, scope);
 
-        readNodes(methodNode, scope);
+        writeStack(scope + 1);
+        writeLocals(scope + 1);
+
+        readNodes(methodNode, scope + 1);
 
         endMethod(scope);
 
+    }
+
+    private void writeMain(ASTMainDeclaration mainMethodNode, int scope) {
+        writeCode(".method public static main([Ljava/lang/String;)V\n", scope);
+        writeStack(scope + 1);
+        writeLocals(scope + 1);
+        readNodes(mainMethodNode, scope + 1);
+        endMethod(scope);
     }
 
 }
