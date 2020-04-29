@@ -67,7 +67,6 @@ public class ErrorHandler {
     }
 
     private void printErrorList() {
-        System.out.println("Printing Errors:");
         for(final Error error : errorList) {
             System.err.println(error);
         }
