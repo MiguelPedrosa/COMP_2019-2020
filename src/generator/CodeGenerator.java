@@ -72,7 +72,7 @@ public class CodeGenerator {
                     writeMethod((ASTMethodDeclaration) child, scope);
                     break;
                 case "ASTMainDeclaration":
-
+                    writeMain((ASTMainDeclaration) child, scope);
                     break;
                 default:
                     break;
@@ -221,12 +221,12 @@ public class CodeGenerator {
 
     private void writeStack(int scope) {
         int value = 99;
-        writeCode(".limit stack " + value + "\n",scope);
+        writeCode(".limit stack " + value + "\n", scope);
     }
 
     private void writeLocals(int scope) {
         int value = 99;
-        writeCode(".limit locals " + value + "\n",scope);
+        writeCode(".limit locals " + value + "\n", scope);
     }
 
     /**
@@ -252,6 +252,9 @@ public class CodeGenerator {
 
         writeCode(".method public static " + methodName + "(" + argsInJasmin + ")" + methodType, scope);
 
+        writeStack(scope + 1);
+        writeLocals(scope + 1);
+
         readNodes(methodNode, scope + 1);
 
         endMethod(scope);
@@ -260,9 +263,9 @@ public class CodeGenerator {
 
     private void writeMain(ASTMainDeclaration mainMethodNode, int scope) {
         writeCode(".method public static main([Ljava/lang/String;)V\n", scope);
-        writeStack(scope);
-        writeLocals(scope);
-        readNodes(mainMethodNode, scope+1);
+        writeStack(scope + 1);
+        writeLocals(scope + 1);
+        readNodes(mainMethodNode, scope + 1);
         endMethod(scope);
     }
 
