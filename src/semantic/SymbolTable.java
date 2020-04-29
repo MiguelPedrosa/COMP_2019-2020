@@ -32,9 +32,9 @@ public class SymbolTable {
         this.classExtendsName = name;
     }
 
-    public void addVariable(String type, String name) {
+    public void addVariable(String type, String name, int tokenLine) {
         if (containsVariable(name)) {
-            ErrorHandler.addError("Variable (" + name + ") declaration repeated");
+            ErrorHandler.addError("Variable (" + name + ") declaration repeated", tokenLine);
 
             return;
         }
@@ -42,27 +42,27 @@ public class SymbolTable {
         variables.put(name, var);
     }
 
-    public void addLocalVariable(String methodKey, String type, String name) {
+    public void addLocalVariable(String methodKey, String type, String name, int tokenLine) {
         if (containsVariable(name))
-            ErrorHandler.addWarning("Variable '" + name + "' already defined in class.");
+            ErrorHandler.addWarning("Variable '" + name + "' already defined in class.", tokenLine);
 
         if (methodKey.equals("main"))
-            this.main.addVariable(type, name);
+            this.main.addVariable(type, name, tokenLine);
         else
-            methods.get(methodKey).addVariable(type, name);
+            methods.get(methodKey).addVariable(type, name, tokenLine);
 
     }
 
-    public boolean addMain() {
+    public boolean addMain(String argumentName) {
         if(this.main != null)
             return false;
         
-        this.main = new MainTable(this);
+        this.main = new MainTable(this, argumentName);
         return true;
         
     }
 
-    public boolean addMethod(String key, String name, LinkedHashMap<String, String> arguments, String returnType) {
+    public boolean addMethod(String key, String name, List<String[]> arguments, String returnType) {
         MethodTable method = new MethodTable(this, name, returnType, arguments);
         if (methods.containsKey(key))
             return false;
@@ -189,6 +189,11 @@ public class SymbolTable {
             getVariables().get(VarId).setInitialize(initializationLevel);
         else
             return;
+    }
+
+    public void initializeAllVariables(String methodKey) {
+        if(this.getMethods().containsKey(methodKey))
+            this.getMethods().get(methodKey).initializeAllVariables();
     }
 
     public Boolean canObjectBeCreated(String className) {

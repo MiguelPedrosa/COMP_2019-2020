@@ -21,7 +21,7 @@ public class Main {
         ErrorHandler.printWarnings();
         ErrorHandler.printErrors();
         if (ErrorHandler.hasErrors()) {
-            System.err.println("Compilation cannot continue because of erros");
+            System.err.println("\nCompilation cannot continue. Found " + MyUtils.ANSI_RED + ErrorHandler.getNumberOfErrors() + MyUtils.ANSI_RESET + " errors.");
             throw new IOException();
         }
 

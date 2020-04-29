@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -243,7 +244,7 @@ public class CodeGenerator {
         String methodName = methodNode.getMethodName();
         String methodType = transformType(methodNode.getReturnType());
 
-        LinkedHashMap<String, String> arguments = methodNode.getArguments();
+        /* LinkedHashMap<String, String> arguments = methodNode.getArguments();
         String argsInJasmin = "";
 
         Set set = arguments.entrySet();
@@ -253,6 +254,14 @@ public class CodeGenerator {
         while (i.hasNext()) {
             Map.Entry ma = (Map.Entry) i.next();
             String argType = transformType(ma.getValue().toString());
+            argsInJasmin = argsInJasmin.concat(argType);
+        } */
+
+        List<String[]> arguments = methodNode.getArguments();
+        String argsInJasmin = "";
+
+        for(String[] argument: arguments){
+            String argType = transformType(argument[1]);
             argsInJasmin = argsInJasmin.concat(argType);
         }
 

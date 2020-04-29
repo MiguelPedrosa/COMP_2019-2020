@@ -6,7 +6,7 @@ import java.util.Map;
 public class ASTMethodDeclaration extends SimpleNode {
 
 	protected String methodName;
-	protected LinkedHashMap<String, String> arguments;
+	protected List<String[]> arguments;
 	protected String returnType;
 	protected String key;
 
@@ -14,7 +14,7 @@ public class ASTMethodDeclaration extends SimpleNode {
 		super(id);
 		this.returnType = "void";
 		this.methodName = null;
-		this.arguments = new LinkedHashMap<String, String>();
+		this.arguments = new ArrayList<>();
 		this.key = null;
 	}
 
@@ -27,7 +27,8 @@ public class ASTMethodDeclaration extends SimpleNode {
 	}
 
 	public void addArgument(String type, String name) {
-		this.arguments.put(name, type);
+		String[] aux = {name, type};
+		this.arguments.add(aux);
 	}
 
 	public void setReturnType(String returnType) {
@@ -42,7 +43,7 @@ public class ASTMethodDeclaration extends SimpleNode {
 		return methodName;
 	}
 
-	public LinkedHashMap<String, String> getArguments() {
+	public List<String[]> getArguments() {
 		return arguments;
 	}
 
@@ -51,9 +52,9 @@ public class ASTMethodDeclaration extends SimpleNode {
 		final String name = "name=\'" + methodName + "\'";
 		String args = "arguments=[ ";
 
-		for (Map.Entry<String, String> entry : arguments.entrySet())
-			args += "{" + entry.getValue() + ", " + entry.getKey() + "} ";
-
+		for(String[] aux: this.arguments)
+			args += "{" + aux[1] + ", " + aux[0] + "} ";
+			
 		args += "]";
 
 		final String returnInfo = "return=" + returnType;

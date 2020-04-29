@@ -4,24 +4,21 @@ import java.util.Map;
 
 public class MethodTable extends SymbolTable {
 
-    private LinkedHashMap<String, String> arguments; //name, type
+    private List<String[]> arguments; //name, type
     private String returnType;
     private String name;
 
 
-    public MethodTable(SymbolTable parentTable, String name, String returnType, LinkedHashMap<String, String> arguments) {
+    public MethodTable(SymbolTable parentTable, String name, String returnType, List<String[]> arguments) {
         super(parentTable);
         this.arguments = arguments;
         this.returnType = returnType;
         this.name = name;
+    }
 
-        for (Map.Entry<String, String> entry : arguments.entrySet())
-            addVariable(entry.getValue(), entry.getKey());
-        
+    public void initializeAllVariables(){
         for (Map.Entry<String, SymbolVar> entry : getVariables().entrySet())
             entry.getValue().setInitialize(2);
-        
-        
     }
 
     public String getReturnType(){
@@ -35,8 +32,8 @@ public class MethodTable extends SymbolTable {
     public String toString() {
         String variableInfo = MyUtils.ANSI_CYAN + "\n\t" + this.name + MyUtils.ANSI_YELLOW + "|" + MyUtils.ANSI_RESET + " Return Type = " + this.returnType + "; Arguments = { ";
 
-        for (Map.Entry<String, String> entry : arguments.entrySet())
-            variableInfo += entry.getValue() + " ";
+        for (String[] argument: arguments)
+            variableInfo += argument[1] + " ";
 
         variableInfo += "}\n";
         variableInfo += "\tLocal variables:\n";

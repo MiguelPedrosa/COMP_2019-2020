@@ -9,16 +9,50 @@ class Life extends Dead{
     
 
     public static void main(String[] a) {
-		
+        Life b;
+        b = new Life();
+		b.inbounds(2,3);
 
-    }
+        Life.inbounds(2,3);
 
-    public static void main(String[] a) {
-		
 
     }
 
     public boolean inbounds(int row, int column) {
+        int a;
+        int a;
+        int a;
+        int a;
+        int a;
+        int a;
+        int a;
+        int a;
+        int a;
+        int a;
+        int a;
+        int a;
+        int a;
+        int a;
+        int a;
+        int a;
+        int a;
+        int a;
+        int a;
+        int a;
+        int a;
+        int a;
+        int a;
+        int a;
+        int a;
+        int a;
+        int a;
+        int a;
+        int a;
+        int a;
+        int a;
+        int a;
+        
+        boolean in;
         a = 4;
         if (row < 0)
             in =  false;
@@ -34,21 +68,6 @@ class Life extends Dead{
         return in;
     }
 
-    public boolean inbounds(int row, int column) {
-        a = 4;
-        if (row < 0)
-            in =  false;
-        else if (column < 0)
-            in =  false;
-        else if (2 < row) 
-            in =  false;
-        else if (2 < column) 
-            in = false;
-        else 
-            in = true;
-            
-        return in;
-    }
 
 /*
     public boolean quicksort(int[] L) {
