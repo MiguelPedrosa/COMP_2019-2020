@@ -6,7 +6,6 @@ public class ErrorHandler {
 
     /* Attribute that allows for the singleton pattern */
     private static ErrorHandler handler = new ErrorHandler();
-    public static int MAX_ERRORS = 10;
 
     /* Public and static interface */
     public static void addError(String description, int line) {
@@ -15,16 +14,6 @@ public class ErrorHandler {
 
     public static void addError(String description) {
         addError(description, -1);
-        /* if (handler.errorList.size() == MAX_ERRORS) {
-            System.err.println("\nCompilation cannot continue. Found " + MyUtils.ANSI_RED
-                    + ErrorHandler.getNumberOfErrors() + MyUtils.ANSI_RESET + " errors.");
-            try{
-                throw new IOException();
-            } catch(IOException e){
-
-            }
-        } */
-
     }
 
     public static void addWarning(String description, int line) {
