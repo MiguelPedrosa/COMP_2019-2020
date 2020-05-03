@@ -275,7 +275,7 @@ public class CodeGenerator {
             argsInJasmin = argsInJasmin.concat(argType);
         }
 
-        writeCode(".method public static " + methodName + "(" + argsInJasmin + ")" + methodType + "\n", scope);
+        writeCode("\n.method public static " + methodName + "(" + argsInJasmin + ")" + methodType + "\n", scope);
 
         writeStack(scope + 1);
         writeLocals(scope + 1);
@@ -287,7 +287,7 @@ public class CodeGenerator {
     }
 
     private void writeMain(ASTMainDeclaration mainMethodNode, int scope, SymbolTable scopeTable) {
-        writeCode(".method public static main([Ljava/lang/String;)V\n", scope);
+        writeCode("\n.method public static main([Ljava/lang/String;)V\n", scope);
         writeStack(scope + 1);
         writeLocals(scope + 1);
         writeCode("\n", scope);
@@ -320,7 +320,7 @@ public class CodeGenerator {
 
     private void writeClassField(ASTVarDeclaration varDecNode, int scope, SymbolTable scopeTable) {
         String type = transformType(varDecNode.getType());
-        writeCode(".field " + varDecNode.getVarId() + " " + type, scope);
+        writeCode(".field " + varDecNode.getVarId() + " " + type + "\n", scope);
     }
 
     private void writeNewLine() {
