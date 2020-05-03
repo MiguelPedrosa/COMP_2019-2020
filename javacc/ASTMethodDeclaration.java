@@ -47,8 +47,8 @@ public class ASTMethodDeclaration extends SimpleNode {
 		return arguments;
 	}
 
-	public String getMethodKey(String methodName) {
-        String key = methodName;
+	public String getMethodKey() {
+        String key = this.methodName;
 
         for(String[] argument: this.arguments)
             key += ";" + argument[1];
