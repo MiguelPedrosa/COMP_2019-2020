@@ -195,6 +195,9 @@ public class CodeGenerator {
             case "String":
                 typeString = "Ljava/lang/String;";
                 break;
+            case "boolean":
+                typeString = "Z";
+                break;
             case "int[]":
                 typeString = "[I";
                 break;
@@ -222,7 +225,9 @@ public class CodeGenerator {
             case "String[]":
                 typeString = "[Ljava/lang/String;";
                 break;
-
+            case "boolean[]":
+                typeString = "[Z";
+                break;
         }
 
         return typeString;
