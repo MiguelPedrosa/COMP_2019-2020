@@ -316,7 +316,6 @@ public class CodeGenerator {
             default:
                 break;
         }
-        writeCode("\n", scope);
     }
 
     private void writeClassField(ASTVarDeclaration varDecNode, int scope, SymbolTable scopeTable) {
