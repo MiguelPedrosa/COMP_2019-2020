@@ -81,6 +81,9 @@ public class CodeGenerator {
                 case "ASTReturn":
                     writeReturn((ASTReturn) child, scope);
                     break;
+                case "ASTVarDeclaration":
+                    writeVarDeclaration((ASTVarDeclaration) child, scope);
+                    break;
                 default:
                     readNodes(child, scope);
                     break;
@@ -192,6 +195,9 @@ public class CodeGenerator {
             case "String":
                 typeString = "Ljava/lang/String;";
                 break;
+            case "boolean":
+                typeString = "Z";
+                break;
             case "int[]":
                 typeString = "[I";
                 break;
@@ -219,7 +225,9 @@ public class CodeGenerator {
             case "String[]":
                 typeString = "[Ljava/lang/String;";
                 break;
-
+            case "boolean[]":
+                typeString = "[Z";
+                break;
         }
 
         return typeString;
@@ -244,23 +252,23 @@ public class CodeGenerator {
         String methodName = methodNode.getMethodName();
         String methodType = transformType(methodNode.getReturnType());
 
-        /* LinkedHashMap<String, String> arguments = methodNode.getArguments();
-        String argsInJasmin = "";
-
-        Set set = arguments.entrySet();
-
-        Iterator i = set.iterator();
-
-        while (i.hasNext()) {
-            Map.Entry ma = (Map.Entry) i.next();
-            String argType = transformType(ma.getValue().toString());
-            argsInJasmin = argsInJasmin.concat(argType);
-        } */
+        /*
+         * LinkedHashMap<String, String> arguments = methodNode.getArguments(); String
+         * argsInJasmin = "";
+         * 
+         * Set set = arguments.entrySet();
+         * 
+         * Iterator i = set.iterator();
+         * 
+         * while (i.hasNext()) { Map.Entry ma = (Map.Entry) i.next(); String argType =
+         * transformType(ma.getValue().toString()); argsInJasmin =
+         * argsInJasmin.concat(argType); }
+         */
 
         List<String[]> arguments = methodNode.getArguments();
         String argsInJasmin = "";
 
-        for(String[] argument: arguments){
+        for (String[] argument : arguments) {
             String argType = transformType(argument[1]);
             argsInJasmin = argsInJasmin.concat(argType);
         }
@@ -291,6 +299,8 @@ public class CodeGenerator {
     }
 
     private void writeVarDeclaration(ASTVarDeclaration varDecNode, int scope) {
+        String type = transformType(varDecNode.getType());
+        writeCode(".field static " + varDecNode.getVarId() + " " + type, scope);
         writeCode("\n", scope);
     }
 

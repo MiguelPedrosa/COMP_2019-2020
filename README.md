@@ -36,7 +36,7 @@ For this project, you need to [install Gradle](https://gradle.org/install/)
 	    - [x] não esquecer que existe method overloading
 * Code Generation
     * [x] estrutura básica de classe (incluindo construtor <init>)
-	* [ ] estrutura básica de fields
+	* [x] estrutura básica de fields
 	* [x] estrutura básica de métodos (podem desconsiderar os limites neste checkpoint: limit_stack 99, limit_locals 99)
 	* [ ] assignments
 	* [ ] operações aritméticas (com prioridade de operações correta)
