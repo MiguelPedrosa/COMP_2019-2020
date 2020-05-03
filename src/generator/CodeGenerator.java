@@ -293,8 +293,8 @@ public class CodeGenerator {
         writeCode("\n", scope);
 
         MainTable mainTable = scopeTable.getMain();
-
         readNodes(mainMethodNode, scope + 1, mainTable);
+
         writeCode("return\n", scope + 1);
         endMethod(scope);
     }
@@ -310,8 +310,8 @@ public class CodeGenerator {
                 writeClassField(varDecNode, scope, scopeTable);
                 break;
             case "MethodTable":
-                break;
             case "MainTable":
+                writeMethodVarDeclaration(varDecNode, scope, scopeTable);
                 break;
             default:
                 break;
@@ -321,6 +321,10 @@ public class CodeGenerator {
     private void writeClassField(ASTVarDeclaration varDecNode, int scope, SymbolTable scopeTable) {
         String type = transformType(varDecNode.getType());
         writeCode(".field " + varDecNode.getVarId() + " " + type + "\n", scope);
+    }
+
+    private void writeMethodVarDeclaration(ASTVarDeclaration varDecNode, int scope, SymbolTable scopeTable) {
+
     }
 
     private void writeNewLine() {
