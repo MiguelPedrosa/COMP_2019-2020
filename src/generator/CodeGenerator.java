@@ -320,7 +320,8 @@ public class CodeGenerator {
     }
 
     private void writeClassField(ASTVarDeclaration varDecNode, int scope, SymbolTable scopeTable) {
-
+        String type = transformType(varDecNode.getType());
+        writeCode(".field " + varDecNode.getVarId() + " " + type, scope);
     }
 
     private void writeNewLine() {
