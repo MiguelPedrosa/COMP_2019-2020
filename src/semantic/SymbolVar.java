@@ -3,11 +3,22 @@ public class SymbolVar {
     private String name;
     private String type;
     private int initialized;
+    private Boolean isArray;
 
     public SymbolVar(String name, String type) {
         this.name = name;
         this.type = type;
         this.initialized = 0;
+        this.isArray = this.isArrayType();
+    }
+
+    private Boolean isArrayType() {
+        for (int i = 0; i < this.type.length(); i++) {
+            if (this.type.charAt(i) == '[') {
+                return true;
+            }
+        }
+        return false;
     }
 
     public String getName() {
@@ -20,6 +31,10 @@ public class SymbolVar {
 
     public int getInitialized() {
         return initialized;
+    }
+
+    public Boolean getIsArray() {
+        return isArray;
     }
 
     public void setInitialize(int initialized) {
