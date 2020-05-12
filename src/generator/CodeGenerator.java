@@ -3,6 +3,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.FileSystem;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -239,9 +240,28 @@ public class CodeGenerator {
         writeCode(".limit stack " + value + "\n", scope);
     }
 
-    private void writeLocals(int scope) {
-        int value = 99;
-        writeCode(".limit locals " + value + "\n", scope);
+    private List<String> prepareLocals(int scope, String methodKey) {
+        if(! this.symbolTable.containsMethod(methodKey)) {
+            System.err.println("Potato is not going well");
+            return new ArrayList<>();
+        }
+
+        Map<String, SymbolVar> variables;
+        if(methodKey.equals("main")) {
+            variables = this.symbolTable.getMain().getVariables();
+        } else {
+            variables = this.symbolTable.getMethodTable(methodKey).getVariables();
+        }
+
+        List<String> locals = new ArrayList<>();
+        // Add variables to locals container
+        for (Map.Entry<String, SymbolVar> entry : variables.entrySet()) {
+            locals.add(entry.getKey());
+        }
+
+        writeCode(".limit locals " + locals.size() + "\n", scope);
+
+        return locals;
     }
 
     /**
@@ -254,19 +274,6 @@ public class CodeGenerator {
 
         MethodTable methodTable = scopeTable.getMethodTable(methodNode.getMethodKey());
 
-        /*
-         * LinkedHashMap<String, String> arguments = methodNode.getArguments(); String
-         * argsInJasmin = "";
-         * 
-         * Set set = arguments.entrySet();
-         * 
-         * Iterator i = set.iterator();
-         * 
-         * while (i.hasNext()) { Map.Entry ma = (Map.Entry) i.next(); String argType =
-         * transformType(ma.getValue().toString()); argsInJasmin =
-         * argsInJasmin.concat(argType); }
-         */
-
         List<String[]> arguments = methodNode.getArguments();
         String argsInJasmin = "";
 
@@ -278,7 +285,8 @@ public class CodeGenerator {
         writeCode("\n.method public static " + methodName + "(" + argsInJasmin + ")" + methodType + "\n", scope);
 
         writeStack(scope + 1);
-        writeLocals(scope + 1);
+        final String methodKey = methodNode.getMethodKey();
+        List<String> locals = prepareLocals(scope + 1, methodKey);
 
         readNodes(methodNode, scope + 1, methodTable);
 
@@ -289,7 +297,7 @@ public class CodeGenerator {
     private void writeMain(ASTMainDeclaration mainMethodNode, int scope, SymbolTable scopeTable) {
         writeCode("\n.method public static main([Ljava/lang/String;)V\n", scope);
         writeStack(scope + 1);
-        writeLocals(scope + 1);
+        List<String> locals = prepareLocals(scope + 1, "main");
         writeCode("\n", scope);
 
         MainTable mainTable = scopeTable.getMain();
