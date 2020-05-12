@@ -280,11 +280,8 @@ public class CodeGenerator {
      * Method to write a Method (or function) into the file
      */
     private void writeMethod(ASTMethodDeclaration methodNode, int scope, SymbolTable scopeTable) {
-        // System.out.println("Writing function...");
-        String methodName = methodNode.getMethodName();
-        String methodType = transformType(methodNode.getReturnType());
-
-        MethodTable methodTable = scopeTable.getMethodTable(methodNode.getMethodKey());
+        final String methodName = methodNode.getMethodName();
+        final String methodType = transformType(methodNode.getReturnType());
 
         List<String[]> arguments = methodNode.getArguments();
         String argsInJasmin = "";
@@ -296,14 +293,14 @@ public class CodeGenerator {
 
         writeCode("\n.method public static " + methodName + "(" + argsInJasmin + ")" + methodType + "\n", scope);
 
-        writeStack(scope + 1);
         final String methodKey = methodNode.getMethodKey();
+        StackManager stackManager = new StackManager();
+        writeStack(scope + 1);
         List<String> locals = prepareLocals(scope + 1, methodKey);
 
-        readNodes(methodNode, scope + 1, methodTable);
+        processMethodNodes(methodNode, scope + 1, stackManager);
 
         endMethod(scope);
-
     }
 
     private void writeMain(ASTMainDeclaration mainMethodNode, int scope, SymbolTable scopeTable) {
@@ -317,6 +314,10 @@ public class CodeGenerator {
 
         writeCode("return\n", scope + 1);
         endMethod(scope);
+    }
+
+    private void processMethodNodes(SimpleNode methodNode, int scope , StackManager stackManager) {
+
     }
 
     private void writeReturn(ASTReturn returnNode, int scope) {
