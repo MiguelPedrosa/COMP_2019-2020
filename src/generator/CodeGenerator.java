@@ -85,6 +85,18 @@ public class CodeGenerator {
                 case "ASTVarDeclaration":
                     writeVarDeclaration((ASTVarDeclaration) child, scope, scopeTable);
                     break;
+                case "ASTPlus":
+                    writePlusOperation((ASTPlus) child, scope, scopeTable);
+                    break;
+                case "ASTMinus":
+                    writeMinusOperation((ASTMinus) child, scope, scopeTable);
+                    break;
+                case "ASTTimes":
+                    writeMultiOperation((ASTTimes) child, scope, scopeTable);
+                    break;
+                case "ASTDividor":
+                    writeDivOperation((ASTDividor) child, scope, scopeTable);
+                    break;
                 default:
                     readNodes(child, scope, scopeTable);
                     break;
@@ -241,13 +253,13 @@ public class CodeGenerator {
     }
 
     private List<String> prepareLocals(int scope, String methodKey) {
-        if(! this.symbolTable.containsMethod(methodKey)) {
+        if (!this.symbolTable.containsMethod(methodKey)) {
             System.err.println("Potato is not going well");
             return new ArrayList<>();
         }
 
         Map<String, SymbolVar> variables;
-        if(methodKey.equals("main")) {
+        if (methodKey.equals("main")) {
             variables = this.symbolTable.getMain().getVariables();
         } else {
             variables = this.symbolTable.getMethodTable(methodKey).getVariables();
@@ -337,6 +349,50 @@ public class CodeGenerator {
 
     private void writeNewLine() {
 
+    }
+
+    /**
+     * Method to write "addition" (+) operation to the file
+     */
+    private void writePlusOperation(ASTPlus plusNode, int scope, SymbolTable scopeTable) {
+        readNodes(plusNode, scope, scopeTable);
+        if (true) // TODO verify if the operation involves integers of floats
+            writeCode("iadd\n", scope);
+        else
+            writeCode("fadd\n", scope);
+    }
+
+    /**
+     * Method to write "subtraction" (-) operation to the file
+     */
+    private void writeMinusOperation(ASTMinus minusNode, int scope, SymbolTable scopeTable) {
+        readNodes(minusNode, scope, scopeTable);
+        if (true) // TODO verify if the operation involves integers of floats
+            writeCode("isub\n", scope);
+        else
+            writeCode("fsub\n", scope);
+    }
+
+    /**
+     * Method to write "multiplication" (*) operation to the file
+     */
+    private void writeMultiOperation(ASTTimes multiNode, int scope, SymbolTable scopeTable) {
+        readNodes(multiNode, scope, scopeTable);
+        if (true) // TODO verify if the operation involves integers of floats
+            writeCode("imul\n", scope);
+        else
+            writeCode("fmul\n", scope);
+    }
+
+    /**
+     * Method to write "division" (/) operation to the file
+     */
+    private void writeDivOperation(ASTDividor divNode, int scope, SymbolTable scopeTable) {
+        readNodes(divNode, scope, scopeTable);
+        if (true) // TODO verify if the operation involves integers of floats
+            writeCode("idiv\n", scope);
+        else
+            writeCode("fdiv\n", scope);
     }
 
 }
