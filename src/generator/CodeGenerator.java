@@ -50,12 +50,12 @@ public class CodeGenerator {
             return false;
         }
 
-        readNodes(rootNode, 0);
+        readNodes(rootNode, 0, symbolTable);
 
         return true;
     }
 
-    private void readNodes(SimpleNode node, int scope) {
+    private void readNodes(SimpleNode node, int scope, SymbolTable scopeTable) {
         int numChildren = node.jjtGetNumChildren();
 
         if (numChildren == 0)
@@ -67,22 +67,25 @@ public class CodeGenerator {
 
             switch (nodeType) {
                 case "ASTStart":
-                    readNodes(child, scope);
+                    readNodes(child, scope, scopeTable);
                     break;
                 case "ASTClassDeclaration":
-                    writeClass((ASTClassDeclaration) child, scope);
+                    writeClass((ASTClassDeclaration) child, scope, scopeTable);
                     break;
                 case "ASTMethodDeclaration":
-                    writeMethod((ASTMethodDeclaration) child, scope);
+                    writeMethod((ASTMethodDeclaration) child, scope, scopeTable);
                     break;
                 case "ASTMainDeclaration":
-                    writeMain((ASTMainDeclaration) child, scope);
+                    writeMain((ASTMainDeclaration) child, scope, scopeTable);
                     break;
                 case "ASTReturn":
                     writeReturn((ASTReturn) child, scope);
                     break;
+                case "ASTVarDeclaration":
+                    writeVarDeclaration((ASTVarDeclaration) child, scope, scopeTable);
+                    break;
                 default:
-                    readNodes(child, scope);
+                    readNodes(child, scope, scopeTable);
                     break;
             }
         }
@@ -146,15 +149,15 @@ public class CodeGenerator {
      * 
      * @param classNode
      */
-    private void writeClass(ASTClassDeclaration classNode, int scope) {
-        System.out.println("Writing class...");
+    private void writeClass(ASTClassDeclaration classNode, int scope, SymbolTable scopeTable) {
+        // System.out.println("Writing class...");
         String className = classNode.getClassId();
         writeCode(".class public " + className + "\n", scope);
         writeCode(".super java/lang/Object\n\n", scope);
 
         writeInitializer(scope);
 
-        readNodes(classNode, scope);
+        readNodes(classNode, scope, scopeTable);
     }
 
     /**
@@ -192,6 +195,9 @@ public class CodeGenerator {
             case "String":
                 typeString = "Ljava/lang/String;";
                 break;
+            case "boolean":
+                typeString = "Z";
+                break;
             case "int[]":
                 typeString = "[I";
                 break;
@@ -219,7 +225,9 @@ public class CodeGenerator {
             case "String[]":
                 typeString = "[Ljava/lang/String;";
                 break;
-
+            case "boolean[]":
+                typeString = "[Z";
+                break;
         }
 
         return typeString;
@@ -239,48 +247,54 @@ public class CodeGenerator {
     /**
      * Method to write a Method (or function) into the file
      */
-    private void writeMethod(ASTMethodDeclaration methodNode, int scope) {
-        System.out.println("Writing function...");
+    private void writeMethod(ASTMethodDeclaration methodNode, int scope, SymbolTable scopeTable) {
+        // System.out.println("Writing function...");
         String methodName = methodNode.getMethodName();
         String methodType = transformType(methodNode.getReturnType());
 
-        /* LinkedHashMap<String, String> arguments = methodNode.getArguments();
-        String argsInJasmin = "";
+        MethodTable methodTable = scopeTable.getMethodTable(methodNode.getMethodKey());
 
-        Set set = arguments.entrySet();
-
-        Iterator i = set.iterator();
-
-        while (i.hasNext()) {
-            Map.Entry ma = (Map.Entry) i.next();
-            String argType = transformType(ma.getValue().toString());
-            argsInJasmin = argsInJasmin.concat(argType);
-        } */
+        /*
+         * LinkedHashMap<String, String> arguments = methodNode.getArguments(); String
+         * argsInJasmin = "";
+         * 
+         * Set set = arguments.entrySet();
+         * 
+         * Iterator i = set.iterator();
+         * 
+         * while (i.hasNext()) { Map.Entry ma = (Map.Entry) i.next(); String argType =
+         * transformType(ma.getValue().toString()); argsInJasmin =
+         * argsInJasmin.concat(argType); }
+         */
 
         List<String[]> arguments = methodNode.getArguments();
         String argsInJasmin = "";
 
-        for(String[] argument: arguments){
+        for (String[] argument : arguments) {
             String argType = transformType(argument[1]);
             argsInJasmin = argsInJasmin.concat(argType);
         }
 
-        writeCode(".method public static " + methodName + "(" + argsInJasmin + ")" + methodType, scope);
+        writeCode("\n.method public static " + methodName + "(" + argsInJasmin + ")" + methodType + "\n", scope);
 
         writeStack(scope + 1);
         writeLocals(scope + 1);
 
-        readNodes(methodNode, scope + 1);
+        readNodes(methodNode, scope + 1, methodTable);
 
         endMethod(scope);
 
     }
 
-    private void writeMain(ASTMainDeclaration mainMethodNode, int scope) {
-        writeCode(".method public static main([Ljava/lang/String;)V\n", scope);
+    private void writeMain(ASTMainDeclaration mainMethodNode, int scope, SymbolTable scopeTable) {
+        writeCode("\n.method public static main([Ljava/lang/String;)V\n", scope);
         writeStack(scope + 1);
         writeLocals(scope + 1);
-        readNodes(mainMethodNode, scope + 1);
+        writeCode("\n", scope);
+
+        MainTable mainTable = scopeTable.getMain();
+        readNodes(mainMethodNode, scope + 1, mainTable);
+
         writeCode("return\n", scope + 1);
         endMethod(scope);
     }
@@ -289,8 +303,32 @@ public class CodeGenerator {
         writeCode("ireturn\n", scope);
     }
 
-    private void writeVarDeclaration(ASTVarDeclaration varDecNode, int scope) {
-        writeCode("\n", scope);
+    private void writeVarDeclaration(ASTVarDeclaration varDecNode, int scope, SymbolTable scopeTable) {
+        String tableType = scopeTable.getClass().getSimpleName();
+        switch (tableType) {
+            case "SymbolTable":
+                writeClassField(varDecNode, scope, scopeTable);
+                break;
+            case "MethodTable":
+            case "MainTable":
+                writeMethodVarDeclaration(varDecNode, scope, scopeTable);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void writeClassField(ASTVarDeclaration varDecNode, int scope, SymbolTable scopeTable) {
+        String type = transformType(varDecNode.getType());
+        writeCode(".field " + varDecNode.getVarId() + " " + type + "\n", scope);
+    }
+
+    private void writeMethodVarDeclaration(ASTVarDeclaration varDecNode, int scope, SymbolTable scopeTable) {
+
+    }
+
+    private void writeNewLine() {
+
     }
 
 }

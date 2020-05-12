@@ -137,6 +137,10 @@ public class SymbolTable {
         return method.getName();
     }
 
+    public MethodTable getMethodTable(String methodKey) {
+        return methods.get(methodKey);
+    }
+
     public LinkedHashMap<String,MethodTable> getMethods() {
         return this.methods;
     }
