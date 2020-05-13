@@ -3,6 +3,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.FileSystem;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -83,6 +84,18 @@ public class CodeGenerator {
                     break;
                 case "ASTVarDeclaration":
                     writeVarDeclaration((ASTVarDeclaration) child, scope, scopeTable);
+                    break;
+                case "ASTPlus":
+                    writePlusOperation((ASTPlus) child, scope, scopeTable);
+                    break;
+                case "ASTMinus":
+                    writeMinusOperation((ASTMinus) child, scope, scopeTable);
+                    break;
+                case "ASTTimes":
+                    writeMultiOperation((ASTTimes) child, scope, scopeTable);
+                    break;
+                case "ASTDividor":
+                    writeDivOperation((ASTDividor) child, scope, scopeTable);
                     break;
                 default:
                     readNodes(child, scope, scopeTable);
@@ -255,33 +268,36 @@ public class CodeGenerator {
         writeCode(".limit stack " + value + "\n", scope);
     }
 
-    private void writeLocals(int scope) {
-        int value = 99;
-        writeCode(".limit locals " + value + "\n", scope);
+    private List<String> prepareLocals(int scope, String methodKey) {
+        if (!this.symbolTable.containsMethod(methodKey)) {
+            System.err.println("Potato is not going well");
+            return new ArrayList<>();
+        }
+
+        Map<String, SymbolVar> variables;
+        if (methodKey.equals("main")) {
+            variables = this.symbolTable.getMain().getVariables();
+        } else {
+            variables = this.symbolTable.getMethodTable(methodKey).getVariables();
+        }
+
+        List<String> locals = new ArrayList<>();
+        // Add variables to locals container
+        for (Map.Entry<String, SymbolVar> entry : variables.entrySet()) {
+            locals.add(entry.getKey());
+        }
+
+        writeCode(".limit locals " + locals.size() + "\n", scope);
+
+        return locals;
     }
 
     /**
      * Method to write a Method (or function) into the file
      */
     private void writeMethod(ASTMethodDeclaration methodNode, int scope, SymbolTable scopeTable) {
-        // System.out.println("Writing function...");
-        String methodName = methodNode.getMethodName();
-        String methodType = transformType(methodNode.getReturnType());
-
-        MethodTable methodTable = scopeTable.getMethodTable(methodNode.getMethodKey());
-
-        /*
-         * LinkedHashMap<String, String> arguments = methodNode.getArguments(); String
-         * argsInJasmin = "";
-         * 
-         * Set set = arguments.entrySet();
-         * 
-         * Iterator i = set.iterator();
-         * 
-         * while (i.hasNext()) { Map.Entry ma = (Map.Entry) i.next(); String argType =
-         * transformType(ma.getValue().toString()); argsInJasmin =
-         * argsInJasmin.concat(argType); }
-         */
+        final String methodName = methodNode.getMethodName();
+        final String methodType = transformType(methodNode.getReturnType());
 
         List<String[]> arguments = methodNode.getArguments();
         String argsInJasmin = "";
@@ -293,19 +309,20 @@ public class CodeGenerator {
 
         writeCode("\n.method public static " + methodName + "(" + argsInJasmin + ")" + methodType + "\n", scope);
 
+        final String methodKey = methodNode.getMethodKey();
+        StackManager stackManager = new StackManager();
         writeStack(scope + 1);
-        writeLocals(scope + 1);
+        List<String> locals = prepareLocals(scope + 1, methodKey);
 
-        readNodes(methodNode, scope + 1, methodTable);
+        processMethodNodes(methodNode, scope + 1, stackManager);
 
         endMethod(scope);
-
     }
 
     private void writeMain(ASTMainDeclaration mainMethodNode, int scope, SymbolTable scopeTable) {
         writeCode("\n.method public static main([Ljava/lang/String;)V\n", scope);
         writeStack(scope + 1);
-        writeLocals(scope + 1);
+        List<String> locals = prepareLocals(scope + 1, "main");
         writeCode("\n", scope);
 
         MainTable mainTable = scopeTable.getMain();
@@ -313,6 +330,10 @@ public class CodeGenerator {
 
         writeCode("return\n", scope + 1);
         endMethod(scope);
+    }
+
+    private void processMethodNodes(SimpleNode methodNode, int scope , StackManager stackManager) {
+
     }
 
     private void writeReturn(ASTReturn returnNode, int scope) {
@@ -345,6 +366,50 @@ public class CodeGenerator {
 
     private void writeNewLine() {
 
+    }
+
+    /**
+     * Method to write "addition" (+) operation to the file
+     */
+    private void writePlusOperation(ASTPlus plusNode, int scope, SymbolTable scopeTable) {
+        readNodes(plusNode, scope, scopeTable);
+        if (true) // TODO verify if the operation involves integers of floats
+            writeCode("iadd\n", scope);
+        else
+            writeCode("fadd\n", scope);
+    }
+
+    /**
+     * Method to write "subtraction" (-) operation to the file
+     */
+    private void writeMinusOperation(ASTMinus minusNode, int scope, SymbolTable scopeTable) {
+        readNodes(minusNode, scope, scopeTable);
+        if (true) // TODO verify if the operation involves integers of floats
+            writeCode("isub\n", scope);
+        else
+            writeCode("fsub\n", scope);
+    }
+
+    /**
+     * Method to write "multiplication" (*) operation to the file
+     */
+    private void writeMultiOperation(ASTTimes multiNode, int scope, SymbolTable scopeTable) {
+        readNodes(multiNode, scope, scopeTable);
+        if (true) // TODO verify if the operation involves integers of floats
+            writeCode("imul\n", scope);
+        else
+            writeCode("fmul\n", scope);
+    }
+
+    /**
+     * Method to write "division" (/) operation to the file
+     */
+    private void writeDivOperation(ASTDividor divNode, int scope, SymbolTable scopeTable) {
+        readNodes(divNode, scope, scopeTable);
+        if (true) // TODO verify if the operation involves integers of floats
+            writeCode("idiv\n", scope);
+        else
+            writeCode("fdiv\n", scope);
     }
 
 }
