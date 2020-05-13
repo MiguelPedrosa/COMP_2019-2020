@@ -87,18 +87,6 @@ public class CodeGenerator {
                 case "ASTVarDeclaration":
                     writeVarDeclaration((ASTVarDeclaration) child, scope, scopeTable);
                     break;
-                case "ASTPlus":
-                    writePlusOperation((ASTPlus) child, scope, scopeTable);
-                    break;
-                case "ASTMinus":
-                    writeMinusOperation((ASTMinus) child, scope, scopeTable);
-                    break;
-                case "ASTTimes":
-                    writeMultiOperation((ASTTimes) child, scope, scopeTable);
-                    break;
-                case "ASTDividor":
-                    writeDivOperation((ASTDividor) child, scope, scopeTable);
-                    break;
                 default:
                     readNodes(child, scope, scopeTable);
                     break;
@@ -445,7 +433,7 @@ public class CodeGenerator {
         String code = "";
 
         writeToString(code, "iadd", scope);        
-        readNodes(plusNode, scope, scopeTable);
+        //readNodes(plusNode, scope, scopeTable);
         if (true) // TODO verify if the operation involves integers of floats
             writeCode("iadd\n", scope);
         else
