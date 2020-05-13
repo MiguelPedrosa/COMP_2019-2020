@@ -123,6 +123,22 @@ public class CodeGenerator {
         }
     }
 
+    private String writeToString(String oldString, String code, int scope) {
+        String identedCode = IntStream.range(0, scope * identationSize).mapToObj(i -> identation)
+                .collect(Collectors.joining(""));
+        identedCode += code;
+
+        return oldString + code;
+    }
+
+    private void writeStringToCode(String code) {
+        try {
+            jFile.write(code.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Method to write the end of a method to the file
      * 
