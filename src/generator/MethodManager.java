@@ -1,12 +1,12 @@
 import java.util.HashMap;
 
-public class StackManager {
+public class MethodManager {
     private int currentStackSize;    
     private int maxStackSize;
     
     private static HashMap<String, Integer> instructions = buildInstructions();
 
-    public StackManager() {
+    public MethodManager() {
         this.currentStackSize = 0;
         this.maxStackSize = 0;
     }

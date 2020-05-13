@@ -33,6 +33,8 @@ public class CodeGenerator {
 
     private SymbolTable symbolTable;
 
+    private int labelCounter = 0;
+
     public CodeGenerator(SimpleNode root, SymbolTable symbolTable, String fileName) {
         this.rootNode = root;
         this.symbolTable = symbolTable;
@@ -269,8 +271,8 @@ public class CodeGenerator {
     }
 
     private List<String> prepareLocals(int scope, String methodKey) {
-        if (!this.symbolTable.containsMethod(methodKey)) {
-            System.err.println("Potato is not going well");
+        if (!this.symbolTable.containsMethod(methodKey) && !methodKey.equals("main")) {
+            System.err.println("Can find method " + methodKey + " in symbol table");
             return new ArrayList<>();
         }
 
@@ -310,11 +312,13 @@ public class CodeGenerator {
         writeCode("\n.method public static " + methodName + "(" + argsInJasmin + ")" + methodType + "\n", scope);
 
         final String methodKey = methodNode.getMethodKey();
-        StackManager stackManager = new StackManager();
+        MethodManager methodManager = new MethodManager();
         writeStack(scope + 1);
         List<String> locals = prepareLocals(scope + 1, methodKey);
 
-        processMethodNodes(methodNode, scope + 1, stackManager);
+        String code = processMethodNodes(methodNode, scope + 1, methodManager);
+
+        writeCode(code, scope);
 
         endMethod(scope);
     }
@@ -332,8 +336,58 @@ public class CodeGenerator {
         endMethod(scope);
     }
 
-    private void processMethodNodes(SimpleNode methodNode, int scope , StackManager stackManager) {
+    private String processMethodNodes(SimpleNode methodNode, int scope, MethodManager methodManager) {
+        int numChildren = methodNode.jjtGetNumChildren();
+        String code = "";
 
+        if (numChildren == 0)
+            return code;
+
+        for (int i = 0; i < numChildren; i++) {
+            SimpleNode child = (SimpleNode) methodNode.jjtGetChild(i);
+            String nodeType = child.getClass().getSimpleName();
+
+            switch (nodeType) {
+                case "ASTScope":
+                    code += processMethodNodes(child, scope + 1, methodManager);
+                    break;
+                case "ASTVarDeclaration":
+                    //variable arlready added in locals
+                    break;
+                case "ASTIF":
+                    code += writeIf((ASTIF) child, scope, methodManager);
+                    break;
+                case "ASTWhile":
+                    break;
+                case "ASTEquals":
+                    break;
+                case "ASTReturn":
+                    break;
+
+                // Expression switches
+                case "ASTExpression":
+                    //processMethodNodes(child, scope, methodManager, scopeTable);
+                    break;
+                case "ASTPlus":
+                    writePlusOperation((ASTPlus) child, scope);
+                    break;
+                case "ASTMinus":
+                    //writeMinusOperation((ASTMinus) child, scope, scopeTable);
+                    break;
+                case "ASTTimes":
+                    //writeMultiOperation((ASTTimes) child, scope, scopeTable);
+                    break;
+                case "ASTDividor":
+                    //writeDivOperation((ASTDividor) child, scope, scopeTable);
+                    break;
+                default:
+                    System.out.println("Node not processed");
+                    code += processMethodNodes(child, scope, methodManager);
+                    break;
+            }
+        }
+
+        return code;
     }
 
     private void writeReturn(ASTReturn returnNode, int scope) {
@@ -346,10 +400,6 @@ public class CodeGenerator {
             case "SymbolTable":
                 writeClassField(varDecNode, scope, scopeTable);
                 break;
-            case "MethodTable":
-            case "MainTable":
-                writeMethodVarDeclaration(varDecNode, scope, scopeTable);
-                break;
             default:
                 break;
         }
@@ -360,23 +410,48 @@ public class CodeGenerator {
         writeCode(".field " + varDecNode.getVarId() + " " + type + "\n", scope);
     }
 
-    private void writeMethodVarDeclaration(ASTVarDeclaration varDecNode, int scope, SymbolTable scopeTable) {
-
-    }
-
     private void writeNewLine() {
 
     }
 
     /**
+     * Method to write "if" to the file
+     */
+    private String writeIf(ASTIF ifNode, int scope, MethodManager methodManager) {
+
+        //verificar stack
+
+        //escrever codigo
+        SimpleNode conditionChild = (SimpleNode) ifNode.jjtGetChild(0);
+        SimpleNode ifScope = (SimpleNode) ifNode.jjtGetChild(1);
+        SimpleNode elseScope = (SimpleNode) ifNode.jjtGetChild(2);
+
+        String elseScopeCode = processMethodNodes(elseScope, scope, methodManager);
+        String ifScopeCode = processMethodNodes(ifScope, scope, methodManager);
+
+        String code = writeToString("\tif_ correct" + this.labelCounter + "\n", elseScopeCode, scope);
+        code = writeToString(code, "\tgoto endIf" + this.labelCounter + "\n", scope);
+        ifScopeCode = "correct" + this.labelCounter + ":\n" + ifScopeCode + "endIf" + this.labelCounter + ":\n";
+        code = writeToString(code, ifScopeCode, scope);
+
+        this.labelCounter++;
+        return code;
+    }
+
+    /**
      * Method to write "addition" (+) operation to the file
      */
-    private void writePlusOperation(ASTPlus plusNode, int scope, SymbolTable scopeTable) {
+    private String writePlusOperation(ASTPlus plusNode, int scope) {
+        String code = "";
+
+        writeToString(code, "iadd", scope);        
         readNodes(plusNode, scope, scopeTable);
         if (true) // TODO verify if the operation involves integers of floats
             writeCode("iadd\n", scope);
         else
             writeCode("fadd\n", scope);
+
+        return code;
     }
 
     /**
