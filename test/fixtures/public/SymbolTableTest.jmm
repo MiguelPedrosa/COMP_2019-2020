@@ -9,17 +9,21 @@ class Life extends Dead{
     
 
     public static void main(String[] a) {
+        Life d;
+        d = new Life();
+        d.inbounds(4, 4);
+
         
-
-
     }
 
     public boolean inbounds(int row, int column) {
         boolean in;
+        int f;
+        f = 1;
         in = true;
-        true;
+        
         if (row < 0){
-            if(row < 2){
+            if(f < 2){
                 in = false;
             }else{
                 in = false;

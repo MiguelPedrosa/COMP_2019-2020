@@ -1,4 +1,6 @@
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class MethodManager {
     private int currentStackSize;    
@@ -6,9 +8,12 @@ public class MethodManager {
     
     private static HashMap<String, Integer> instructions = buildInstructions();
 
+    List<String> locals;
+
     public MethodManager() {
         this.currentStackSize = 0;
         this.maxStackSize = 0;
+        this.locals = new ArrayList<>();
     }
 
     private static HashMap<String, Integer> buildInstructions() {
@@ -29,6 +34,7 @@ public class MethodManager {
         instructionsAux.put("iflt",      -2);
         instructionsAux.put("ifne",      -2);
         instructionsAux.put("bipush",      +1);
+        instructionsAux.put("aload",      +1);
 
         return instructionsAux;
     }
@@ -49,11 +55,29 @@ public class MethodManager {
             this.maxStackSize = this.currentStackSize;
     }
 
+    public int indexOfLocal(String local){
+        return this.locals.indexOf(local);
+    }
+
+    /**
+     * @param locals the locals to set
+     */
+    public void setLocals(List<String> locals) {
+        this.locals = locals;
+    }
+
     /**
      * @return the maxStackSize
      */
     public int getMaxStackSize() {
         return maxStackSize;
+    }
+
+    /**
+     * @return the locals
+     */
+    public List<String> getLocals() {
+        return locals;
     }
 
 }

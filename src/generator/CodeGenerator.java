@@ -259,6 +259,10 @@ public class CodeGenerator {
         writeCode(".limit stack " + numStacks + "\n", scope);
     }
 
+    private void writeLocals(int numLocals, int scope) {
+        writeCode(".limit locals " + numLocals + "\n", scope);
+    }
+
     private List<String> prepareLocals(int scope, String methodKey) {
         if (!this.symbolTable.containsMethod(methodKey) && !methodKey.equals("main")) {
             System.err.println("Can find method " + methodKey + " in symbol table");
@@ -278,7 +282,6 @@ public class CodeGenerator {
             locals.add(entry.getKey());
         }
 
-        writeCode(".limit locals " + locals.size() + "\n", scope);
 
         return locals;
     }
@@ -302,12 +305,15 @@ public class CodeGenerator {
 
         final String methodKey = methodNode.getMethodKey();
         MethodManager methodManager = new MethodManager();
-        
+        List<String> locals = prepareLocals(scope + 1, methodKey);
+
+        methodManager.setLocals(locals);
 
         String code = processMethodNodes(methodNode, scope + 1, methodManager);
 
         writeStack(methodManager.getMaxStackSize(), scope + 1);
-        List<String> locals = prepareLocals(scope + 1, methodKey);
+        writeLocals(locals.size(), scope + 1);
+
         writeCode(code, scope);
 
         endMethod(scope);
@@ -315,17 +321,19 @@ public class CodeGenerator {
 
     private void writeMain(ASTMainDeclaration mainMethodNode, int scope, SymbolTable scopeTable) {
         writeCode("\n.method public static main([Ljava/lang/String;)V\n", scope);
-        List<String> locals = prepareLocals(scope + 1, "main");
-        writeCode("\n", scope);
 
         MethodManager methodManager = new MethodManager();
-        
+        List<String> locals = prepareLocals(scope + 1, "main");
+
+        methodManager.setLocals(locals);
 
         String code = processMethodNodes(mainMethodNode, scope + 1, methodManager);
 
         writeStack(methodManager.getMaxStackSize(), scope + 1);
-
+        writeLocals(locals.size(), scope + 1);
+        writeCode(code, scope);
         writeCode("return\n", scope + 1);
+
         endMethod(scope);
     }
 
@@ -362,6 +370,10 @@ public class CodeGenerator {
                     break;
 
                 case "ASTFuncCall":
+                    break;
+                
+                case "ASTIdentifier":
+                    code += writeIdentifier((ASTIdentifier) child, scope, methodManager);
                     break;
 
                 // Expression switches
@@ -415,7 +427,23 @@ public class CodeGenerator {
     }
 
     /**
-     * Method to write "if" to the file
+     * Method to write "identifier" to the file
+     */
+    private String writeIdentifier(ASTIdentifier identifierNode, int scope, MethodManager methodManager) {
+        String code = "";
+
+        String identifier = identifierNode.getIdentifier();
+
+        int local = methodManager.indexOfLocal(identifier);
+         
+        code = writeToString(code, "aload " + local + "\n", scope);
+        methodManager.addInstruction("aload");
+        
+        return code;
+    }
+
+    /**
+     * Method to write "literal" to the file
      */
     private String writeLiteral(ASTLiteral literalNode, int scope, MethodManager methodManager) {
         String code = "";
