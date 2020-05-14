@@ -482,22 +482,16 @@ public class CodeGenerator {
         SimpleNode ifScope = (SimpleNode) ifNode.jjtGetChild(1);
         SimpleNode elseScope = (SimpleNode) ifNode.jjtGetChild(2);
 
-        String conditionCode = processMethodNodes(conditionChild, scope, methodManager);
-        String elseScopeCode = processMethodNodes(elseScope, scope, methodManager);
-        String ifScopeCode = processMethodNodes(ifScope, scope, methodManager);
-
-        code += conditionCode;
-        //TODO: if_ correto (ir buscar à stack e isso)
-        code = writeToString(code, "if_ correct" + label + "\n", scope);
-        //TODO:verificar stack de if
-        code += elseScopeCode;
+        code += processMethodNodes(conditionChild, scope, methodManager);
+        code = writeToString(code, "bipush 1\n", scope);
+        methodManager.addInstruction("bipush");
+        code = writeToString(code, "ifeq correct" + label + "\n", scope);
+        methodManager.addInstruction("ifeq");
+        code += processMethodNodes(elseScope, scope, methodManager);
         code = writeToString(code, "goto endIf" + label + "\n", scope);
-        //TODO:verificar stack de goto
         code = writeToString(code, "correct" + label + ":\n" , 0);
-        //TODO:verificar stack de labels
-        code += ifScopeCode;
+        code += processMethodNodes(ifScope, scope, methodManager);
         code = writeToString(code, "endIf" + label + ":\n" , 0);
-        //TODO:verificar stack de labels
 
         return code;
     }
