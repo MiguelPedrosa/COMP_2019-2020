@@ -118,7 +118,9 @@ public class CodeGenerator {
     private void writeCode(String code, int scope) {
         String identedCode = IntStream.range(0, scope * identationSize).mapToObj(i -> identation)
                 .collect(Collectors.joining(""));
+
         identedCode += code;
+
         try {
             jFile.write(identedCode.getBytes());
         } catch (IOException e) {
@@ -131,7 +133,7 @@ public class CodeGenerator {
                 .collect(Collectors.joining(""));
         identedCode += code;
 
-        return oldString + code;
+        return oldString + identedCode;
     }
 
     private void writeStringToCode(String code) {
@@ -253,9 +255,8 @@ public class CodeGenerator {
 
     }
 
-    private void writeStack(int scope) {
-        int value = 99;
-        writeCode(".limit stack " + value + "\n", scope);
+    private void writeStack(int numStacks, int scope) {
+        writeCode(".limit stack " + numStacks + "\n", scope);
     }
 
     private List<String> prepareLocals(int scope, String methodKey) {
@@ -301,11 +302,12 @@ public class CodeGenerator {
 
         final String methodKey = methodNode.getMethodKey();
         MethodManager methodManager = new MethodManager();
-        writeStack(scope + 1);
-        List<String> locals = prepareLocals(scope + 1, methodKey);
+        
 
         String code = processMethodNodes(methodNode, scope + 1, methodManager);
 
+        writeStack(methodManager.getMaxStackSize(), scope + 1);
+        List<String> locals = prepareLocals(scope + 1, methodKey);
         writeCode(code, scope);
 
         endMethod(scope);
@@ -313,12 +315,15 @@ public class CodeGenerator {
 
     private void writeMain(ASTMainDeclaration mainMethodNode, int scope, SymbolTable scopeTable) {
         writeCode("\n.method public static main([Ljava/lang/String;)V\n", scope);
-        writeStack(scope + 1);
         List<String> locals = prepareLocals(scope + 1, "main");
         writeCode("\n", scope);
 
-        MainTable mainTable = scopeTable.getMain();
-        readNodes(mainMethodNode, scope + 1, mainTable);
+        MethodManager methodManager = new MethodManager();
+        
+
+        String code = processMethodNodes(mainMethodNode, scope + 1, methodManager);
+
+        writeStack(methodManager.getMaxStackSize(), scope + 1);
 
         writeCode("return\n", scope + 1);
         endMethod(scope);
@@ -337,7 +342,7 @@ public class CodeGenerator {
 
             switch (nodeType) {
                 case "ASTScope":
-                    code += processMethodNodes(child, scope + 1, methodManager);
+                    code += processMethodNodes(child, scope, methodManager);
                     break;
                 case "ASTVarDeclaration":
                     //variable arlready added in locals
@@ -352,9 +357,16 @@ public class CodeGenerator {
                 case "ASTReturn":
                     break;
 
+                case "ASTLiteral":
+                    code += writeLiteral((ASTLiteral) child, scope, methodManager);
+                    break;
+
+                case "ASTFuncCall":
+                    break;
+
                 // Expression switches
                 case "ASTExpression":
-                    //processMethodNodes(child, scope, methodManager, scopeTable);
+                    code += processMethodNodes(child, scope, methodManager);
                     break;
                 case "ASTPlus":
                     writePlusOperation((ASTPlus) child, scope);
@@ -405,24 +417,60 @@ public class CodeGenerator {
     /**
      * Method to write "if" to the file
      */
+    private String writeLiteral(ASTLiteral literalNode, int scope, MethodManager methodManager) {
+        String code = "";
+
+        String literal = literalNode.getLiteral();
+        int stackLiteral;
+        switch (literal) {
+            case "true":
+                stackLiteral = 1;
+                break;
+            case "false":
+                stackLiteral = 0;
+                break;
+            default:
+                stackLiteral = Integer.parseInt(literal);
+                break;
+        }
+
+        code = writeToString(code, "bipush " + stackLiteral + "\n", scope);
+        methodManager.addInstruction("bipush");
+
+        return code;
+    }
+
+    /**
+     * Method to write "if" to the file
+     */
     private String writeIf(ASTIF ifNode, int scope, MethodManager methodManager) {
 
-        //verificar stack
+        String code = "";
+        int label = this.labelCounter;
+        this.labelCounter++;
 
         //escrever codigo
         SimpleNode conditionChild = (SimpleNode) ifNode.jjtGetChild(0);
         SimpleNode ifScope = (SimpleNode) ifNode.jjtGetChild(1);
         SimpleNode elseScope = (SimpleNode) ifNode.jjtGetChild(2);
 
+        String conditionCode = processMethodNodes(conditionChild, scope, methodManager);
         String elseScopeCode = processMethodNodes(elseScope, scope, methodManager);
         String ifScopeCode = processMethodNodes(ifScope, scope, methodManager);
 
-        String code = writeToString("\tif_ correct" + this.labelCounter + "\n", elseScopeCode, scope);
-        code = writeToString(code, "\tgoto endIf" + this.labelCounter + "\n", scope);
-        ifScopeCode = "correct" + this.labelCounter + ":\n" + ifScopeCode + "endIf" + this.labelCounter + ":\n";
-        code = writeToString(code, ifScopeCode, scope);
+        code += conditionCode;
+        //TODO: if_ correto (ir buscar à stack e isso)
+        code = writeToString(code, "if_ correct" + label + "\n", scope);
+        //TODO:verificar stack de if
+        code += elseScopeCode;
+        code = writeToString(code, "goto endIf" + label + "\n", scope);
+        //TODO:verificar stack de goto
+        code = writeToString(code, "correct" + label + ":\n" , 0);
+        //TODO:verificar stack de labels
+        code += ifScopeCode;
+        code = writeToString(code, "endIf" + label + ":\n" , 0);
+        //TODO:verificar stack de labels
 
-        this.labelCounter++;
         return code;
     }
 
@@ -432,7 +480,7 @@ public class CodeGenerator {
     private String writePlusOperation(ASTPlus plusNode, int scope) {
         String code = "";
 
-        writeToString(code, "iadd", scope);        
+        writeToString(code, "iadd\n", scope);        
         //readNodes(plusNode, scope, scopeTable);
         if (true) // TODO verify if the operation involves integers of floats
             writeCode("iadd\n", scope);

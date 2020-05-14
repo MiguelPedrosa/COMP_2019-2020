@@ -28,6 +28,7 @@ public class MethodManager {
         instructionsAux.put("ifle",      -2);
         instructionsAux.put("iflt",      -2);
         instructionsAux.put("ifne",      -2);
+        instructionsAux.put("bipush",      +1);
 
         return instructionsAux;
     }
@@ -46,6 +47,13 @@ public class MethodManager {
 
         if(this.maxStackSize < this.currentStackSize)
             this.maxStackSize = this.currentStackSize;
+    }
+
+    /**
+     * @return the maxStackSize
+     */
+    public int getMaxStackSize() {
+        return maxStackSize;
     }
 
 }
