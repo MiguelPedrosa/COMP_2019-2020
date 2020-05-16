@@ -359,6 +359,7 @@ public class CodeGenerator {
                     code += writeIf((ASTIF) child, scope, methodManager);
                     break;
                 case "ASTWhile":
+                    code += writeWhile((ASTWhile) child, scope, methodManager);
                     break;
                 case "ASTEquals":
                     break;
@@ -477,7 +478,6 @@ public class CodeGenerator {
         int label = this.labelCounter;
         this.labelCounter++;
 
-        //escrever codigo
         SimpleNode conditionChild = (SimpleNode) ifNode.jjtGetChild(0);
         SimpleNode ifScope = (SimpleNode) ifNode.jjtGetChild(1);
         SimpleNode elseScope = (SimpleNode) ifNode.jjtGetChild(2);
@@ -492,6 +492,32 @@ public class CodeGenerator {
         code = writeToString(code, "correct" + label + ":\n" , 0);
         code += processMethodNodes(ifScope, scope, methodManager);
         code = writeToString(code, "endIf" + label + ":\n" , 0);
+
+        return code;
+    }
+
+    /**
+     * Method to write "while" to the file
+     */
+    private String writeWhile(ASTWhile whileNode, int scope, MethodManager methodManager) {
+
+        String code = "";
+
+        int label = this.labelCounter;
+        this.labelCounter++;
+
+        SimpleNode conditionChild = (SimpleNode) whileNode.jjtGetChild(0);
+        SimpleNode scopeChild = (SimpleNode) whileNode.jjtGetChild(1);
+
+        code = writeToString(code, "while" + label + ":\n" , 0);
+        code += processMethodNodes(conditionChild, scope, methodManager);
+        code = writeToString(code, "bipush 0\n", scope);
+        methodManager.addInstruction("bipush");
+        code = writeToString(code, "ifeq endWhile" + label + ":\n" , scope);
+        methodManager.addInstruction("ifeq");
+        code += processMethodNodes(scopeChild, scope, methodManager);
+        code = writeToString(code, "goto while" + label + "\n", scope);
+        code = writeToString(code, "endWhile" + label + ":\n" , 0);
 
         return code;
     }

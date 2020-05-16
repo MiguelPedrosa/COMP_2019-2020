@@ -32,6 +32,11 @@ class Life extends Dead{
         else {
             in = true;
         }
+
+
+        while(row < 0){
+            
+        }
             
         return in;
     }
