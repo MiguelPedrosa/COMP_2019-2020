@@ -5,7 +5,6 @@ import static io.println(int) void;
 import static Math.sort() int;
 
 class Life extends Dead{
-
     
 
     public static void main(String[] a) {
@@ -16,12 +15,13 @@ class Life extends Dead{
         
     }
 
-    public boolean inbounds(int row, int column) {
+    public Life inbounds(int row, int column) {
+        Life here;
         boolean in;
         int f;
         f = 1;
         in = true;
-        
+        here = new Life();
         if (row < 0){
             if(f < 2){
                 in = false;
@@ -35,10 +35,10 @@ class Life extends Dead{
 
 
         while(row < 0){
-            
+
         }
             
-        return in;
+        return here.inbounds(row, column);
     }
 
 

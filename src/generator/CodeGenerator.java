@@ -81,9 +81,6 @@ public class CodeGenerator {
                 case "ASTMainDeclaration":
                     writeMain((ASTMainDeclaration) child, scope, scopeTable);
                     break;
-                case "ASTReturn":
-                    writeReturn((ASTReturn) child, scope);
-                    break;
                 case "ASTVarDeclaration":
                     writeVarDeclaration((ASTVarDeclaration) child, scope, scopeTable);
                     break;
@@ -263,23 +260,25 @@ public class CodeGenerator {
         writeCode(".limit locals " + numLocals + "\n", scope);
     }
 
-    private List<String> prepareLocals(int scope, String methodKey) {
+    private List<SymbolVar> prepareLocals(int scope, String methodKey) {
         if (!this.symbolTable.containsMethod(methodKey) && !methodKey.equals("main")) {
             System.err.println("Can find method " + methodKey + " in symbol table");
             return new ArrayList<>();
         }
 
         Map<String, SymbolVar> variables;
+        List<SymbolVar> locals = new ArrayList<>();
+
         if (methodKey.equals("main")) {
             variables = this.symbolTable.getMain().getVariables();
         } else {
             variables = this.symbolTable.getMethodTable(methodKey).getVariables();
+            locals.add(new SymbolVar("this", "void"));
         }
 
-        List<String> locals = new ArrayList<>();
         // Add variables to locals container
         for (Map.Entry<String, SymbolVar> entry : variables.entrySet()) {
-            locals.add(entry.getKey());
+            locals.add(entry.getValue());
         }
 
 
@@ -305,7 +304,7 @@ public class CodeGenerator {
 
         final String methodKey = methodNode.getMethodKey();
         MethodManager methodManager = new MethodManager();
-        List<String> locals = prepareLocals(scope + 1, methodKey);
+        List<SymbolVar> locals = prepareLocals(scope + 1, methodKey);
 
         methodManager.setLocals(locals);
 
@@ -323,7 +322,7 @@ public class CodeGenerator {
         writeCode("\n.method public static main([Ljava/lang/String;)V\n", scope);
 
         MethodManager methodManager = new MethodManager();
-        List<String> locals = prepareLocals(scope + 1, "main");
+        List<SymbolVar> locals = prepareLocals(scope + 1, "main");
 
         methodManager.setLocals(locals);
 
@@ -365,24 +364,19 @@ public class CodeGenerator {
                     break;
                 case "ASTReturn":
                     break;
-
                 case "ASTLiteral":
                     code += writeLiteral((ASTLiteral) child, scope, methodManager);
                     break;
-
                 case "ASTFuncCall":
                     break;
-                
                 case "ASTIdentifier":
                     code += writeIdentifier((ASTIdentifier) child, scope, methodManager);
                     break;
-
-                // Expression switches
                 case "ASTExpression":
                     code += processMethodNodes(child, scope, methodManager);
                     break;
                 case "ASTPlus":
-                    writePlusOperation((ASTPlus) child, scope);
+                    //writePlusOperation((ASTPlus) child, scope);
                     break;
                 case "ASTMinus":
                     //writeMinusOperation((ASTMinus) child, scope, scopeTable);
@@ -392,6 +386,16 @@ public class CodeGenerator {
                     break;
                 case "ASTDividor":
                     //writeDivOperation((ASTDividor) child, scope, scopeTable);
+                    break;
+                case "ASTNot":
+                    break;
+                case "ASTNew":
+                    break;
+                case "ASTLessThan":
+                    break;
+                case "ASTLength":
+                    break;
+                case "ASTArrayAccess":
                     break;
                 default:
                     System.out.println("Node not processed");
@@ -403,9 +407,7 @@ public class CodeGenerator {
         return code;
     }
 
-    private void writeReturn(ASTReturn returnNode, int scope) {
-        writeCode("ireturn\n", scope);
-    }
+    
 
     private void writeVarDeclaration(ASTVarDeclaration varDecNode, int scope, SymbolTable scopeTable) {
         String tableType = scopeTable.getClass().getSimpleName();
@@ -430,15 +432,61 @@ public class CodeGenerator {
     /**
      * Method to write "identifier" to the file
      */
+    private String writeReturn(ASTReturn returnNode, int scope, MethodManager methodManager) {
+
+        //TODO: check if this method is ok with group
+        String code = "";
+
+        
+        SimpleNode returnExpression = (SimpleNode) returnNode.jjtGetChild(0);
+
+        /* 
+        Expression
+            Variable(identifier)
+            literal
+            new
+            function call 
+            
+        TODO:What happens when its "return new Potato()"???
+        is new Potato in stack? invokevirtual like a function???*/
+
+
+        code += processMethodNodes(returnExpression, scope, methodManager);
+
+        if(methodManager.getLastTypeInStack().equals("int")){
+            code = writeToString(code, "ireturn\n", scope);
+        }
+        else{
+            code = writeToString(code, "areturn\n", scope);
+        }
+
+        return code;
+    }
+
+    /**
+     * Method to write "identifier" to the file
+     */
     private String writeIdentifier(ASTIdentifier identifierNode, int scope, MethodManager methodManager) {
         String code = "";
 
         String identifier = identifierNode.getIdentifier();
 
-        int local = methodManager.indexOfLocal(identifier);
-         
-        code = writeToString(code, "aload " + local + "\n", scope);
-        methodManager.addInstruction("aload");
+        int localIndex = methodManager.indexOfLocal(identifier);
+        String type = methodManager.typeOfLocal(identifier);
+
+        if(type == null){
+
+            //TODO: check if in global variables
+            //code only enter here when var is part of fields, proccess that
+            return code;
+        }
+        if(type.equals("int")){
+            code = writeToString(code, "iload " + localIndex + "\n", scope);
+            methodManager.addInstruction("iload", type);
+        } else {
+            code = writeToString(code, "aload " + localIndex + "\n", scope);
+            methodManager.addInstruction("aload", type);
+        }
         
         return code;
     }
@@ -464,7 +512,7 @@ public class CodeGenerator {
         }
 
         code = writeToString(code, "bipush " + stackLiteral + "\n", scope);
-        methodManager.addInstruction("bipush");
+        methodManager.addInstruction("bipush", "int");
 
         return code;
     }
@@ -484,9 +532,9 @@ public class CodeGenerator {
 
         code += processMethodNodes(conditionChild, scope, methodManager);
         code = writeToString(code, "bipush 1\n", scope);
-        methodManager.addInstruction("bipush");
+        methodManager.addInstruction("bipush", "int");
         code = writeToString(code, "ifeq correct" + label + "\n", scope);
-        methodManager.addInstruction("ifeq");
+        methodManager.addInstruction("ifeq", "");
         code += processMethodNodes(elseScope, scope, methodManager);
         code = writeToString(code, "goto endIf" + label + "\n", scope);
         code = writeToString(code, "correct" + label + ":\n" , 0);
@@ -512,9 +560,9 @@ public class CodeGenerator {
         code = writeToString(code, "while" + label + ":\n" , 0);
         code += processMethodNodes(conditionChild, scope, methodManager);
         code = writeToString(code, "bipush 0\n", scope);
-        methodManager.addInstruction("bipush");
+        methodManager.addInstruction("bipush", "int");
         code = writeToString(code, "ifeq endWhile" + label + ":\n" , scope);
-        methodManager.addInstruction("ifeq");
+        methodManager.addInstruction("ifeq", "");
         code += processMethodNodes(scopeChild, scope, methodManager);
         code = writeToString(code, "goto while" + label + "\n", scope);
         code = writeToString(code, "endWhile" + label + ":\n" , 0);
@@ -529,7 +577,6 @@ public class CodeGenerator {
         String code = "";
 
         writeToString(code, "iadd\n", scope);        
-        //readNodes(plusNode, scope, scopeTable);
         if (true) // TODO verify if the operation involves integers of floats
             writeCode("iadd\n", scope);
         else
