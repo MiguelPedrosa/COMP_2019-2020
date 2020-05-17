@@ -383,16 +383,16 @@ public class CodeGenerator {
                     code += processMethodNodes(child, scope, methodManager);
                     break;
                 case "ASTPlus":
-                    // writePlusOperation((ASTPlus) child, scope);
+                    code += writePlusOperation((ASTPlus) child, scope, methodManager);
                     break;
                 case "ASTMinus":
-                    // writeMinusOperation((ASTMinus) child, scope, scopeTable);
+                    code += writeMinusOperation((ASTMinus) child, scope, methodManager);
                     break;
                 case "ASTTimes":
-                    // writeMultiOperation((ASTTimes) child, scope, scopeTable);
+                    code += writeMultiOperation((ASTTimes) child, scope, methodManager);
                     break;
                 case "ASTDividor":
-                    // writeDivOperation((ASTDividor) child, scope, scopeTable);
+                    code += writeDivOperation((ASTDividor) child, scope, methodManager);
                     break;
                 case "ASTNot":
                     break;
@@ -774,14 +774,16 @@ public class CodeGenerator {
     /**
      * Method to write "addition" (+) operation to the file
      */
-    private String writePlusOperation(final ASTPlus plusNode, final int scope) {
-        final String code = "";
+    private String writePlusOperation(final ASTPlus plusNode, final int scope, final MethodManager methodManager) {
+        String code = "";
 
-        writeToString(code, "iadd\n", scope);
-        if (true) // TODO verify if the operation involves integers of floats
-            writeCode("iadd\n", scope);
-        else
-            writeCode("fadd\n", scope);
+        final SimpleNode leftChild = (SimpleNode) plusNode.jjtGetChild(0);
+        final SimpleNode rightChild = (SimpleNode) plusNode.jjtGetChild(1);
+
+        code += processMethodNodes(leftChild, scope, methodManager);
+        code += processMethodNodes(rightChild, scope, methodManager);
+
+        code = writeToString(code, "iadd\n", scope);
 
         return code;
     }
@@ -789,34 +791,52 @@ public class CodeGenerator {
     /**
      * Method to write "subtraction" (-) operation to the file
      */
-    private void writeMinusOperation(final ASTMinus minusNode, final int scope, final SymbolTable scopeTable) {
-        readNodes(minusNode, scope, scopeTable);
-        if (true) // TODO verify if the operation involves integers of floats
-            writeCode("isub\n", scope);
-        else
-            writeCode("fsub\n", scope);
+    private String writeMinusOperation(final ASTMinus minusNode, final int scope, final MethodManager methodManager) {
+        String code = "";
+
+        final SimpleNode leftChild = (SimpleNode) minusNode.jjtGetChild(0);
+        final SimpleNode rightChild = (SimpleNode) minusNode.jjtGetChild(1);
+
+        code += processMethodNodes(leftChild, scope, methodManager);
+        code += processMethodNodes(rightChild, scope, methodManager);
+
+        code = writeToString(code, "isub\n", scope);
+
+        return code;
     }
 
     /**
      * Method to write "multiplication" (*) operation to the file
      */
-    private void writeMultiOperation(final ASTTimes multiNode, final int scope, final SymbolTable scopeTable) {
-        readNodes(multiNode, scope, scopeTable);
-        if (true) // TODO verify if the operation involves integers of floats
-            writeCode("imul\n", scope);
-        else
-            writeCode("fmul\n", scope);
+    private String writeMultiOperation(final ASTTimes multiNode, final int scope, final MethodManager methodManager) {
+        String code = "";
+
+        final SimpleNode leftChild = (SimpleNode) multiNode.jjtGetChild(0);
+        final SimpleNode rightChild = (SimpleNode) multiNode.jjtGetChild(1);
+
+        code += processMethodNodes(leftChild, scope, methodManager);
+        code += processMethodNodes(rightChild, scope, methodManager);
+
+        code = writeToString(code, "imul\n", scope);
+
+        return code;
     }
 
     /**
      * Method to write "division" (/) operation to the file
      */
-    private void writeDivOperation(final ASTDividor divNode, final int scope, final SymbolTable scopeTable) {
-        readNodes(divNode, scope, scopeTable);
-        if (true) // TODO verify if the operation involves integers of floats
-            writeCode("idiv\n", scope);
-        else
-            writeCode("fdiv\n", scope);
+    private String writeDivOperation(final ASTDividor divNode, final int scope, final MethodManager methodManager) {
+        String code = "";
+
+        final SimpleNode leftChild = (SimpleNode) divNode.jjtGetChild(0);
+        final SimpleNode rightChild = (SimpleNode) divNode.jjtGetChild(1);
+
+        code += processMethodNodes(leftChild, scope, methodManager);
+        code += processMethodNodes(rightChild, scope, methodManager);
+
+        code = writeToString(code, "idiv\n", scope);
+
+        return code;
     }
 
 }
