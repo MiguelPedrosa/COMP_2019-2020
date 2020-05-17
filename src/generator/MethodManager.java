@@ -21,10 +21,13 @@ public class MethodManager {
     private static HashMap<String, Integer> buildInstructions() {
         HashMap<String, Integer> instructionsAux = new HashMap<>();
 
-        instructionsAux.put("ifeq",      -2);
         instructionsAux.put("bipush",      +1);
         instructionsAux.put("aload",      +1);
         instructionsAux.put("iload",      +1);
+        instructionsAux.put("getfield",      +1);
+        instructionsAux.put("invokestatic",      +1);
+
+        instructionsAux.put("ifeq",      -2);
         instructionsAux.put("ireturn",      -1);
         instructionsAux.put("areturn",      -1);
 
@@ -52,7 +55,14 @@ public class MethodManager {
             case "areturn":
                 this.stackTypes.remove(this.stackTypes.size() - 1);
                 break;
+            case "getfield":
+                this.stackTypes.add(type);
+                break;
+            case "invokestatic":
+                this.stackTypes.add(type);
+                break;
             default:
+                System.out.println("intruction" + instruction + " not being analised");
                 break;
         }
     }
@@ -76,6 +86,18 @@ public class MethodManager {
         
     }
 
+    public void stackPop(int numPop){
+        if(this.currentStackSize - numPop < 0) {
+            System.err.println("Stack size was smaller than zero");
+            return;
+        }
+
+        this.currentStackSize = this.currentStackSize - numPop;
+        for(int i = 0; i < numPop; i++){
+            this.stackTypes.remove(this.stackTypes.size() - 1);
+        }
+    }
+
     public int indexOfLocal(String local){
         for(int i = 0; i< this.locals.size(); i++)
             if(this.locals.get(i).getName().equals(local))
@@ -91,9 +113,18 @@ public class MethodManager {
     }
 
     public String getLastTypeInStack() {
+        if(this.stackTypes.size() == 0)
+            return "";
         return this.stackTypes.get(this.stackTypes.size()-1);
     }
 
+    /**
+     * @return the stackTypes
+     */
+    public List<String> getStackTypes() {
+        return stackTypes;
+    }
+    
     /**
      * @param locals the locals to set
      */

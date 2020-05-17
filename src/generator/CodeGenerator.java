@@ -23,19 +23,19 @@ public class CodeGenerator {
     private static final String fileSeparator = System.getProperty("file.separator");
 
     // Identation settings (can be changed later)
-    private String identation = Character.toString(space);
-    private int identationSize = 2;
+    private final String identation = Character.toString(space);
+    private final int identationSize = 2;
 
     private FileOutputStream jFile;
-    private SimpleNode rootNode;
-    private String fileName;
-    private String filePath;
+    private final SimpleNode rootNode;
+    private final String fileName;
+    private final String filePath;
 
-    private SymbolTable symbolTable;
+    private final SymbolTable symbolTable;
 
     private int labelCounter = 0;
 
-    public CodeGenerator(SimpleNode root, SymbolTable symbolTable, String fileName) {
+    public CodeGenerator(final SimpleNode root, final SymbolTable symbolTable, final String fileName) {
         this.rootNode = root;
         this.symbolTable = symbolTable;
         this.fileName = fileName;
@@ -58,15 +58,15 @@ public class CodeGenerator {
         return true;
     }
 
-    private void readNodes(SimpleNode node, int scope, SymbolTable scopeTable) {
-        int numChildren = node.jjtGetNumChildren();
+    private void readNodes(final SimpleNode node, final int scope, final SymbolTable scopeTable) {
+        final int numChildren = node.jjtGetNumChildren();
 
         if (numChildren == 0)
             return;
 
         for (int i = 0; i < numChildren; i++) {
-            SimpleNode child = (SimpleNode) node.jjtGetChild(i);
-            String nodeType = child.getClass().getSimpleName();
+            final SimpleNode child = (SimpleNode) node.jjtGetChild(i);
+            final String nodeType = child.getClass().getSimpleName();
 
             switch (nodeType) {
                 case "ASTStart":
@@ -98,7 +98,7 @@ public class CodeGenerator {
         System.out.println("Generating code file...\n\n");
         try {
             jFile = new FileOutputStream(filePath + fileSeparator + fileName + fileExtension);
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             e.printStackTrace();
             System.out.println("Failed to generate code file!\n\n");
             return false;
@@ -112,7 +112,7 @@ public class CodeGenerator {
      * @param code
      * @param scope
      */
-    private void writeCode(String code, int scope) {
+    private void writeCode(final String code, final int scope) {
         String identedCode = IntStream.range(0, scope * identationSize).mapToObj(i -> identation)
                 .collect(Collectors.joining(""));
 
@@ -120,12 +120,12 @@ public class CodeGenerator {
 
         try {
             jFile.write(identedCode.getBytes());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }
 
-    private String writeToString(String oldString, String code, int scope) {
+    private String writeToString(final String oldString, final String code, final int scope) {
         String identedCode = IntStream.range(0, scope * identationSize).mapToObj(i -> identation)
                 .collect(Collectors.joining(""));
         identedCode += code;
@@ -133,10 +133,10 @@ public class CodeGenerator {
         return oldString + identedCode;
     }
 
-    private void writeStringToCode(String code) {
+    private void writeStringToCode(final String code) {
         try {
             jFile.write(code.getBytes());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }
@@ -145,7 +145,7 @@ public class CodeGenerator {
      * Method to write the end of a method to the file
      * 
      */
-    private void endMethod(int scope) {
+    private void endMethod(final int scope) {
         writeCode(".end method\n\n", scope);
     }
 
@@ -153,7 +153,7 @@ public class CodeGenerator {
      * Method to write class initializer
      * 
      */
-    private void writeInitializer(int scope) {
+    private void writeInitializer(final int scope) {
         writeCode("; standard initializer\n", scope);
         writeCode(".method public <init>()V\n", scope);
         writeCode("aload_0\n", scope + 1);
@@ -167,9 +167,9 @@ public class CodeGenerator {
      * 
      * @param classNode
      */
-    private void writeClass(ASTClassDeclaration classNode, int scope, SymbolTable scopeTable) {
+    private void writeClass(final ASTClassDeclaration classNode, final int scope, final SymbolTable scopeTable) {
         // System.out.println("Writing class...");
-        String className = classNode.getClassId();
+        final String className = classNode.getClassId();
         writeCode(".class public " + className + "\n", scope);
         writeCode(".super java/lang/Object\n\n", scope);
 
@@ -181,7 +181,7 @@ public class CodeGenerator {
     /**
      * Method to transform a type string into a type for Jasmin
      */
-    private String transformType(String type) {
+    private String transformType(final String type) {
 
         String typeString = null;
 
@@ -190,7 +190,7 @@ public class CodeGenerator {
                 typeString = "I";
                 break;
             case "long":
-                typeString = "L";
+                typeString = "J";
                 break;
             case "float":
                 typeString = "F";
@@ -208,10 +208,13 @@ public class CodeGenerator {
                 typeString = "S";
                 break;
             case "reference":
-                typeString = "A";
+                typeString = "a";
                 break;
             case "String":
                 typeString = "Ljava/lang/String;";
+                break;
+            case "void":
+                typeString = "V";
                 break;
             case "boolean":
                 typeString = "Z";
@@ -220,7 +223,7 @@ public class CodeGenerator {
                 typeString = "[I";
                 break;
             case "long[]":
-                typeString = "[L";
+                typeString = "[J";
                 break;
             case "float[]":
                 typeString = "[F";
@@ -238,7 +241,7 @@ public class CodeGenerator {
                 typeString = "[S";
                 break;
             case "reference[]":
-                typeString = "[A";
+                typeString = "[a";
                 break;
             case "String[]":
                 typeString = "[Ljava/lang/String;";
@@ -246,28 +249,31 @@ public class CodeGenerator {
             case "boolean[]":
                 typeString = "[Z";
                 break;
+            default:
+                typeString = "L" + type;
+                break;
         }
 
         return typeString;
 
     }
 
-    private void writeStack(int numStacks, int scope) {
+    private void writeStack(final int numStacks, final int scope) {
         writeCode(".limit stack " + numStacks + "\n", scope);
     }
 
-    private void writeLocals(int numLocals, int scope) {
+    private void writeLocals(final int numLocals, final int scope) {
         writeCode(".limit locals " + numLocals + "\n", scope);
     }
 
-    private List<SymbolVar> prepareLocals(int scope, String methodKey) {
+    private List<SymbolVar> prepareLocals(final int scope, final String methodKey) {
         if (!this.symbolTable.containsMethod(methodKey) && !methodKey.equals("main")) {
             System.err.println("Can find method " + methodKey + " in symbol table");
             return new ArrayList<>();
         }
 
         Map<String, SymbolVar> variables;
-        List<SymbolVar> locals = new ArrayList<>();
+        final List<SymbolVar> locals = new ArrayList<>();
 
         if (methodKey.equals("main")) {
             variables = this.symbolTable.getMain().getVariables();
@@ -277,10 +283,9 @@ public class CodeGenerator {
         }
 
         // Add variables to locals container
-        for (Map.Entry<String, SymbolVar> entry : variables.entrySet()) {
+        for (final Map.Entry<String, SymbolVar> entry : variables.entrySet()) {
             locals.add(entry.getValue());
         }
-
 
         return locals;
     }
@@ -288,27 +293,27 @@ public class CodeGenerator {
     /**
      * Method to write a Method (or function) into the file
      */
-    private void writeMethod(ASTMethodDeclaration methodNode, int scope, SymbolTable scopeTable) {
+    private void writeMethod(final ASTMethodDeclaration methodNode, final int scope, final SymbolTable scopeTable) {
         final String methodName = methodNode.getMethodName();
         final String methodType = transformType(methodNode.getReturnType());
 
-        List<String[]> arguments = methodNode.getArguments();
+        final List<String[]> arguments = methodNode.getArguments();
         String argsInJasmin = "";
 
-        for (String[] argument : arguments) {
-            String argType = transformType(argument[1]);
+        for (final String[] argument : arguments) {
+            final String argType = transformType(argument[1]);
             argsInJasmin = argsInJasmin.concat(argType);
         }
 
         writeCode("\n.method public static " + methodName + "(" + argsInJasmin + ")" + methodType + "\n", scope);
 
         final String methodKey = methodNode.getMethodKey();
-        MethodManager methodManager = new MethodManager();
-        List<SymbolVar> locals = prepareLocals(scope + 1, methodKey);
+        final MethodManager methodManager = new MethodManager();
+        final List<SymbolVar> locals = prepareLocals(scope + 1, methodKey);
 
         methodManager.setLocals(locals);
 
-        String code = processMethodNodes(methodNode, scope + 1, methodManager);
+        final String code = processMethodNodes(methodNode, scope + 1, methodManager);
 
         writeStack(methodManager.getMaxStackSize(), scope + 1);
         writeLocals(locals.size(), scope + 1);
@@ -318,15 +323,15 @@ public class CodeGenerator {
         endMethod(scope);
     }
 
-    private void writeMain(ASTMainDeclaration mainMethodNode, int scope, SymbolTable scopeTable) {
+    private void writeMain(final ASTMainDeclaration mainMethodNode, final int scope, final SymbolTable scopeTable) {
         writeCode("\n.method public static main([Ljava/lang/String;)V\n", scope);
 
-        MethodManager methodManager = new MethodManager();
-        List<SymbolVar> locals = prepareLocals(scope + 1, "main");
+        final MethodManager methodManager = new MethodManager();
+        final List<SymbolVar> locals = prepareLocals(scope + 1, "main");
 
         methodManager.setLocals(locals);
 
-        String code = processMethodNodes(mainMethodNode, scope + 1, methodManager);
+        final String code = processMethodNodes(mainMethodNode, scope + 1, methodManager);
 
         writeStack(methodManager.getMaxStackSize(), scope + 1);
         writeLocals(locals.size(), scope + 1);
@@ -336,23 +341,23 @@ public class CodeGenerator {
         endMethod(scope);
     }
 
-    private String processMethodNodes(SimpleNode methodNode, int scope, MethodManager methodManager) {
-        int numChildren = methodNode.jjtGetNumChildren();
+    private String processMethodNodes(final SimpleNode methodNode, final int scope, final MethodManager methodManager) {
+        final int numChildren = methodNode.jjtGetNumChildren();
         String code = "";
 
         if (numChildren == 0)
             return code;
 
         for (int i = 0; i < numChildren; i++) {
-            SimpleNode child = (SimpleNode) methodNode.jjtGetChild(i);
-            String nodeType = child.getClass().getSimpleName();
+            final SimpleNode child = (SimpleNode) methodNode.jjtGetChild(i);
+            final String nodeType = child.getClass().getSimpleName();
 
             switch (nodeType) {
                 case "ASTScope":
                     code += processMethodNodes(child, scope, methodManager);
                     break;
                 case "ASTVarDeclaration":
-                    //variable arlready added in locals
+                    // variable arlready added in locals
                     break;
                 case "ASTIF":
                     code += writeIf((ASTIF) child, scope, methodManager);
@@ -363,11 +368,13 @@ public class CodeGenerator {
                 case "ASTEquals":
                     break;
                 case "ASTReturn":
+                    code += writeReturn((ASTReturn) child, scope, methodManager);
                     break;
                 case "ASTLiteral":
                     code += writeLiteral((ASTLiteral) child, scope, methodManager);
                     break;
                 case "ASTFuncCall":
+                    code += writeFuncCall((ASTFuncCall) child, scope, methodManager);
                     break;
                 case "ASTIdentifier":
                     code += writeIdentifier((ASTIdentifier) child, scope, methodManager);
@@ -376,16 +383,16 @@ public class CodeGenerator {
                     code += processMethodNodes(child, scope, methodManager);
                     break;
                 case "ASTPlus":
-                    //writePlusOperation((ASTPlus) child, scope);
+                    // writePlusOperation((ASTPlus) child, scope);
                     break;
                 case "ASTMinus":
-                    //writeMinusOperation((ASTMinus) child, scope, scopeTable);
+                    // writeMinusOperation((ASTMinus) child, scope, scopeTable);
                     break;
                 case "ASTTimes":
-                    //writeMultiOperation((ASTTimes) child, scope, scopeTable);
+                    // writeMultiOperation((ASTTimes) child, scope, scopeTable);
                     break;
                 case "ASTDividor":
-                    //writeDivOperation((ASTDividor) child, scope, scopeTable);
+                    // writeDivOperation((ASTDividor) child, scope, scopeTable);
                     break;
                 case "ASTNot":
                     break;
@@ -407,10 +414,8 @@ public class CodeGenerator {
         return code;
     }
 
-    
-
-    private void writeVarDeclaration(ASTVarDeclaration varDecNode, int scope, SymbolTable scopeTable) {
-        String tableType = scopeTable.getClass().getSimpleName();
+    private void writeVarDeclaration(final ASTVarDeclaration varDecNode, final int scope, final SymbolTable scopeTable) {
+        final String tableType = scopeTable.getClass().getSimpleName();
         switch (tableType) {
             case "SymbolTable":
                 writeClassField(varDecNode, scope, scopeTable);
@@ -420,8 +425,8 @@ public class CodeGenerator {
         }
     }
 
-    private void writeClassField(ASTVarDeclaration varDecNode, int scope, SymbolTable scopeTable) {
-        String type = transformType(varDecNode.getType());
+    private void writeClassField(final ASTVarDeclaration varDecNode, final int scope, final SymbolTable scopeTable) {
+        final String type = transformType(varDecNode.getType());
         writeCode(".field " + varDecNode.getVarId() + " " + type + "\n", scope);
     }
 
@@ -429,34 +434,181 @@ public class CodeGenerator {
 
     }
 
+    private String writeFuncCall(final ASTFuncCall funcCallNode, final int scope, final MethodManager methodManager) {
+        String code = "";
+
+        /* funcCallNode
+        invokestatic java/lang/Math/sin(D)D
+
+        invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
+        */
+        final SimpleNode firstChild = (SimpleNode) funcCallNode.jjtGetChild(0);
+        final SimpleNode method = (SimpleNode) funcCallNode.jjtGetChild(1);
+        final SimpleNode arguments = (SimpleNode) funcCallNode.jjtGetChild(2); 
+
+        //put class in Stack
+
+        //expressão ou identifier (estatico ou var)
+        if(firstChild instanceof ASTIdentifier){
+            List<String> list = writeFuncCallIdentifier((ASTIdentifier) firstChild, scope, methodManager);
+
+            if(list.size() == 2) {
+                String codeLine;
+                String className = list.get(0);
+                String methodName = ((ASTIdentifier) method).getIdentifier();
+                String args = "";
+
+                String returnType;
+                //this.symbolTable.getImports().getClasses().get(list.get(0));
+                //
+                this.writeArgs((ASTFuncArgs)arguments, scope, methodManager);
+
+                int numberArgs = arguments.jjtGetNumChildren();
+                List<String> argsTypes = new ArrayList<>();
+                for(int i = (methodManager.getStackTypes().size()-numberArgs); i < methodManager.getStackTypes().size(); i++){
+                    argsTypes.add(methodManager.getStackTypes().get(i));
+                }
+
+                returnType = this.getFuncReturnType(argsTypes, className, methodName, true);
+                //list.get(0)/method(args;)returnType
+                for(int i = 0; i < argsTypes.size(); i++){
+                    if( i + 1 == argsTypes.size())
+                        args += this.transformType(argsTypes.get(i));
+                    else
+                        args += this.transformType(argsTypes.get(i)) + ";";
+                }
+                //invokestatic java/lang/Math/sin(D)D
+                codeLine = "invokestatic " + className + "/" + methodName + "(" + args + ")" + returnType + "\n";
+                code = writeToString(code, codeLine, scope);
+                methodManager.stackPop(numberArgs);
+                methodManager.addInstruction("invokestatic", returnType);
+            } else if(list.size() == 1){
+                code += list.get(0);
+                //variable
+            }
+        }
+        else{
+            code += processMethodNodes(firstChild, scope, methodManager);
+        }
+
+        String className = methodManager.getLastTypeInStack();
+
+        //TODO:
+        if(this.symbolTable.getImports().containsKey(className)){
+
+        } else{
+            
+        }
+
+        return code;
+    }
+
+    /**
+     * Method to write "identifier" to the file when its called in funcCall
+     */
+    private String getFuncReturnType(List<String> argsTypes, String className, String methodName, boolean isStatic) {
+        String signature = methodName;
+        for (String arg : argsTypes) {
+            signature += ";" + arg;
+        }
+
+        if(isStatic){
+            if(!this.symbolTable.getImports().get(className).hasStaticMethod(signature))
+                System.out.println("here " + className + " " + signature);
+            return this.symbolTable.getImports().get(className).getStaticMethodType(signature);
+        }else if(this.symbolTable.getImports().containsKey(className)){
+            return this.symbolTable.getImports().get(className).getMethodType(signature);
+        }
+
+        return this.symbolTable.getMethodReturn(signature);
+    }
+
+    /**
+     * Method to write "identifier" to the file when its called in funcCall
+     */
+    private String writeArgs(ASTFuncArgs argsNode, int scope, MethodManager methodManager) {
+        String code = "";
+
+        ArrayList<String> argsTypes = new ArrayList<String>();
+
+        for (int i = 0; i < argsNode.jjtGetNumChildren(); i++) {
+            SimpleNode childNode = (SimpleNode) argsNode.jjtGetChild(i);
+            code += this.processMethodNodes(childNode, scope, methodManager);
+        }
+
+        return code;
+    }
+
+    /**
+     * Method to write "identifier" to the file when its called in funcCall
+     */
+    private List<String> writeFuncCallIdentifier(final ASTIdentifier identifierNode, final int scope, final MethodManager methodManager) {
+        final List<String> list = new ArrayList<String>();
+
+        String code = "";
+
+        final String identifier = identifierNode.getIdentifier();
+
+        final int localIndex = methodManager.indexOfLocal(identifier);
+        String type = methodManager.typeOfLocal(identifier);
+
+        if (type == null) {
+
+            if (this.symbolTable.containsVariable(identifier)) {
+                // TODO: check if group agree with code
+                // TODO: when array change for arrays instead of fields? prof example
+                type = this.symbolTable.getVariableType(identifier);
+
+                // ???? aload0 antes ????
+                code = writeToString(code, "getfield " + this.symbolTable.getClasseName() + "/" + identifier + " "
+                        + transformType(type) + "\n", scope);
+                methodManager.addInstruction("getfield", type);
+
+                list.add(code);
+                return list;
+            }
+            else{
+                list.add(identifier);
+                list.add(identifier);
+                return list;
+            }
+
+        }
+        if (type.equals("int")) {
+            code = writeToString(code, "iload " + localIndex + "\n", scope);
+            methodManager.addInstruction("iload", type);
+        } else {
+            code = writeToString(code, "aload " + localIndex + "\n", scope);
+            methodManager.addInstruction("aload", type);
+        }
+
+        list.add(code);
+        return list;
+    }
+
+
     /**
      * Method to write "identifier" to the file
      */
-    private String writeReturn(ASTReturn returnNode, int scope, MethodManager methodManager) {
+    private String writeReturn(final ASTReturn returnNode, final int scope, final MethodManager methodManager) {
 
-        //TODO: check if this method is ok with group
+        // TODO: check if this method is ok with group
         String code = "";
 
-        
-        SimpleNode returnExpression = (SimpleNode) returnNode.jjtGetChild(0);
+        final SimpleNode returnExpression = (SimpleNode) returnNode.jjtGetChild(0);
 
-        /* 
-        Expression
-            Variable(identifier)
-            literal
-            new
-            function call 
-            
-        TODO:What happens when its "return new Potato()"???
-        is new Potato in stack? invokevirtual like a function???*/
-
+        /*
+         * Expression Variable(identifier) literal new function call
+         * 
+         * TODO:What happens when its "return new Potato()"??? is new Potato in stack?
+         * invokevirtual like a function???
+         */
 
         code += processMethodNodes(returnExpression, scope, methodManager);
 
-        if(methodManager.getLastTypeInStack().equals("int")){
+        if (methodManager.getLastTypeInStack().equals("int")) {
             code = writeToString(code, "ireturn\n", scope);
-        }
-        else{
+        } else {
             code = writeToString(code, "areturn\n", scope);
         }
 
@@ -466,53 +618,65 @@ public class CodeGenerator {
     /**
      * Method to write "identifier" to the file
      */
-    private String writeIdentifier(ASTIdentifier identifierNode, int scope, MethodManager methodManager) {
+    private String writeIdentifier(final ASTIdentifier identifierNode, final int scope, final MethodManager methodManager) {
         String code = "";
 
-        String identifier = identifierNode.getIdentifier();
+        final String identifier = identifierNode.getIdentifier();
 
-        int localIndex = methodManager.indexOfLocal(identifier);
+        final int localIndex = methodManager.indexOfLocal(identifier);
         String type = methodManager.typeOfLocal(identifier);
 
-        if(type == null){
+        if (type == null) {
 
-            //TODO: check if in global variables
-            //code only enter here when var is part of fields, proccess that
+            // TODO: check if group agree with code
+            // TODO: when array change for arrays instead of fields? prof example
+            type = this.symbolTable.getVariableType(identifier);
+
+            // ???? aload0 antes ????
+            code = writeToString(code, "getfield " + this.symbolTable.getClasseName() + "/" + identifier + " "
+                    + transformType(type) + "\n", scope);
+            methodManager.addInstruction("getfield", type);
+
             return code;
         }
-        if(type.equals("int")){
+        if (type.equals("int")) {
             code = writeToString(code, "iload " + localIndex + "\n", scope);
             methodManager.addInstruction("iload", type);
         } else {
             code = writeToString(code, "aload " + localIndex + "\n", scope);
             methodManager.addInstruction("aload", type);
         }
-        
+
         return code;
     }
 
     /**
      * Method to write "literal" to the file
      */
-    private String writeLiteral(ASTLiteral literalNode, int scope, MethodManager methodManager) {
+    private String writeLiteral(final ASTLiteral literalNode, final int scope, final MethodManager methodManager) {
         String code = "";
 
-        String literal = literalNode.getLiteral();
+        final String literal = literalNode.getLiteral();
         int stackLiteral;
         switch (literal) {
             case "true":
                 stackLiteral = 1;
+                code = writeToString(code, "bipush " + stackLiteral + "\n", scope);
+                methodManager.addInstruction("bipush", "boolean");
                 break;
             case "false":
                 stackLiteral = 0;
+                code = writeToString(code, "bipush " + stackLiteral + "\n", scope);
+                methodManager.addInstruction("bipush", "boolean");
                 break;
             default:
                 stackLiteral = Integer.parseInt(literal);
+                code = writeToString(code, "bipush " + stackLiteral + "\n", scope);
+                methodManager.addInstruction("bipush", "int");
                 break;
         }
 
-        code = writeToString(code, "bipush " + stackLiteral + "\n", scope);
-        methodManager.addInstruction("bipush", "int");
+        
 
         return code;
     }
@@ -520,15 +684,15 @@ public class CodeGenerator {
     /**
      * Method to write "if" to the file
      */
-    private String writeIf(ASTIF ifNode, int scope, MethodManager methodManager) {
+    private String writeIf(final ASTIF ifNode, final int scope, final MethodManager methodManager) {
 
         String code = "";
-        int label = this.labelCounter;
+        final int label = this.labelCounter;
         this.labelCounter++;
 
-        SimpleNode conditionChild = (SimpleNode) ifNode.jjtGetChild(0);
-        SimpleNode ifScope = (SimpleNode) ifNode.jjtGetChild(1);
-        SimpleNode elseScope = (SimpleNode) ifNode.jjtGetChild(2);
+        final SimpleNode conditionChild = (SimpleNode) ifNode.jjtGetChild(0);
+        final SimpleNode ifScope = (SimpleNode) ifNode.jjtGetChild(1);
+        final SimpleNode elseScope = (SimpleNode) ifNode.jjtGetChild(2);
 
         code += processMethodNodes(conditionChild, scope, methodManager);
         code = writeToString(code, "bipush 1\n", scope);
@@ -537,9 +701,9 @@ public class CodeGenerator {
         methodManager.addInstruction("ifeq", "");
         code += processMethodNodes(elseScope, scope, methodManager);
         code = writeToString(code, "goto endIf" + label + "\n", scope);
-        code = writeToString(code, "correct" + label + ":\n" , 0);
+        code = writeToString(code, "correct" + label + ":\n", 0);
         code += processMethodNodes(ifScope, scope, methodManager);
-        code = writeToString(code, "endIf" + label + ":\n" , 0);
+        code = writeToString(code, "endIf" + label + ":\n", 0);
 
         return code;
     }
@@ -547,25 +711,25 @@ public class CodeGenerator {
     /**
      * Method to write "while" to the file
      */
-    private String writeWhile(ASTWhile whileNode, int scope, MethodManager methodManager) {
+    private String writeWhile(final ASTWhile whileNode, final int scope, final MethodManager methodManager) {
 
         String code = "";
 
-        int label = this.labelCounter;
+        final int label = this.labelCounter;
         this.labelCounter++;
 
-        SimpleNode conditionChild = (SimpleNode) whileNode.jjtGetChild(0);
-        SimpleNode scopeChild = (SimpleNode) whileNode.jjtGetChild(1);
+        final SimpleNode conditionChild = (SimpleNode) whileNode.jjtGetChild(0);
+        final SimpleNode scopeChild = (SimpleNode) whileNode.jjtGetChild(1);
 
-        code = writeToString(code, "while" + label + ":\n" , 0);
+        code = writeToString(code, "while" + label + ":\n", 0);
         code += processMethodNodes(conditionChild, scope, methodManager);
         code = writeToString(code, "bipush 0\n", scope);
         methodManager.addInstruction("bipush", "int");
-        code = writeToString(code, "ifeq endWhile" + label + ":\n" , scope);
+        code = writeToString(code, "ifeq endWhile" + label + ":\n", scope);
         methodManager.addInstruction("ifeq", "");
         code += processMethodNodes(scopeChild, scope, methodManager);
         code = writeToString(code, "goto while" + label + "\n", scope);
-        code = writeToString(code, "endWhile" + label + ":\n" , 0);
+        code = writeToString(code, "endWhile" + label + ":\n", 0);
 
         return code;
     }
@@ -573,10 +737,10 @@ public class CodeGenerator {
     /**
      * Method to write "addition" (+) operation to the file
      */
-    private String writePlusOperation(ASTPlus plusNode, int scope) {
-        String code = "";
+    private String writePlusOperation(final ASTPlus plusNode, final int scope) {
+        final String code = "";
 
-        writeToString(code, "iadd\n", scope);        
+        writeToString(code, "iadd\n", scope);
         if (true) // TODO verify if the operation involves integers of floats
             writeCode("iadd\n", scope);
         else
@@ -588,7 +752,7 @@ public class CodeGenerator {
     /**
      * Method to write "subtraction" (-) operation to the file
      */
-    private void writeMinusOperation(ASTMinus minusNode, int scope, SymbolTable scopeTable) {
+    private void writeMinusOperation(final ASTMinus minusNode, final int scope, final SymbolTable scopeTable) {
         readNodes(minusNode, scope, scopeTable);
         if (true) // TODO verify if the operation involves integers of floats
             writeCode("isub\n", scope);
@@ -599,7 +763,7 @@ public class CodeGenerator {
     /**
      * Method to write "multiplication" (*) operation to the file
      */
-    private void writeMultiOperation(ASTTimes multiNode, int scope, SymbolTable scopeTable) {
+    private void writeMultiOperation(final ASTTimes multiNode, final int scope, final SymbolTable scopeTable) {
         readNodes(multiNode, scope, scopeTable);
         if (true) // TODO verify if the operation involves integers of floats
             writeCode("imul\n", scope);
@@ -610,7 +774,7 @@ public class CodeGenerator {
     /**
      * Method to write "division" (/) operation to the file
      */
-    private void writeDivOperation(ASTDividor divNode, int scope, SymbolTable scopeTable) {
+    private void writeDivOperation(final ASTDividor divNode, final int scope, final SymbolTable scopeTable) {
         readNodes(divNode, scope, scopeTable);
         if (true) // TODO verify if the operation involves integers of floats
             writeCode("idiv\n", scope);

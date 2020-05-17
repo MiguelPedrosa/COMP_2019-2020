@@ -436,7 +436,6 @@ public class SemanticAnalyser {
                         if (this.ST.containsMethod(method))
                             type = this.ST.getMethodReturn(method);
                         else if (this.isMethodInImports(this.ST.getClassExtendsName(), method, isStatic)) {
-                            System.out.println(method);
                             if (isStatic)
                                 type = this.ST.getImports().get(this.ST.getClassExtendsName())
                                         .getStaticMethodType(method);

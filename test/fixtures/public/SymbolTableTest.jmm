@@ -1,42 +1,27 @@
 import static io.read() int;
 import static io.println() void;
 import static io.println(int) void;
+import static hello.inbounds(int, boolean) void;
 
 import static Math.sort() int;
 
 class Life extends Dead{
     
+    Life a;
 
-    public static void main(String[] a) {
+    public static void main(String[] b) {
         Life d;
         d = new Life();
         d.inbounds(4, 4);
-
-        
+        a = new Life();
+        a;
     }
 
     public Life inbounds(int row, int column) {
         Life here;
-        boolean in;
-        int f;
-        f = 1;
-        in = true;
         here = new Life();
-        if (row < 0){
-            if(f < 2){
-                in = false;
-            }else{
-                in = false;
-            }
-        }
-        else {
-            in = true;
-        }
+        hello.inbounds(4, true);
 
-
-        while(row < 0){
-
-        }
             
         return here.inbounds(row, column);
     }
