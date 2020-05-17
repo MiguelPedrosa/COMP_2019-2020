@@ -78,10 +78,10 @@ public class ParserTest {
         test("fixtures/public/MonteCarloPi.jmm", false);
     }
 
-    @Test
+/*     @Test
     public void testQuickSort() {
         test("fixtures/public/QuickSort.jmm", false);
-    }
+    } */
 
     @Test
     public void testSimple() {

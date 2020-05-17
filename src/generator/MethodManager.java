@@ -26,6 +26,7 @@ public class MethodManager {
         instructionsAux.put("iload",      +1);
         instructionsAux.put("getfield",      +1);
         instructionsAux.put("invokestatic",      +1);
+        instructionsAux.put("invokevirtual",      +1);
 
         instructionsAux.put("ifeq",      -2);
         instructionsAux.put("ireturn",      -1);
@@ -59,6 +60,9 @@ public class MethodManager {
                 this.stackTypes.add(type);
                 break;
             case "invokestatic":
+                this.stackTypes.add(type);
+                break;
+            case "invokevirtual":
                 this.stackTypes.add(type);
                 break;
             default:

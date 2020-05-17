@@ -279,7 +279,7 @@ public class CodeGenerator {
             variables = this.symbolTable.getMain().getVariables();
         } else {
             variables = this.symbolTable.getMethodTable(methodKey).getVariables();
-            locals.add(new SymbolVar("this", "void"));
+            locals.add(new SymbolVar("this", this.symbolTable.getClasseName()));
         }
 
         // Add variables to locals container
@@ -414,7 +414,8 @@ public class CodeGenerator {
         return code;
     }
 
-    private void writeVarDeclaration(final ASTVarDeclaration varDecNode, final int scope, final SymbolTable scopeTable) {
+    private void writeVarDeclaration(final ASTVarDeclaration varDecNode, final int scope,
+            final SymbolTable scopeTable) {
         final String tableType = scopeTable.getClass().getSimpleName();
         switch (tableType) {
             case "SymbolTable":
@@ -437,67 +438,101 @@ public class CodeGenerator {
     private String writeFuncCall(final ASTFuncCall funcCallNode, final int scope, final MethodManager methodManager) {
         String code = "";
 
-        /* funcCallNode
-        invokestatic java/lang/Math/sin(D)D
-
-        invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
-        */
         final SimpleNode firstChild = (SimpleNode) funcCallNode.jjtGetChild(0);
         final SimpleNode method = (SimpleNode) funcCallNode.jjtGetChild(1);
-        final SimpleNode arguments = (SimpleNode) funcCallNode.jjtGetChild(2); 
+        final SimpleNode arguments = (SimpleNode) funcCallNode.jjtGetChild(2);
 
-        //put class in Stack
-
-        //expressão ou identifier (estatico ou var)
-        if(firstChild instanceof ASTIdentifier){
+        if (firstChild instanceof ASTIdentifier) {
             List<String> list = writeFuncCallIdentifier((ASTIdentifier) firstChild, scope, methodManager);
 
-            if(list.size() == 2) {
+            // static
+            if (list.size() == 2) {
                 String codeLine;
                 String className = list.get(0);
                 String methodName = ((ASTIdentifier) method).getIdentifier();
                 String args = "";
-
                 String returnType;
-                //this.symbolTable.getImports().getClasses().get(list.get(0));
-                //
-                this.writeArgs((ASTFuncArgs)arguments, scope, methodManager);
+
+                code += this.writeArgs((ASTFuncArgs) arguments, scope, methodManager);
 
                 int numberArgs = arguments.jjtGetNumChildren();
                 List<String> argsTypes = new ArrayList<>();
-                for(int i = (methodManager.getStackTypes().size()-numberArgs); i < methodManager.getStackTypes().size(); i++){
+                for (int i = (methodManager.getStackTypes().size() - numberArgs); i < methodManager.getStackTypes()
+                        .size(); i++) {
                     argsTypes.add(methodManager.getStackTypes().get(i));
                 }
 
+                for (int i = 0; i < argsTypes.size(); i++)
+                    args += this.transformType(argsTypes.get(i));
+
                 returnType = this.getFuncReturnType(argsTypes, className, methodName, true);
-                //list.get(0)/method(args;)returnType
-                for(int i = 0; i < argsTypes.size(); i++){
-                    if( i + 1 == argsTypes.size())
-                        args += this.transformType(argsTypes.get(i));
-                    else
-                        args += this.transformType(argsTypes.get(i)) + ";";
-                }
-                //invokestatic java/lang/Math/sin(D)D
-                codeLine = "invokestatic " + className + "/" + methodName + "(" + args + ")" + returnType + "\n";
+
+                codeLine = "invokestatic " + className + "/" + methodName + "(" + args + ")"
+                        + this.transformType(returnType) + "\n";
                 code = writeToString(code, codeLine, scope);
+
                 methodManager.stackPop(numberArgs);
                 methodManager.addInstruction("invokestatic", returnType);
-            } else if(list.size() == 1){
-                code += list.get(0);
-                //variable
+
             }
-        }
-        else{
+            // variable
+            else if (list.size() == 1) {
+                code += list.get(0);
+                String codeLine;
+                String className = methodManager.getLastTypeInStack();
+                String methodName = ((ASTIdentifier) method).getIdentifier();
+                String args = "";
+                String returnType;
+
+                code += this.writeArgs((ASTFuncArgs) arguments, scope, methodManager);
+
+                int numberArgs = arguments.jjtGetNumChildren();
+                List<String> argsTypes = new ArrayList<>();
+                for (int i = (methodManager.getStackTypes().size() - numberArgs); i < methodManager.getStackTypes()
+                        .size(); i++) {
+                    argsTypes.add(methodManager.getStackTypes().get(i));
+                }
+
+                for (int i = 0; i < argsTypes.size(); i++)
+                    args += this.transformType(argsTypes.get(i));
+
+                returnType = this.getFuncReturnType(argsTypes, className, methodName, false);
+
+                codeLine = "invokevirtual " + className + "/" + methodName + "(" + args + ")"
+                        + this.transformType(returnType) + "\n";
+                code = writeToString(code, codeLine, scope);
+
+                methodManager.stackPop(numberArgs);
+                methodManager.addInstruction("invokevirtual", returnType);
+            }
+        } else {
             code += processMethodNodes(firstChild, scope, methodManager);
-        }
+            String codeLine;
+            String className = methodManager.getLastTypeInStack();
+            String methodName = ((ASTIdentifier) method).getIdentifier();
+            String args = "";
+            String returnType;
 
-        String className = methodManager.getLastTypeInStack();
+            code += this.writeArgs((ASTFuncArgs) arguments, scope, methodManager);
 
-        //TODO:
-        if(this.symbolTable.getImports().containsKey(className)){
+            int numberArgs = arguments.jjtGetNumChildren();
+            List<String> argsTypes = new ArrayList<>();
+            for (int i = (methodManager.getStackTypes().size() - numberArgs); i < methodManager.getStackTypes()
+                    .size(); i++) {
+                argsTypes.add(methodManager.getStackTypes().get(i));
+            }
 
-        } else{
-            
+            for (int i = 0; i < argsTypes.size(); i++)
+                args += this.transformType(argsTypes.get(i));
+
+            returnType = this.getFuncReturnType(argsTypes, className, methodName, false);
+
+            codeLine = "invokevirtual " + className + "/" + methodName + "(" + args + ")"
+                    + this.transformType(returnType) + "\n";
+            code = writeToString(code, codeLine, scope);
+
+            methodManager.stackPop(numberArgs);
+            methodManager.addInstruction("invokevirtual", returnType);
         }
 
         return code;
@@ -512,11 +547,11 @@ public class CodeGenerator {
             signature += ";" + arg;
         }
 
-        if(isStatic){
-            if(!this.symbolTable.getImports().get(className).hasStaticMethod(signature))
+        if (isStatic) {
+            if (!this.symbolTable.getImports().get(className).hasStaticMethod(signature))
                 System.out.println("here " + className + " " + signature);
             return this.symbolTable.getImports().get(className).getStaticMethodType(signature);
-        }else if(this.symbolTable.getImports().containsKey(className)){
+        } else if (this.symbolTable.getImports().containsKey(className)) {
             return this.symbolTable.getImports().get(className).getMethodType(signature);
         }
 
@@ -542,7 +577,8 @@ public class CodeGenerator {
     /**
      * Method to write "identifier" to the file when its called in funcCall
      */
-    private List<String> writeFuncCallIdentifier(final ASTIdentifier identifierNode, final int scope, final MethodManager methodManager) {
+    private List<String> writeFuncCallIdentifier(final ASTIdentifier identifierNode, final int scope,
+            final MethodManager methodManager) {
         final List<String> list = new ArrayList<String>();
 
         String code = "";
@@ -566,8 +602,7 @@ public class CodeGenerator {
 
                 list.add(code);
                 return list;
-            }
-            else{
+            } else {
                 list.add(identifier);
                 list.add(identifier);
                 return list;
@@ -585,7 +620,6 @@ public class CodeGenerator {
         list.add(code);
         return list;
     }
-
 
     /**
      * Method to write "identifier" to the file
@@ -618,7 +652,8 @@ public class CodeGenerator {
     /**
      * Method to write "identifier" to the file
      */
-    private String writeIdentifier(final ASTIdentifier identifierNode, final int scope, final MethodManager methodManager) {
+    private String writeIdentifier(final ASTIdentifier identifierNode, final int scope,
+            final MethodManager methodManager) {
         String code = "";
 
         final String identifier = identifierNode.getIdentifier();
@@ -669,14 +704,16 @@ public class CodeGenerator {
                 code = writeToString(code, "bipush " + stackLiteral + "\n", scope);
                 methodManager.addInstruction("bipush", "boolean");
                 break;
+            case "this":
+                code = writeToString(code, "aload 0 \n", scope);
+                methodManager.addInstruction("aload", this.symbolTable.getClasseName());
+                break;
             default:
                 stackLiteral = Integer.parseInt(literal);
                 code = writeToString(code, "bipush " + stackLiteral + "\n", scope);
                 methodManager.addInstruction("bipush", "int");
                 break;
         }
-
-        
 
         return code;
     }
