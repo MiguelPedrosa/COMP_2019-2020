@@ -3,9 +3,9 @@ import java.util.HashMap;
 import java.util.List;
 
 public class MethodManager {
-    private int currentStackSize;    
+    private int currentStackSize;
     private int maxStackSize;
-    
+
     private static HashMap<String, Integer> instructions = buildInstructions();
 
     private List<String> stackTypes;
@@ -21,22 +21,27 @@ public class MethodManager {
     private static HashMap<String, Integer> buildInstructions() {
         HashMap<String, Integer> instructionsAux = new HashMap<>();
 
-        instructionsAux.put("bipush",      +1);
-        instructionsAux.put("aload",      +1);
-        instructionsAux.put("iload",      +1);
-        instructionsAux.put("getfield",      +1);
-        instructionsAux.put("invokestatic",      +1);
-        instructionsAux.put("invokevirtual",      +1);
+        instructionsAux.put("bipush", +1);
+        instructionsAux.put("aload", +1);
+        instructionsAux.put("iload", +1);
+        instructionsAux.put("getfield", +1);
+        instructionsAux.put("invokestatic", +1);
+        instructionsAux.put("invokevirtual", +1);
 
-        instructionsAux.put("ifeq",      -2);
-        instructionsAux.put("ireturn",      -1);
-        instructionsAux.put("areturn",      -1);
+        instructionsAux.put("iadd", +1);
+        instructionsAux.put("isub", +1);
+        instructionsAux.put("imul", +1);
+        instructionsAux.put("idiv", +1);
+
+        instructionsAux.put("ifeq", -2);
+        instructionsAux.put("ireturn", -1);
+        instructionsAux.put("areturn", -1);
 
         return instructionsAux;
     }
 
-    private void updateStackType(String instruction, String type){
-        switch (instruction){
+    private void updateStackType(String instruction, String type) {
+        switch (instruction) {
             case "ifeq":
                 this.stackTypes.remove(this.stackTypes.size() - 1);
                 this.stackTypes.remove(this.stackTypes.size() - 1);
@@ -65,6 +70,18 @@ public class MethodManager {
             case "invokevirtual":
                 this.stackTypes.add(type);
                 break;
+            case "iadd":
+                this.stackTypes.add(type);
+                break;
+            case "isub":
+                this.stackTypes.add(type);
+                break;
+            case "imul":
+                this.stackTypes.add(type);
+                break;
+            case "idiv":
+                this.stackTypes.add(type);
+                break;
             default:
                 System.out.println("intruction" + instruction + " not being analised");
                 break;
@@ -72,54 +89,53 @@ public class MethodManager {
     }
 
     public void addInstruction(String instruction, String type) {
-        if(! instruction.contains(instruction)) {
+        if (!instruction.contains(instruction)) {
             return;
         }
 
         final int offset = instructions.get(instruction);
-        if(this.currentStackSize + offset < 0) {
+        if (this.currentStackSize + offset < 0) {
             System.err.println("Stack size was smaller than zero");
             return;
         }
         this.updateStackType(instruction, type);
         this.currentStackSize += offset;
 
-        if(this.maxStackSize < this.currentStackSize)
+        if (this.maxStackSize < this.currentStackSize)
             this.maxStackSize = this.currentStackSize;
 
-        
     }
 
-    public void stackPop(int numPop){
-        if(this.currentStackSize - numPop < 0) {
+    public void stackPop(int numPop) {
+        if (this.currentStackSize - numPop < 0) {
             System.err.println("Stack size was smaller than zero");
             return;
         }
 
         this.currentStackSize = this.currentStackSize - numPop;
-        for(int i = 0; i < numPop; i++){
+        for (int i = 0; i < numPop; i++) {
             this.stackTypes.remove(this.stackTypes.size() - 1);
         }
     }
 
-    public int indexOfLocal(String local){
-        for(int i = 0; i< this.locals.size(); i++)
-            if(this.locals.get(i).getName().equals(local))
+    public int indexOfLocal(String local) {
+        for (int i = 0; i < this.locals.size(); i++)
+            if (this.locals.get(i).getName().equals(local))
                 return i;
         return -1;
     }
 
-    public String typeOfLocal(String local){
-        for(int i = 0; i< this.locals.size(); i++)
-            if(this.locals.get(i).getName().equals(local))
+    public String typeOfLocal(String local) {
+        for (int i = 0; i < this.locals.size(); i++)
+            if (this.locals.get(i).getName().equals(local))
                 return this.locals.get(i).getType();
         return null;
     }
 
     public String getLastTypeInStack() {
-        if(this.stackTypes.size() == 0)
+        if (this.stackTypes.size() == 0)
             return "";
-        return this.stackTypes.get(this.stackTypes.size()-1);
+        return this.stackTypes.get(this.stackTypes.size() - 1);
     }
 
     /**
@@ -128,7 +144,7 @@ public class MethodManager {
     public List<String> getStackTypes() {
         return stackTypes;
     }
-    
+
     /**
      * @param locals the locals to set
      */

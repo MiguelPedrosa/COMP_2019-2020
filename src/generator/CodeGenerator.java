@@ -785,6 +785,9 @@ public class CodeGenerator {
 
         code = writeToString(code, "iadd\n", scope);
 
+        methodManager.stackPop(2);
+        methodManager.addInstruction("iadd", "int");
+
         return code;
     }
 
@@ -801,6 +804,9 @@ public class CodeGenerator {
         code += processMethodNodes(rightChild, scope, methodManager);
 
         code = writeToString(code, "isub\n", scope);
+
+        methodManager.stackPop(2);
+        methodManager.addInstruction("isub", "int");
 
         return code;
     }
@@ -819,6 +825,9 @@ public class CodeGenerator {
 
         code = writeToString(code, "imul\n", scope);
 
+        methodManager.stackPop(2);
+        methodManager.addInstruction("imul", "int");
+
         return code;
     }
 
@@ -835,6 +844,9 @@ public class CodeGenerator {
         code += processMethodNodes(rightChild, scope, methodManager);
 
         code = writeToString(code, "idiv\n", scope);
+
+        methodManager.stackPop(2);
+        methodManager.addInstruction("idiv", "int");
 
         return code;
     }
