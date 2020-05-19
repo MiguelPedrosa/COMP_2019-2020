@@ -876,7 +876,7 @@ public class CodeGenerator {
         code += processMethodNodes(leftChild, scope, methodManager);
         code += processMethodNodes(rightChild, scope, methodManager);
 
-        //TODO
+        //TODO: fazer um if e ou dar push de 0 ou de 1 para a stack
         /* code = writeToString(code, "if_icmpge\n", scope);
         
         methodManager.stackPop(2);
