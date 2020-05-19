@@ -345,9 +345,23 @@ public class CodeGenerator {
         final int numChildren = methodNode.jjtGetNumChildren();
         String code = "";
 
-        if (numChildren == 0)
-            return code;
+        if (numChildren == 0){
+            final String nodeType = methodNode.getClass().getSimpleName();
 
+            if(nodeType.equals("ASTLiteral"))
+                code += writeLiteral((ASTLiteral) methodNode, scope, methodManager);
+            else if(nodeType.equals("ASTIdentifier"))
+                code += writeIdentifier((ASTIdentifier) methodNode, scope, methodManager);
+            else if(nodeType.equals("ASTScope")){
+                //do nothing is scope has no childs
+            }
+            else
+                System.out.println("Node: " + nodeType + " with no childs not processed");
+                
+            return code;
+        }
+
+        
         for (int i = 0; i < numChildren; i++) {
             final SimpleNode child = (SimpleNode) methodNode.jjtGetChild(i);
             final String nodeType = child.getClass().getSimpleName();
@@ -399,6 +413,7 @@ public class CodeGenerator {
                 case "ASTNew":
                     break;
                 case "ASTLessThan":
+                    code += writeLessThanOperation((ASTLessThan) child, scope, methodManager);
                     break;
                 case "ASTLength":
                     break;
@@ -548,8 +563,6 @@ public class CodeGenerator {
         }
 
         if (isStatic) {
-            if (!this.symbolTable.getImports().get(className).hasStaticMethod(signature))
-                System.out.println("here " + className + " " + signature);
             return this.symbolTable.getImports().get(className).getStaticMethodType(signature);
         } else if (this.symbolTable.getImports().containsKey(className)) {
             return this.symbolTable.getImports().get(className).getMethodType(signature);
@@ -847,6 +860,27 @@ public class CodeGenerator {
 
         methodManager.stackPop(2);
         methodManager.addInstruction("idiv", "int");
+
+        return code;
+    }
+
+    /**
+     * Method to write "less than" (<) operation to the file
+     */
+    private String writeLessThanOperation(ASTLessThan lessThanNode, int scope, MethodManager methodManager) {
+        String code = "";
+
+        final SimpleNode leftChild = (SimpleNode) divNode.jjtGetChild(0);
+        final SimpleNode rightChild = (SimpleNode) divNode.jjtGetChild(1);
+
+        code += processMethodNodes(leftChild, scope, methodManager);
+        code += processMethodNodes(rightChild, scope, methodManager);
+
+        //TODO
+        /* code = writeToString(code, "if_icmpge\n", scope);
+        
+        methodManager.stackPop(2);
+        methodManager.addInstruction("idiv", "int"); */
 
         return code;
     }

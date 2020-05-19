@@ -14,7 +14,11 @@ class Life extends Dead{
         d = new Life();
         d.inbounds(4, 4);
         a = new Life();
-        a;
+        if(4+5 < 3){
+            a;
+        } else{
+            
+        }
     }
 
     public Life inbounds(int row, int column) {
