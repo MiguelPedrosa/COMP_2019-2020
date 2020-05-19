@@ -345,23 +345,21 @@ public class CodeGenerator {
         final int numChildren = methodNode.jjtGetNumChildren();
         String code = "";
 
-        if (numChildren == 0){
+        if (numChildren == 0) {
             final String nodeType = methodNode.getClass().getSimpleName();
 
-            if(nodeType.equals("ASTLiteral"))
+            if (nodeType.equals("ASTLiteral"))
                 code += writeLiteral((ASTLiteral) methodNode, scope, methodManager);
-            else if(nodeType.equals("ASTIdentifier"))
+            else if (nodeType.equals("ASTIdentifier"))
                 code += writeIdentifier((ASTIdentifier) methodNode, scope, methodManager);
-            else if(nodeType.equals("ASTScope")){
-                //do nothing is scope has no childs
-            }
-            else
+            else if (nodeType.equals("ASTScope")) {
+                // do nothing is scope has no childs
+            } else
                 System.out.println("Node: " + nodeType + " with no childs not processed");
-                
+
             return code;
         }
 
-        
         for (int i = 0; i < numChildren; i++) {
             final SimpleNode child = (SimpleNode) methodNode.jjtGetChild(i);
             final String nodeType = child.getClass().getSimpleName();
@@ -413,7 +411,7 @@ public class CodeGenerator {
                 case "ASTNew":
                     break;
                 case "ASTLessThan":
-                    code += writeLessThanOperation((ASTLessThan) child, scope, methodManager);
+                    // code += writeLessThanOperation((ASTLessThan) child, scope, methodManager);
                     break;
                 case "ASTLength":
                     break;
@@ -870,17 +868,18 @@ public class CodeGenerator {
     private String writeLessThanOperation(ASTLessThan lessThanNode, int scope, MethodManager methodManager) {
         String code = "";
 
-        final SimpleNode leftChild = (SimpleNode) divNode.jjtGetChild(0);
-        final SimpleNode rightChild = (SimpleNode) divNode.jjtGetChild(1);
+        final SimpleNode leftChild = (SimpleNode) lessThanNode.jjtGetChild(0);
+        final SimpleNode rightChild = (SimpleNode) lessThanNode.jjtGetChild(1);
 
         code += processMethodNodes(leftChild, scope, methodManager);
         code += processMethodNodes(rightChild, scope, methodManager);
 
-        //TODO: fazer um if e ou dar push de 0 ou de 1 para a stack
-        /* code = writeToString(code, "if_icmpge\n", scope);
-        
-        methodManager.stackPop(2);
-        methodManager.addInstruction("idiv", "int"); */
+        // TODO: fazer um if e ou dar push de 0 ou de 1 para a stack
+        /*
+         * code = writeToString(code, "if_icmpge\n", scope);
+         * 
+         * methodManager.stackPop(2); methodManager.addInstruction("idiv", "int");
+         */
 
         return code;
     }
