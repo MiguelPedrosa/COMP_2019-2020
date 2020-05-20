@@ -345,21 +345,6 @@ public class CodeGenerator {
         final int numChildren = methodNode.jjtGetNumChildren();
         String code = "";
 
-        if (numChildren == 0) {
-            final String nodeType = methodNode.getClass().getSimpleName();
-
-            if (nodeType.equals("ASTLiteral"))
-                code += writeLiteral((ASTLiteral) methodNode, scope, methodManager);
-            else if (nodeType.equals("ASTIdentifier"))
-                code += writeIdentifier((ASTIdentifier) methodNode, scope, methodManager);
-            else if (nodeType.equals("ASTScope")) {
-                // do nothing is scope has no childs
-            } else
-                System.out.println("Node: " + nodeType + " with no childs not processed");
-
-            return code;
-        }
-
         for (int i = 0; i < numChildren; i++) {
             final SimpleNode child = (SimpleNode) methodNode.jjtGetChild(i);
             final String nodeType = child.getClass().getSimpleName();
@@ -788,11 +773,7 @@ public class CodeGenerator {
     private String writePlusOperation(final ASTPlus plusNode, final int scope, final MethodManager methodManager) {
         String code = "";
 
-        final SimpleNode leftChild = (SimpleNode) plusNode.jjtGetChild(0);
-        final SimpleNode rightChild = (SimpleNode) plusNode.jjtGetChild(1);
-
-        code += processMethodNodes(leftChild, scope, methodManager);
-        code += processMethodNodes(rightChild, scope, methodManager);
+        code += processMethodNodes(plusNode, scope, methodManager);
 
         code = writeToString(code, "iadd\n", scope);
 
@@ -808,11 +789,7 @@ public class CodeGenerator {
     private String writeMinusOperation(final ASTMinus minusNode, final int scope, final MethodManager methodManager) {
         String code = "";
 
-        final SimpleNode leftChild = (SimpleNode) minusNode.jjtGetChild(0);
-        final SimpleNode rightChild = (SimpleNode) minusNode.jjtGetChild(1);
-
-        code += processMethodNodes(leftChild, scope, methodManager);
-        code += processMethodNodes(rightChild, scope, methodManager);
+        code += processMethodNodes(minusNode, scope, methodManager);
 
         code = writeToString(code, "isub\n", scope);
 
@@ -828,12 +805,7 @@ public class CodeGenerator {
     private String writeMultiOperation(final ASTTimes multiNode, final int scope, final MethodManager methodManager) {
         String code = "";
 
-        final SimpleNode leftChild = (SimpleNode) multiNode.jjtGetChild(0);
-        final SimpleNode rightChild = (SimpleNode) multiNode.jjtGetChild(1);
-
-        code += processMethodNodes(leftChild, scope, methodManager);
-        code += processMethodNodes(rightChild, scope, methodManager);
-
+        code += processMethodNodes(multiNode, scope, methodManager);
         code = writeToString(code, "imul\n", scope);
 
         methodManager.stackPop(2);
@@ -848,11 +820,7 @@ public class CodeGenerator {
     private String writeDivOperation(final ASTDividor divNode, final int scope, final MethodManager methodManager) {
         String code = "";
 
-        final SimpleNode leftChild = (SimpleNode) divNode.jjtGetChild(0);
-        final SimpleNode rightChild = (SimpleNode) divNode.jjtGetChild(1);
-
-        code += processMethodNodes(leftChild, scope, methodManager);
-        code += processMethodNodes(rightChild, scope, methodManager);
+        code += processMethodNodes(divNode, scope, methodManager);
 
         code = writeToString(code, "idiv\n", scope);
 
