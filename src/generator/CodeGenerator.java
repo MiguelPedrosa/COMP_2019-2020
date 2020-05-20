@@ -758,7 +758,7 @@ public class CodeGenerator {
         code += processMethodNodes(conditionChild, scope, methodManager);
         code = writeToString(code, "bipush 0\n", scope);
         methodManager.addInstruction("bipush", "int");
-        code = writeToString(code, "ifeq endWhile" + label + ":\n", scope);
+        code = writeToString(code, "ifeq endWhile" + label + "\n", scope);
         methodManager.addInstruction("ifeq", "");
         code += processMethodNodes(scopeChild, scope, methodManager);
         code = writeToString(code, "goto while" + label + "\n", scope);
