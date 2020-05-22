@@ -811,7 +811,12 @@ public class CodeGenerator {
     private String writeMultiOperation(final ASTTimes multiNode, final int scope, final MethodManager methodManager) {
         String code = "";
 
-        code += processMethodNodes(multiNode, scope, methodManager);
+        final SimpleNode childLeft  = multiNode.jjtGetChild(0);
+        final SimpleNode childRight = multiNode.jjtGetChild(1);
+
+        code += processMethodNodes(childLeft,  scope, methodManager);
+        code += processMethodNodes(childRight, scope, methodManager);
+
         code = writeToString(code, "imul\n", scope);
 
         methodManager.stackPop(2);
