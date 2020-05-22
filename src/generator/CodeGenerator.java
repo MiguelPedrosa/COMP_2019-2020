@@ -771,8 +771,8 @@ public class CodeGenerator {
     private String writePlusOperation(final ASTPlus plusNode, final int scope, final MethodManager methodManager) {
         String code = "";
 
-        final SimpleNode childLeft  = plusNode.jjtGetChild(0);
-        final SimpleNode childRight = plusNode.jjtGetChild(1);
+        final SimpleNode childLeft  = (SimpleNode) plusNode.jjtGetChild(0);
+        final SimpleNode childRight = (SimpleNode) plusNode.jjtGetChild(1);
 
         code += processMethodNodes(childLeft,  scope, methodManager);
         code += processMethodNodes(childRight, scope, methodManager);
@@ -791,8 +791,8 @@ public class CodeGenerator {
     private String writeMinusOperation(final ASTMinus minusNode, final int scope, final MethodManager methodManager) {
         String code = "";
 
-        final SimpleNode childLeft  = minusNode.jjtGetChild(0);
-        final SimpleNode childRight = minusNode.jjtGetChild(1);
+        final SimpleNode childLeft  = (SimpleNode) minusNode.jjtGetChild(0);
+        final SimpleNode childRight = (SimpleNode) minusNode.jjtGetChild(1);
 
         code += processMethodNodes(childLeft,  scope, methodManager);
         code += processMethodNodes(childRight, scope, methodManager);
@@ -811,8 +811,8 @@ public class CodeGenerator {
     private String writeMultiOperation(final ASTTimes multiNode, final int scope, final MethodManager methodManager) {
         String code = "";
 
-        final SimpleNode childLeft  = multiNode.jjtGetChild(0);
-        final SimpleNode childRight = multiNode.jjtGetChild(1);
+        final SimpleNode childLeft  = (SimpleNode) multiNode.jjtGetChild(0);
+        final SimpleNode childRight = (SimpleNode) multiNode.jjtGetChild(1);
 
         code += processMethodNodes(childLeft,  scope, methodManager);
         code += processMethodNodes(childRight, scope, methodManager);
@@ -831,8 +831,8 @@ public class CodeGenerator {
     private String writeDivOperation(final ASTDividor divNode, final int scope, final MethodManager methodManager) {
         String code = "";
 
-        final SimpleNode childLeft  = divNode.jjtGetChild(0);
-        final SimpleNode childRight = divNode.jjtGetChild(1);
+        final SimpleNode childLeft  = (SimpleNode) divNode.jjtGetChild(0);
+        final SimpleNode childRight = (SimpleNode) divNode.jjtGetChild(1);
 
         code += processMethodNodes(childLeft,  scope, methodManager);
         code += processMethodNodes(childRight, scope, methodManager);
