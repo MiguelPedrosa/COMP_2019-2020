@@ -341,55 +341,49 @@ public class CodeGenerator {
         endMethod(scope);
     }
 
-    private String processMethodNodes(final SimpleNode methodNode, final int scope, final MethodManager methodManager) {
-        final int numChildren = methodNode.jjtGetNumChildren();
-        String code = "";
+    private String processMethodNodes(final SimpleNode currentNode, final int scope, final MethodManager methodManager) {
 
-        for (int i = 0; i < numChildren; i++) {
-            final SimpleNode child = (SimpleNode) methodNode.jjtGetChild(i);
-            final String nodeType = child.getClass().getSimpleName();
+        String code = "";
+        final String nodeType = currentNode.getClass().getSimpleName();
 
             switch (nodeType) {
-                case "ASTScope":
-                    code += processMethodNodes(child, scope, methodManager);
-                    break;
                 case "ASTVarDeclaration":
                     // variable arlready added in locals
                     break;
                 case "ASTIF":
-                    code += writeIf((ASTIF) child, scope, methodManager);
+                    code += writeIf((ASTIF) currentNode, scope, methodManager);
                     break;
                 case "ASTWhile":
-                    code += writeWhile((ASTWhile) child, scope, methodManager);
+                    code += writeWhile((ASTWhile) currentNode, scope, methodManager);
                     break;
                 case "ASTEquals":
                     break;
                 case "ASTReturn":
-                    code += writeReturn((ASTReturn) child, scope, methodManager);
+                    code += writeReturn((ASTReturn) currentNode, scope, methodManager);
                     break;
                 case "ASTLiteral":
-                    code += writeLiteral((ASTLiteral) child, scope, methodManager);
+                    code += writeLiteral((ASTLiteral) currentNode, scope, methodManager);
                     break;
                 case "ASTFuncCall":
-                    code += writeFuncCall((ASTFuncCall) child, scope, methodManager);
+                    code += writeFuncCall((ASTFuncCall) currentNode, scope, methodManager);
                     break;
                 case "ASTIdentifier":
-                    code += writeIdentifier((ASTIdentifier) child, scope, methodManager);
+                    code += writeIdentifier((ASTIdentifier) currentNode, scope, methodManager);
                     break;
                 case "ASTExpression":
-                    code += processMethodNodes(child, scope, methodManager);
+                    code += processMethodNodes(currentNode, scope, methodManager);
                     break;
                 case "ASTPlus":
-                    code += writePlusOperation((ASTPlus) child, scope, methodManager);
+                    code += writePlusOperation((ASTPlus) currentNode, scope, methodManager);
                     break;
                 case "ASTMinus":
-                    code += writeMinusOperation((ASTMinus) child, scope, methodManager);
+                    code += writeMinusOperation((ASTMinus) currentNode, scope, methodManager);
                     break;
                 case "ASTTimes":
-                    code += writeMultiOperation((ASTTimes) child, scope, methodManager);
+                    code += writeMultiOperation((ASTTimes) currentNode, scope, methodManager);
                     break;
                 case "ASTDividor":
-                    code += writeDivOperation((ASTDividor) child, scope, methodManager);
+                    code += writeDivOperation((ASTDividor) currentNode, scope, methodManager);
                     break;
                 case "ASTNot":
                     break;
@@ -403,11 +397,15 @@ public class CodeGenerator {
                 case "ASTArrayAccess":
                     break;
                 default:
-                    System.out.println("Node not processed");
-                    code += processMethodNodes(child, scope, methodManager);
+                    System.out.println("Node not processed:" + nodeType);
+                case "ASTScope":
+                    final int numChildren = currentNode.jjtGetNumChildren();
+                    for (int i = 0; i < numChildren; i++) {
+                        final SimpleNode child = (SimpleNode) currentNode.jjtGetChild(i);
+                        code += processMethodNodes(child, scope, methodManager);
+                    }
                     break;
             }
-        }
 
         return code;
     }
@@ -773,7 +771,11 @@ public class CodeGenerator {
     private String writePlusOperation(final ASTPlus plusNode, final int scope, final MethodManager methodManager) {
         String code = "";
 
-        code += processMethodNodes(plusNode, scope, methodManager);
+        final SimpleNode childLeft  = plusNode.jjtGetChild(0);
+        final SimpleNode childRight = plusNode.jjtGetChild(1);
+
+        code += processMethodNodes(childLeft,  scope, methodManager);
+        code += processMethodNodes(childRight, scope, methodManager);
 
         code = writeToString(code, "iadd\n", scope);
 
@@ -789,7 +791,11 @@ public class CodeGenerator {
     private String writeMinusOperation(final ASTMinus minusNode, final int scope, final MethodManager methodManager) {
         String code = "";
 
-        code += processMethodNodes(minusNode, scope, methodManager);
+        final SimpleNode childLeft  = minusNode.jjtGetChild(0);
+        final SimpleNode childRight = minusNode.jjtGetChild(1);
+
+        code += processMethodNodes(childLeft,  scope, methodManager);
+        code += processMethodNodes(childRight, scope, methodManager);
 
         code = writeToString(code, "isub\n", scope);
 
