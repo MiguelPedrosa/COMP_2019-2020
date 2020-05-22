@@ -831,7 +831,11 @@ public class CodeGenerator {
     private String writeDivOperation(final ASTDividor divNode, final int scope, final MethodManager methodManager) {
         String code = "";
 
-        code += processMethodNodes(divNode, scope, methodManager);
+        final SimpleNode childLeft  = divNode.jjtGetChild(0);
+        final SimpleNode childRight = divNode.jjtGetChild(1);
+
+        code += processMethodNodes(childLeft,  scope, methodManager);
+        code += processMethodNodes(childRight, scope, methodManager);
 
         code = writeToString(code, "idiv\n", scope);
 
