@@ -341,71 +341,72 @@ public class CodeGenerator {
         endMethod(scope);
     }
 
-    private String processMethodNodes(final SimpleNode currentNode, final int scope, final MethodManager methodManager) {
+    private String processMethodNodes(final SimpleNode currentNode, final int scope,
+            final MethodManager methodManager) {
 
         String code = "";
         final String nodeType = currentNode.getClass().getSimpleName();
 
-            switch (nodeType) {
-                case "ASTVarDeclaration":
-                    // variable arlready added in locals
-                    break;
-                case "ASTIF":
-                    code += writeIf((ASTIF) currentNode, scope, methodManager);
-                    break;
-                case "ASTWhile":
-                    code += writeWhile((ASTWhile) currentNode, scope, methodManager);
-                    break;
-                case "ASTEquals":
-                    break;
-                case "ASTReturn":
-                    code += writeReturn((ASTReturn) currentNode, scope, methodManager);
-                    break;
-                case "ASTLiteral":
-                    code += writeLiteral((ASTLiteral) currentNode, scope, methodManager);
-                    break;
-                case "ASTFuncCall":
-                    code += writeFuncCall((ASTFuncCall) currentNode, scope, methodManager);
-                    break;
-                case "ASTIdentifier":
-                    code += writeIdentifier((ASTIdentifier) currentNode, scope, methodManager);
-                    break;
-                case "ASTExpression":
-                    code += processMethodNodes(currentNode, scope, methodManager);
-                    break;
-                case "ASTPlus":
-                    code += writePlusOperation((ASTPlus) currentNode, scope, methodManager);
-                    break;
-                case "ASTMinus":
-                    code += writeMinusOperation((ASTMinus) currentNode, scope, methodManager);
-                    break;
-                case "ASTTimes":
-                    code += writeMultiOperation((ASTTimes) currentNode, scope, methodManager);
-                    break;
-                case "ASTDividor":
-                    code += writeDivOperation((ASTDividor) currentNode, scope, methodManager);
-                    break;
-                case "ASTNot":
-                    break;
-                case "ASTNew":
-                    break;
-                case "ASTLessThan":
-                    // code += writeLessThanOperation((ASTLessThan) child, scope, methodManager);
-                    break;
-                case "ASTLength":
-                    break;
-                case "ASTArrayAccess":
-                    break;
-                default:
-                    System.out.println("Node not processed:" + nodeType);
-                case "ASTScope":
-                    final int numChildren = currentNode.jjtGetNumChildren();
-                    for (int i = 0; i < numChildren; i++) {
-                        final SimpleNode child = (SimpleNode) currentNode.jjtGetChild(i);
-                        code += processMethodNodes(child, scope, methodManager);
-                    }
-                    break;
-            }
+        switch (nodeType) {
+            case "ASTVarDeclaration":
+                // variable arlready added in locals
+                break;
+            case "ASTIF":
+                code += writeIf((ASTIF) currentNode, scope, methodManager);
+                break;
+            case "ASTWhile":
+                code += writeWhile((ASTWhile) currentNode, scope, methodManager);
+                break;
+            case "ASTEquals":
+                break;
+            case "ASTReturn":
+                code += writeReturn((ASTReturn) currentNode, scope, methodManager);
+                break;
+            case "ASTLiteral":
+                code += writeLiteral((ASTLiteral) currentNode, scope, methodManager);
+                break;
+            case "ASTFuncCall":
+                code += writeFuncCall((ASTFuncCall) currentNode, scope, methodManager);
+                break;
+            case "ASTIdentifier":
+                code += writeIdentifier((ASTIdentifier) currentNode, scope, methodManager);
+                break;
+            case "ASTExpression":
+                code += processMethodNodes(currentNode, scope, methodManager);
+                break;
+            case "ASTPlus":
+                code += writePlusOperation((ASTPlus) currentNode, scope, methodManager);
+                break;
+            case "ASTMinus":
+                code += writeMinusOperation((ASTMinus) currentNode, scope, methodManager);
+                break;
+            case "ASTTimes":
+                code += writeMultiOperation((ASTTimes) currentNode, scope, methodManager);
+                break;
+            case "ASTDividor":
+                code += writeDivOperation((ASTDividor) currentNode, scope, methodManager);
+                break;
+            case "ASTNot":
+                break;
+            case "ASTNew":
+                break;
+            case "ASTLessThan":
+                // code += writeLessThanOperation((ASTLessThan) child, scope, methodManager);
+                break;
+            case "ASTLength":
+                break;
+            case "ASTArrayAccess":
+                break;
+            default:
+                System.out.println("Node not processed:" + nodeType);
+            case "ASTScope":
+                final int numChildren = currentNode.jjtGetNumChildren();
+                for (int i = 0; i < numChildren; i++) {
+                    final SimpleNode child = (SimpleNode) currentNode.jjtGetChild(i);
+                    code += processMethodNodes(child, scope, methodManager);
+                }
+                break;
+        }
 
         return code;
     }
