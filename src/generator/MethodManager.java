@@ -33,8 +33,10 @@ public class MethodManager {
         instructionsAux.put("imul", +1);
         instructionsAux.put("idiv", +1);
 
-        instructionsAux.put("ifeq", -2);
+        instructionsAux.put("iaload", +1);
         instructionsAux.put("dcmp", +1);
+
+        instructionsAux.put("ifeq", -2);
         instructionsAux.put("ireturn", -1);
         instructionsAux.put("areturn", -1);
 
@@ -84,6 +86,9 @@ public class MethodManager {
                 this.stackTypes.add(type);
                 break;
             case "dcmp":
+                this.stackTypes.add(type);
+                break;
+            case "iaload":
                 this.stackTypes.add(type);
                 break;
             default:
