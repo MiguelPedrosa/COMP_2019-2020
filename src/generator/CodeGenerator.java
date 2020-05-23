@@ -313,7 +313,13 @@ public class CodeGenerator {
 
         methodManager.setLocals(locals);
 
-        final String code = processMethodNodes(methodNode, scope + 1, methodManager);
+        String code = "";
+
+        final int numChildren = methodNode.jjtGetNumChildren();
+        for (int i = 0; i < numChildren; i++) {
+            final SimpleNode child = (SimpleNode) methodNode.jjtGetChild(i);
+            code += processMethodNodes(child, scope +1, methodManager);
+        }
 
         writeStack(methodManager.getMaxStackSize(), scope + 1);
         writeLocals(locals.size(), scope + 1);
@@ -331,7 +337,13 @@ public class CodeGenerator {
 
         methodManager.setLocals(locals);
 
-        final String code = processMethodNodes(mainMethodNode, scope + 1, methodManager);
+        String code = "";
+
+        final int numChildren = mainMethodNode.jjtGetNumChildren();
+        for (int i = 0; i < numChildren; i++) {
+            final SimpleNode child = (SimpleNode) mainMethodNode.jjtGetChild(i);
+            code += processMethodNodes(child, scope +1, methodManager);
+        }
 
         writeStack(methodManager.getMaxStackSize(), scope + 1);
         writeLocals(locals.size(), scope + 1);
@@ -372,7 +384,8 @@ public class CodeGenerator {
                 code += writeIdentifier((ASTIdentifier) currentNode, scope, methodManager);
                 break;
             case "ASTExpression":
-                code += processMethodNodes(currentNode, scope, methodManager);
+                final SimpleNode expressionChild = (SimpleNode) currentNode.jjtGetChild(0);
+                code += processMethodNodes(expressionChild, scope, methodManager);
                 break;
             case "ASTPlus":
                 code += writePlusOperation((ASTPlus) currentNode, scope, methodManager);
@@ -391,11 +404,12 @@ public class CodeGenerator {
             case "ASTNew":
                 break;
             case "ASTLessThan":
-                // code += writeLessThanOperation((ASTLessThan) child, scope, methodManager);
+                code += writeLessThanOperation((ASTLessThan) currentNode, scope, methodManager);
                 break;
-            case "ASTLength":
+                case "ASTLength":
                 break;
             case "ASTArrayAccess":
+                code += writeArrayAccess((ASTArrayAccess) currentNode, scope, methodManager);
                 break;
             default:
                 System.out.println("Node not processed:" + nodeType);
@@ -426,10 +440,6 @@ public class CodeGenerator {
     private void writeClassField(final ASTVarDeclaration varDecNode, final int scope, final SymbolTable scopeTable) {
         final String type = transformType(varDecNode.getType());
         writeCode(".field " + varDecNode.getVarId() + " " + type + "\n", scope);
-    }
-
-    private void writeNewLine() {
-
     }
 
     private String writeFuncCall(final ASTFuncCall funcCallNode, final int scope, final MethodManager methodManager) {
@@ -640,6 +650,14 @@ public class CodeGenerator {
         } else {
             code = writeToString(code, "areturn\n", scope);
         }
+
+        return code;
+    }
+
+    private String writeArrayAccess(final ASTArrayAccess identifierNode, final int scope,
+        final MethodManager methodManager) {
+
+        String code = "";
 
         return code;
     }
@@ -855,16 +873,20 @@ public class CodeGenerator {
         final SimpleNode leftChild = (SimpleNode) lessThanNode.jjtGetChild(0);
         final SimpleNode rightChild = (SimpleNode) lessThanNode.jjtGetChild(1);
 
-        code += processMethodNodes(leftChild, scope, methodManager);
+        // Child order is inverted because dcmp requires it to work 
+        // as intended with a < operation
+        // Convertion to double is done so that a compare instruction can be
+        // used and result of operation is a single value on the stack
         code += processMethodNodes(rightChild, scope, methodManager);
+        code = writeToString(code, "i2d\n", scope);
 
-        // TODO: fazer um if e ou dar push de 0 ou de 1 para a stack
-        /*
-         * code = writeToString(code, "if_icmpge\n", scope);
-         * 
-         * methodManager.stackPop(2); methodManager.addInstruction("idiv", "int");
-         */
+        code += processMethodNodes(leftChild, scope, methodManager);
+        code = writeToString(code, "i2d\n", scope);
 
+        code = writeToString(code, "dcmp\n", scope);
+
+        methodManager.stackPop(2);
+        methodManager.addInstruction("dcmp", "boolean");
         return code;
     }
 
