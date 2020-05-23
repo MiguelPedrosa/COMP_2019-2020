@@ -473,7 +473,7 @@ public class SemanticAnalyser {
             if (childType != null && this.isArrayType(childType))
                 type = intType;
             else
-                ErrorHandler.addError("Final variable legnth is undefined.", expression.getLine());
+                ErrorHandler.addError("Lenght was called on a none array object.", expression.getLine());
         }
 
         else if (expression instanceof ASTNot) {
