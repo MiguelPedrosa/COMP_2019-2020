@@ -370,6 +370,7 @@ public class CodeGenerator {
                 code += writeWhile((ASTWhile) currentNode, scope, methodManager);
                 break;
             case "ASTEquals":
+                code += writeEquals((ASTEquals) currentNode, scope, methodManager);
                 break;
             case "ASTReturn":
                 code += writeReturn((ASTReturn) currentNode, scope, methodManager);
@@ -562,14 +563,32 @@ public class CodeGenerator {
             signature += ";" + arg;
         }
 
-
-        if (isStatic) {
-            return this.symbolTable.getImports().get(className).getStaticMethodType(signature);
-        } else if (this.symbolTable.getImports().containsKey(className)) {
-            return this.symbolTable.getImports().get(className).getMethodType(signature);
+        if(this.symbolTable.containsMethod(signature)) {
+            return this.symbolTable.getMethodReturn(signature);
         }
 
-        return this.symbolTable.getMethodReturn(signature);
+        if(this.symbolTable.getImports().containsKey(className)) {
+            if (isStatic) {
+                return this.symbolTable.getImports().get(className).getStaticMethodType(signature);
+            } else {
+                return this.symbolTable.getImports().get(className).getMethodType(signature);
+            }
+        }
+
+        if(this.symbolTable.getClasseName().equals(className)) {
+            className = this.symbolTable.getClassExtendsName();
+
+            if(this.symbolTable.getImports().containsKey(className)) {
+                if (isStatic) {
+                    return this.symbolTable.getImports().get(className).getStaticMethodType(signature);
+                } else {
+                    return this.symbolTable.getImports().get(className).getMethodType(signature);
+                }
+            }
+        }
+
+        System.err.printf("Unexcepted branch execution on getFuncReturnType\n");
+        return null;
     }
 
     /**
@@ -621,11 +640,17 @@ public class CodeGenerator {
             }
 
         }
+        // Optimization :)
+        String indexForInstruction = " ";
+        if(localIndex >= 0 && localIndex <= 3)
+            indexForInstruction = "_";
+        indexForInstruction += localIndex;
+
         if (type.equals("int")) {
-            code = writeToString(code, "iload " + localIndex + "\n", scope);
+            code = writeToString(code, "iload" + indexForInstruction + "\n", scope);
             methodManager.addInstruction("iload", type);
         } else {
-            code = writeToString(code, "aload " + localIndex + "\n", scope);
+            code = writeToString(code, "aload" + indexForInstruction + "\n", scope);
             methodManager.addInstruction("aload", type);
         }
 
@@ -713,11 +738,70 @@ public class CodeGenerator {
             return code;
         }
         if (type.equals("int")) {
-            code = writeToString(code, "iload " + localIndex + "\n", scope);
+            code = writeToString(code, "iload_" + localIndex + "\n", scope);
             methodManager.addInstruction("iload", type);
         } else {
-            code = writeToString(code, "aload " + localIndex + "\n", scope);
+            code = writeToString(code, "aload_" + localIndex + "\n", scope);
             methodManager.addInstruction("aload", type);
+        }
+
+        return code;
+    }
+
+    /**
+     * Method to write equals to the file
+     */
+    private String writeEquals(final ASTEquals equalsNode, final int scope,
+            final MethodManager methodManager) {
+        String code = "";
+
+        final SimpleNode childLeft  = (SimpleNode) equalsNode.jjtGetChild(0);
+        final SimpleNode childRight = (SimpleNode) equalsNode.jjtGetChild(1);
+                
+        // Store value in non-array variable
+        if(childLeft instanceof ASTIdentifier) {
+
+            code += processMethodNodes(childRight,  scope, methodManager);
+
+            final String identifier = ((ASTIdentifier) childLeft).getIdentifier();
+            final int localIndex = methodManager.indexOfLocal(identifier);
+            String type = methodManager.typeOfLocal(identifier);
+
+            if (type == null) {
+
+                type = this.symbolTable.getVariableType(identifier);
+    
+                code = writeToString(code, "putfield " + this.symbolTable.getClasseName() + "/" + identifier + " "
+                        + transformType(type) + "\n", scope);
+                methodManager.addInstruction("putfield", type);
+    
+                return code;
+            }
+            if (type.equals("int")) {
+                code = writeToString(code, "istore " + localIndex + "\n", scope);
+                methodManager.addInstruction("istore", type);
+            } else {
+                code = writeToString(code, "astore " + localIndex + "\n", scope);
+                methodManager.addInstruction("astore", type);
+            }
+        } else { // Store value in array variable
+            final SimpleNode arrayName  = (SimpleNode) childLeft.jjtGetChild(0);
+            final SimpleNode arrayIndex = (SimpleNode) childLeft.jjtGetChild(1);
+
+            code += processMethodNodes(arrayName,  scope, methodManager);
+            final String arrayType = methodManager.getLastTypeInStack();
+            final String simpleArrayType = methodManager.getSimpleArrayType(arrayType);
+            code += processMethodNodes(arrayIndex, scope, methodManager);
+            // In arrays, new value is at the top of the stack
+            code += processMethodNodes(childRight,  scope, methodManager);
+
+            if (simpleArrayType.equals("int")) {
+                code = writeToString(code, "iastore " + "\n", scope);
+                methodManager.addInstruction("iastore", simpleArrayType);
+            } else {
+                code = writeToString(code, "aastore " + "\n", scope);
+                methodManager.addInstruction("aastore", simpleArrayType);
+            }
         }
 
         return code;
@@ -743,12 +827,18 @@ public class CodeGenerator {
                 methodManager.addInstruction("bipush", "boolean");
                 break;
             case "this":
-                code = writeToString(code, "aload 0 \n", scope);
+                code = writeToString(code, "aload_0 \n", scope);
                 methodManager.addInstruction("aload", this.symbolTable.getClasseName());
                 break;
             default:
                 stackLiteral = Integer.parseInt(literal);
-                code = writeToString(code, "bipush " + stackLiteral + "\n", scope);
+                if(stackLiteral >= 0 && stackLiteral <= 5) {
+                    code = writeToString(code, "iconst_" + stackLiteral + "\n", scope);
+                } else if(stackLiteral == -1) {
+                    code = writeToString(code, "iconst_m1\n", scope);
+                } else {
+                    code = writeToString(code, "bipush " + stackLiteral + "\n", scope);
+                }
                 methodManager.addInstruction("bipush", "int");
                 break;
         }
@@ -899,15 +989,15 @@ public class CodeGenerator {
         // Convertion to double is done so that a compare instruction can be
         // used and result of operation is a single value on the stack
         code += processMethodNodes(rightChild, scope, methodManager);
-        code = writeToString(code, "i2d\n", scope);
+        code = writeToString(code, "i2l\n", scope);
 
         code += processMethodNodes(leftChild, scope, methodManager);
-        code = writeToString(code, "i2d\n", scope);
+        code = writeToString(code, "i2l\n", scope);
 
-        code = writeToString(code, "dcmp\n", scope);
+        code = writeToString(code, "lcmp\n", scope);
 
         methodManager.stackPop(2);
-        methodManager.addInstruction("dcmp", "boolean");
+        methodManager.addInstruction("lcmp", "boolean");
         return code;
     }
 
