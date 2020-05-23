@@ -35,6 +35,7 @@ public class MethodManager {
         instructionsAux.put("iand", +1);
         instructionsAux.put("iconst", +1);
 
+        instructionsAux.put("aaload", +1);
         instructionsAux.put("iaload", +1);
         instructionsAux.put("dcmp", +1);
         
@@ -69,6 +70,7 @@ public class MethodManager {
             case "idiv":
             case "dcmp":
             case "iaload":
+            case "aaload":
             case "iand":
             case "iconst":
                 this.stackTypes.add(type);
@@ -128,6 +130,20 @@ public class MethodManager {
         if (this.stackTypes.size() == 0)
             return "";
         return this.stackTypes.get(this.stackTypes.size() - 1);
+    }
+
+    public String getSimpleArrayType(String ArrayType) {
+        String result = "";
+
+        for (int i = 0; i < ArrayType.length(); i++) {
+            if (ArrayType.charAt(i) == '[') {
+                break;
+            } else {
+                result += ArrayType.charAt(i);
+            }
+        }
+
+        return result;
     }
 
     /**
