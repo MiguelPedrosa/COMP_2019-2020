@@ -411,6 +411,7 @@ public class CodeGenerator {
                 code += writeLessThanOperation((ASTLessThan) currentNode, scope, methodManager);
                 break;
             case "ASTLength":
+                code += writeLengthOperation((ASTLength) currentNode, scope, methodManager);
                 break;
             case "ASTArrayAccess":
                 code += writeArrayAccess((ASTArrayAccess) currentNode, scope, methodManager);
@@ -941,6 +942,24 @@ public class CodeGenerator {
 
         methodManager.stackPop(1);
         methodManager.addInstruction("iconst", "boolean");
+
+        return code;
+    }
+
+    /**
+     * Method to write "length" array operator to the file
+     */
+    private String writeLengthOperation(final ASTLength lengthNode, final int scope, final MethodManager methodManager) {
+        String code = "";
+
+        final SimpleNode child  = (SimpleNode) lengthNode.jjtGetChild(0);
+
+        code += processMethodNodes(child,  scope, methodManager);
+
+        code = writeToString(code, "arraylength\n", scope);
+
+        methodManager.stackPop(1);
+        methodManager.addInstruction("arraylength", "int");
 
         return code;
     }
