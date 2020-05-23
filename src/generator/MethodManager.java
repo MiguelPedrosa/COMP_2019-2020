@@ -34,6 +34,7 @@ public class MethodManager {
         instructionsAux.put("idiv", +1);
 
         instructionsAux.put("ifeq", -2);
+        instructionsAux.put("dcmp", +1);
         instructionsAux.put("ireturn", -1);
         instructionsAux.put("areturn", -1);
 
@@ -82,6 +83,9 @@ public class MethodManager {
             case "idiv":
                 this.stackTypes.add(type);
                 break;
+            case "dcmp":
+                this.stackTypes.add(type);
+                break;
             default:
                 System.out.println("intruction" + instruction + " not being analised");
                 break;
@@ -89,7 +93,8 @@ public class MethodManager {
     }
 
     public void addInstruction(String instruction, String type) {
-        if (!instruction.contains(instruction)) {
+        if (!instructions.containsKey(instruction)) {
+            System.err.printf("Forgot to add instruction %s\n", instruction);
             return;
         }
 
