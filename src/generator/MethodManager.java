@@ -37,6 +37,8 @@ public class MethodManager {
 
         instructionsAux.put("iaload", +1);
         instructionsAux.put("dcmp", +1);
+        
+        instructionsAux.put("arraylength", +1);
 
         instructionsAux.put("ifgt", -1);
         instructionsAux.put("ifle", -1);
@@ -50,53 +52,24 @@ public class MethodManager {
         switch (instruction) {
             case "ifgt":
             case "ifle":
-                this.stackTypes.remove(this.stackTypes.size() - 1);
-                break;
-            case "bipush":
-                this.stackTypes.add(type);
-                break;
-            case "aload":
-                this.stackTypes.add(type);
-                break;
-            case "iload":
-                this.stackTypes.add(type);
-                break;
             case "ireturn":
-                this.stackTypes.remove(this.stackTypes.size() - 1);
-                break;
             case "areturn":
                 this.stackTypes.remove(this.stackTypes.size() - 1);
                 break;
+            case "bipush":
+            case "arraylength":
+            case "aload":
+            case "iload":
             case "getfield":
-                this.stackTypes.add(type);
-                break;
             case "invokestatic":
-                this.stackTypes.add(type);
-                break;
             case "invokevirtual":
-                this.stackTypes.add(type);
-                break;
             case "iadd":
-                this.stackTypes.add(type);
-                break;
             case "isub":
-                this.stackTypes.add(type);
-                break;
             case "imul":
-                this.stackTypes.add(type);
-                break;
             case "idiv":
-                this.stackTypes.add(type);
-                break;
             case "dcmp":
-                this.stackTypes.add(type);
-                break;
             case "iaload":
-                this.stackTypes.add(type);
-                break;
             case "iand":
-                this.stackTypes.add(type);
-                break;
             case "iconst":
                 this.stackTypes.add(type);
                 break;
