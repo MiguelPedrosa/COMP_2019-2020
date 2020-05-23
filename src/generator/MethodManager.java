@@ -37,15 +37,21 @@ public class MethodManager {
 
         instructionsAux.put("aaload", +1);
         instructionsAux.put("iaload", +1);
-        instructionsAux.put("dcmp", +1);
+        instructionsAux.put("lcmp", +1);
         
         instructionsAux.put("arraylength", +1);
         instructionsAux.put("new", +1);
+        instructionsAux.put("newarray", +1);
 
         instructionsAux.put("ifgt", -1);
         instructionsAux.put("ifle", -1);
         instructionsAux.put("ireturn", -1);
         instructionsAux.put("areturn", -1);
+
+        instructionsAux.put("astore", -1);
+        instructionsAux.put("istore", -1);
+        instructionsAux.put("aastore", -3);
+        instructionsAux.put("iastore", -3);
 
         return instructionsAux;
     }
@@ -56,6 +62,14 @@ public class MethodManager {
             case "ifle":
             case "ireturn":
             case "areturn":
+            case "astore":
+            case "istore":
+                this.stackTypes.remove(this.stackTypes.size() - 1);
+                break;
+            case "iastore":
+            case "aastore":
+                this.stackTypes.remove(this.stackTypes.size() - 1);
+                this.stackTypes.remove(this.stackTypes.size() - 1);
                 this.stackTypes.remove(this.stackTypes.size() - 1);
                 break;
             case "bipush":
@@ -69,12 +83,13 @@ public class MethodManager {
             case "isub":
             case "imul":
             case "idiv":
-            case "dcmp":
+            case "lcmp":
             case "iaload":
             case "aaload":
             case "iand":
             case "iconst":
             case "new":
+            case "newarray":
                 this.stackTypes.add(type);
                 break;
             default:
