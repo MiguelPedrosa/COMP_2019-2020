@@ -478,6 +478,7 @@ public class CodeGenerator {
                 for (int i = 0; i < argsTypes.size(); i++)
                     args += this.transformType(argsTypes.get(i));
 
+                
                 returnType = this.getFuncReturnType(argsTypes, className, methodName, true);
 
                 codeLine = "invokestatic " + className + "/" + methodName + "(" + args + ")"
@@ -490,7 +491,6 @@ public class CodeGenerator {
             }
             // variable
             else if (list.size() == 1) {
-                System.out.printf("List[0] = %s\n", list.get(0));
                 code += list.get(0);
                 String codeLine;
                 String className = methodManager.getLastTypeInStack();
@@ -516,8 +516,9 @@ public class CodeGenerator {
                         + this.transformType(returnType) + "\n";
                 code = writeToString(code, codeLine, scope);
 
-                methodManager.stackPop(numberArgs);
+                methodManager.stackPop(numberArgs + 1);
                 methodManager.addInstruction("invokevirtual", returnType);
+
             }
         } else {
             code += processMethodNodes(firstChild, scope, methodManager);
@@ -545,7 +546,7 @@ public class CodeGenerator {
                     + this.transformType(returnType) + "\n";
             code = writeToString(code, codeLine, scope);
 
-            methodManager.stackPop(numberArgs);
+            methodManager.stackPop(numberArgs + 1);
             methodManager.addInstruction("invokevirtual", returnType);
         }
 
@@ -561,7 +562,6 @@ public class CodeGenerator {
             signature += ";" + arg;
         }
 
-        System.out.printf("args=%s\nclassName=%s\nmethodName=%s\n", argsTypes, className, methodName);
 
         if (isStatic) {
             return this.symbolTable.getImports().get(className).getStaticMethodType(signature);
@@ -584,8 +584,6 @@ public class CodeGenerator {
             SimpleNode childNode = (SimpleNode) argsNode.jjtGetChild(i);
             code += this.processMethodNodes(childNode, scope, methodManager);
         }
-
-System.out.println("Code:\n" + code + "End code\n");
 
         return code;
     }
@@ -610,7 +608,6 @@ System.out.println("Code:\n" + code + "End code\n");
                 // TODO: when array change for arrays instead of fields? prof example
                 type = this.symbolTable.getVariableType(identifier);
 
-                // ???? aload0 antes ????
                 code = writeToString(code, "getfield " + this.symbolTable.getClasseName() + "/" + identifier + " "
                         + transformType(type) + "\n", scope);
                 methodManager.addInstruction("getfield", type);
