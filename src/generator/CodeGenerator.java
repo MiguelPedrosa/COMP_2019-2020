@@ -654,10 +654,20 @@ public class CodeGenerator {
         return code;
     }
 
-    private String writeArrayAccess(final ASTArrayAccess identifierNode, final int scope,
+    private String writeArrayAccess(final ASTArrayAccess arrayNode, final int scope,
         final MethodManager methodManager) {
 
         String code = "";
+
+        final SimpleNode arrayNodeName  = (SimpleNode) arrayNode.jjtGetChild(0);
+        final SimpleNode arrayNodeIndex = (SimpleNode) arrayNode.jjtGetChild(1);
+
+        processMethodNodes(arrayNodeName,  scope, methodManager);
+        processMethodNodes(arrayNodeIndex, scope, methodManager);
+
+        code = writeToString(code, "iaload\n", scope);
+        methodManager.stackPop(2);
+        methodManager.addInstruction("iaload", "int");
 
         return code;
     }
