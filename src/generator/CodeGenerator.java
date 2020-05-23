@@ -305,7 +305,7 @@ public class CodeGenerator {
             argsInJasmin = argsInJasmin.concat(argType);
         }
 
-        writeCode("\n.method public static " + methodName + "(" + argsInJasmin + ")" + methodType + "\n", scope);
+        writeCode("\n.method public " + methodName + "(" + argsInJasmin + ")" + methodType + "\n", scope);
 
         final String methodKey = methodNode.getMethodKey();
         final MethodManager methodManager = new MethodManager();
@@ -400,13 +400,17 @@ public class CodeGenerator {
                 code += writeDivOperation((ASTDividor) currentNode, scope, methodManager);
                 break;
             case "ASTNot":
+                code += writeNotOperation((ASTNot) currentNode, scope, methodManager);
                 break;
             case "ASTNew":
+                break;
+            case "ASTAnd":
+                code += writeAndOperation((ASTAnd) currentNode, scope, methodManager);
                 break;
             case "ASTLessThan":
                 code += writeLessThanOperation((ASTLessThan) currentNode, scope, methodManager);
                 break;
-                case "ASTLength":
+            case "ASTLength":
                 break;
             case "ASTArrayAccess":
                 code += writeArrayAccess((ASTArrayAccess) currentNode, scope, methodManager);
@@ -755,10 +759,8 @@ public class CodeGenerator {
         final SimpleNode elseScope = (SimpleNode) ifNode.jjtGetChild(2);
 
         code += processMethodNodes(conditionChild, scope, methodManager);
-        code = writeToString(code, "bipush 1\n", scope);
-        methodManager.addInstruction("bipush", "int");
-        code = writeToString(code, "ifeq correct" + label + "\n", scope);
-        methodManager.addInstruction("ifeq", "");
+        code = writeToString(code, "ifgt correct" + label + "\n", scope);
+        methodManager.addInstruction("ifgt", "");
         code += processMethodNodes(elseScope, scope, methodManager);
         code = writeToString(code, "goto endIf" + label + "\n", scope);
         code = writeToString(code, "correct" + label + ":\n", 0);
@@ -783,10 +785,8 @@ public class CodeGenerator {
 
         code = writeToString(code, "while" + label + ":\n", 0);
         code += processMethodNodes(conditionChild, scope, methodManager);
-        code = writeToString(code, "bipush 0\n", scope);
-        methodManager.addInstruction("bipush", "int");
-        code = writeToString(code, "ifeq endWhile" + label + "\n", scope);
-        methodManager.addInstruction("ifeq", "");
+        code = writeToString(code, "ifle endWhile" + label + "\n", scope);
+        methodManager.addInstruction("ifle", "");
         code += processMethodNodes(scopeChild, scope, methodManager);
         code = writeToString(code, "goto while" + label + "\n", scope);
         code = writeToString(code, "endWhile" + label + ":\n", 0);
@@ -897,6 +897,51 @@ public class CodeGenerator {
 
         methodManager.stackPop(2);
         methodManager.addInstruction("dcmp", "boolean");
+        return code;
+    }
+
+    /**
+     * Method to write "and" (&&) operation to the file
+     */
+    private String writeAndOperation(final ASTAnd andNode, final int scope, final MethodManager methodManager) {
+        String code = "";
+
+        final SimpleNode childLeft  = (SimpleNode) andNode.jjtGetChild(0);
+        final SimpleNode childRight = (SimpleNode) andNode.jjtGetChild(1);
+
+        code += processMethodNodes(childLeft,  scope, methodManager);
+        code += processMethodNodes(childRight, scope, methodManager);
+
+        code = writeToString(code, "iand\n", scope);
+
+        methodManager.stackPop(2);
+        methodManager.addInstruction("iand", "boolean");
+
+        return code;
+    }
+
+    /**
+     * Method to write "not" (!) operation to the file
+     */
+    private String writeNotOperation(final ASTNot notNode, final int scope, final MethodManager methodManager) {
+        String code = "";
+        final String notLabel = "not" + this.labelCounter;
+        final String endLabel = "endNot" + this.labelCounter;
+        this.labelCounter++;
+
+        final SimpleNode child  = (SimpleNode) notNode.jjtGetChild(0);
+
+        code += processMethodNodes(child,  scope, methodManager);
+        code = writeToString(code, "ifgt " + notLabel + "\n", scope);
+        code = writeToString(code, "iconst_1\n", scope);
+        code = writeToString(code, "goto " + endLabel + "\n", scope);
+        code = writeToString(code, notLabel + ":\n", 0);
+        code = writeToString(code, "iconst_0\n", scope);
+        code = writeToString(code, endLabel + ":\n", 0);
+
+        methodManager.stackPop(1);
+        methodManager.addInstruction("iconst", "boolean");
+
         return code;
     }
 
