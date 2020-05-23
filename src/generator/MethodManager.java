@@ -40,6 +40,7 @@ public class MethodManager {
         instructionsAux.put("dcmp", +1);
         
         instructionsAux.put("arraylength", +1);
+        instructionsAux.put("new", +1);
 
         instructionsAux.put("ifgt", -1);
         instructionsAux.put("ifle", -1);
@@ -73,6 +74,7 @@ public class MethodManager {
             case "aaload":
             case "iand":
             case "iconst":
+            case "new":
                 this.stackTypes.add(type);
                 break;
             default:

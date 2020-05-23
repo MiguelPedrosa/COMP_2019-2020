@@ -403,6 +403,7 @@ public class CodeGenerator {
                 code += writeNotOperation((ASTNot) currentNode, scope, methodManager);
                 break;
             case "ASTNew":
+                code += writeNewOperation((ASTNew) currentNode, scope, methodManager);
                 break;
             case "ASTAnd":
                 code += writeAndOperation((ASTAnd) currentNode, scope, methodManager);
@@ -489,6 +490,7 @@ public class CodeGenerator {
             }
             // variable
             else if (list.size() == 1) {
+                System.out.printf("List[0] = %s\n", list.get(0));
                 code += list.get(0);
                 String codeLine;
                 String className = methodManager.getLastTypeInStack();
@@ -559,6 +561,8 @@ public class CodeGenerator {
             signature += ";" + arg;
         }
 
+        System.out.printf("args=%s\nclassName=%s\nmethodName=%s\n", argsTypes, className, methodName);
+
         if (isStatic) {
             return this.symbolTable.getImports().get(className).getStaticMethodType(signature);
         } else if (this.symbolTable.getImports().containsKey(className)) {
@@ -581,6 +585,8 @@ public class CodeGenerator {
             code += this.processMethodNodes(childNode, scope, methodManager);
         }
 
+System.out.println("Code:\n" + code + "End code\n");
+
         return code;
     }
 
@@ -599,7 +605,6 @@ public class CodeGenerator {
         String type = methodManager.typeOfLocal(identifier);
 
         if (type == null) {
-
             if (this.symbolTable.containsVariable(identifier)) {
                 // TODO: check if group agree with code
                 // TODO: when array change for arrays instead of fields? prof example
@@ -968,6 +973,32 @@ public class CodeGenerator {
 
         methodManager.stackPop(1);
         methodManager.addInstruction("arraylength", "int");
+
+        return code;
+    }
+
+    /**
+     * Method to write "new" operation to the file
+     */
+    private String writeNewOperation(final ASTNew newNode, final int scope, final MethodManager methodManager) {
+        String code = "";
+
+        final SimpleNode child  = (SimpleNode) newNode.jjtGetChild(0);
+
+        if(child instanceof ASTExpression) {
+            code += processMethodNodes(child, scope, methodManager);
+            code = writeToString(code, "newarray int\n", scope);
+            methodManager.stackPop(1);
+            methodManager.addInstruction("newarray", "int[]");
+        } else { // Child is identifier: aka constructor
+            String identifier = ((ASTIdentifier) child).getIdentifier();
+
+            code = writeToString(code, "new " + identifier + "\n", scope);
+            code = writeToString(code, "dup\n", scope);
+            code = writeToString(code, "invokespecial " + identifier + "/<init>()V\n", scope);
+
+            methodManager.addInstruction("new", identifier);
+        }
 
         return code;
     }
