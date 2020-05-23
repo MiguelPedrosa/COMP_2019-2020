@@ -25,7 +25,7 @@ public class Main {
             throw new IOException();
         }
 
-        CodeGenerator codeGenerator = new CodeGenerator(root, classTable, "testFileName");
+        CodeGenerator codeGenerator = new CodeGenerator(root, classTable, getOutputFilename(filePath));
         codeGenerator.start();
     }
 
@@ -37,5 +37,10 @@ public class Main {
             System.out.println("No file given.");
             return null;
         }
+    }
+
+    public static String getOutputFilename(String filePath) {
+        String filename = (new File(filePath)).getName();
+        return filename.split("\\.")[0];
     }
 }
