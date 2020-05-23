@@ -668,11 +668,19 @@ public class CodeGenerator {
         final SimpleNode arrayNodeIndex = (SimpleNode) arrayNode.jjtGetChild(1);
 
         processMethodNodes(arrayNodeName,  scope, methodManager);
+        final String arrayType = methodManager.getLastTypeInStack();
+        final String simpleArrayType = methodManager.getSimpleArrayType(arrayType);
         processMethodNodes(arrayNodeIndex, scope, methodManager);
 
-        code = writeToString(code, "iaload\n", scope);
-        methodManager.stackPop(2);
-        methodManager.addInstruction("iaload", "int");
+        if(simpleArrayType.equals("int")) {
+            code = writeToString(code, "iaload\n", scope);
+            methodManager.stackPop(2);
+            methodManager.addInstruction("iaload", "int");
+        } else {
+            code = writeToString(code, "aaload\n", scope);
+            methodManager.stackPop(2);
+            methodManager.addInstruction("aaload", simpleArrayType);
+        }
 
         return code;
     }
