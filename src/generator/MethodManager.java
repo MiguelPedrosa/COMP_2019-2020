@@ -32,11 +32,14 @@ public class MethodManager {
         instructionsAux.put("isub", +1);
         instructionsAux.put("imul", +1);
         instructionsAux.put("idiv", +1);
+        instructionsAux.put("iand", +1);
+        instructionsAux.put("iconst", +1);
 
         instructionsAux.put("iaload", +1);
         instructionsAux.put("dcmp", +1);
 
-        instructionsAux.put("ifeq", -2);
+        instructionsAux.put("ifgt", -1);
+        instructionsAux.put("ifle", -1);
         instructionsAux.put("ireturn", -1);
         instructionsAux.put("areturn", -1);
 
@@ -45,8 +48,8 @@ public class MethodManager {
 
     private void updateStackType(String instruction, String type) {
         switch (instruction) {
-            case "ifeq":
-                this.stackTypes.remove(this.stackTypes.size() - 1);
+            case "ifgt":
+            case "ifle":
                 this.stackTypes.remove(this.stackTypes.size() - 1);
                 break;
             case "bipush":
@@ -89,6 +92,12 @@ public class MethodManager {
                 this.stackTypes.add(type);
                 break;
             case "iaload":
+                this.stackTypes.add(type);
+                break;
+            case "iand":
+                this.stackTypes.add(type);
+                break;
+            case "iconst":
                 this.stackTypes.add(type);
                 break;
             default:
