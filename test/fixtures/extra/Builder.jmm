@@ -1,0 +1,45 @@
+import static ioPlus.printResult(int) void;
+
+class Builder {
+    int size;
+    int width;
+    int height;
+
+    public static void main(String[] args) {
+        Builder builder;
+        builder = new Builder().setSize(1).setWidth(2).setHeight(3);
+
+        ioPlus.printResult(builder.getSize());
+        ioPlus.printResult(builder.getWidth());
+        ioPlus.printResult(builder.getHeight());
+    }
+
+
+    public Builder setSize(int arg) {
+        size = arg;
+        return this;
+    }
+
+    public Builder setWidth(int arg) {
+        width = arg;
+        return this;
+    }
+
+    public Builder setHeight(int arg) {
+        height = arg;
+        return this;
+    }
+
+
+    public int getSize() {
+        return size;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+}
