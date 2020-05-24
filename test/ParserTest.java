@@ -53,6 +53,35 @@ public class ParserTest {
         }
     }
 
+    /**
+     * Our tests
+     */
+    @Test
+    public void testBuilder() {
+        test("fixtures/extra/Builder.jmm", false);
+    }
+    @Test
+    public void testMainArg() {
+        test("fixtures/extra/MainArg.jmm", false);
+    }
+    @Test
+    public void testNestedIf() {
+        test("fixtures/extra/NestedIf.jmm", false);
+    }
+    @Test
+    public void testNestedWhile() {
+        test("fixtures/extra/NestedWhile.jmm", false);
+    }
+    @Test
+    public void testOverloader() {
+        test("fixtures/extra/Overloader.jmm", false);
+    }
+
+    
+     /**
+     * Professor's tests
+     */
+
     @Test
     public void testFindMaximum() {
         test("fixtures/public/FindMaximum.jmm", false);
