@@ -658,7 +658,7 @@ public class CodeGenerator {
             indexForInstruction = "_";
         indexForInstruction += localIndex;
 
-        if (type.equals("int")) {
+        if (type.equals("int") || type.equals("boolean")) {
             code = writeToString(code, "iload" + indexForInstruction + "\n", scope);
             methodManager.addInstruction("iload", type);
         } else {
@@ -689,7 +689,7 @@ public class CodeGenerator {
 
         code += processMethodNodes(returnExpression, scope, methodManager);
 
-        if (methodManager.getLastTypeInStack().equals("int")) {
+        if (methodManager.getLastTypeInStack().equals("int") || methodManager.getLastTypeInStack().equals("boolean")) {
             code = writeToString(code, "ireturn\n", scope);
         } else {
             code = writeToString(code, "areturn\n", scope);
@@ -711,7 +711,7 @@ public class CodeGenerator {
         final String simpleArrayType = methodManager.getSimpleArrayType(arrayType);
         processMethodNodes(arrayNodeIndex, scope, methodManager);
 
-        if(simpleArrayType.equals("int")) {
+        if(simpleArrayType.equals("int") || simpleArrayType.equals("boolean")) {
             code = writeToString(code, "iaload\n", scope);
             methodManager.stackPop(2);
             methodManager.addInstruction("iaload", "int");
@@ -758,7 +758,7 @@ public class CodeGenerator {
             indexForInstruction = "_";
         indexForInstruction += localIndex;
 
-        if (type.equals("int")) {
+        if (type.equals("int") || type.equals("boolean")) {
             code = writeToString(code, "iload" + indexForInstruction + "\n", scope);
             methodManager.addInstruction("iload", type);
         } else {
@@ -798,7 +798,7 @@ public class CodeGenerator {
     
                 return code;
             }
-            if (type.equals("int")) {
+            if (type.equals("int") || type.equals("boolean")) {
                 code = writeToString(code, "istore " + localIndex + "\n", scope);
                 methodManager.addInstruction("istore", type);
             } else {
@@ -816,7 +816,7 @@ public class CodeGenerator {
             // In arrays, new value is at the top of the stack
             code += processMethodNodes(childRight,  scope, methodManager);
 
-            if (simpleArrayType.equals("int")) {
+            if (simpleArrayType.equals("int") || simpleArrayType.equals("boolean")) {
                 code = writeToString(code, "iastore " + "\n", scope);
                 methodManager.addInstruction("iastore", simpleArrayType);
             } else {
