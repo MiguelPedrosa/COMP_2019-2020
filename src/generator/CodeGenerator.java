@@ -454,7 +454,7 @@ public class CodeGenerator {
     private void writeClassField(final ASTVarDeclaration varDecNode, final int scope, final SymbolTable scopeTable) {
         final String type = transformType(varDecNode.getType());
         String identifier = varDecNode.getVarId();
-        identifier = JasminSanitizer.getJasminIdentifier(identifier);
+        identifier = getJasminIdentifier(identifier);
         // Field is always declared as private because that is the java default
         writeCode(".field private " + identifier + " " + type + "\n", scope);
     }
@@ -637,10 +637,14 @@ public class CodeGenerator {
                 // TODO: when array change for arrays instead of fields? prof example
                 type = this.symbolTable.getVariableType(identifier);
 
-                final String filteredIdentifier = JasminSanitizer.getJasminIdentifier(identifier);
+                final String filteredIdentifier = getJasminIdentifier(identifier);
 
+                code = writeToString(code, "aload_0 \n", scope);
+                methodManager.addInstruction("aload", this.symbolTable.getClasseName());
+                
                 code = writeToString(code, "getfield " + this.symbolTable.getClasseName() + "/" + filteredIdentifier + " "
-                        + transformType(type) + "\n", scope);
+                + transformType(type) + "\n", scope);
+                methodManager.stackPop(1);
                 methodManager.addInstruction("getfield", type);
 
                 list.add(code);
@@ -706,10 +710,10 @@ public class CodeGenerator {
         final SimpleNode arrayNodeName  = (SimpleNode) arrayNode.jjtGetChild(0);
         final SimpleNode arrayNodeIndex = (SimpleNode) arrayNode.jjtGetChild(1);
 
-        processMethodNodes(arrayNodeName,  scope, methodManager);
+        code += processMethodNodes(arrayNodeName,  scope, methodManager);
         final String arrayType = methodManager.getLastTypeInStack();
         final String simpleArrayType = methodManager.getSimpleArrayType(arrayType);
-        processMethodNodes(arrayNodeIndex, scope, methodManager);
+        code += processMethodNodes(arrayNodeIndex, scope, methodManager);
 
         if(simpleArrayType.equals("int") || simpleArrayType.equals("boolean")) {
             code = writeToString(code, "iaload\n", scope);
@@ -742,11 +746,14 @@ public class CodeGenerator {
             // TODO: when array change for arrays instead of fields? prof example
             type = this.symbolTable.getVariableType(identifier);
 
-            String filteredIdentifier = JasminSanitizer.getJasminIdentifier(identifier);
+            String filteredIdentifier = getJasminIdentifier(identifier);
 
-            // ???? aload0 antes ????
+            code = writeToString(code, "aload_0 \n", scope);
+            methodManager.addInstruction("aload", this.symbolTable.getClasseName());
+
             code = writeToString(code, "getfield " + this.symbolTable.getClasseName() + "/" + filteredIdentifier
                     + " " + transformType(type) + "\n", scope);
+            methodManager.stackPop(1);
             methodManager.addInstruction("getfield", type);
 
             return code;
@@ -791,7 +798,11 @@ public class CodeGenerator {
             if (type == null) {
 
                 type = this.symbolTable.getVariableType(identifier);
-                String filteredIdentifier = JasminSanitizer.getJasminIdentifier(identifier);
+                String filteredIdentifier = getJasminIdentifier(identifier);
+
+                code = writeToString(code, "aload_0 \n", scope);
+                methodManager.addInstruction("aload", this.symbolTable.getClasseName());
+
                 code = writeToString(code, "putfield " + this.symbolTable.getClasseName() + "/" +
                         filteredIdentifier + " " + transformType(type) + "\n", scope);
                 methodManager.addInstruction("putfield", type);
@@ -1114,6 +1125,20 @@ public class CodeGenerator {
         }
 
         return code;
+    }
+
+    private static String getJasminIdentifier(String identifier) {
+        /**
+         * This function exists because identifiers in J-- are allowed to be
+         * declared as Jasmin keywords. As sugested, we created a method that
+         * sanitizes all identifier's names and transforms all keywords
+         * into acceptable names for Jasmin. We tried filtering as
+         * many names as possible, but Jasmin's documentation does not
+         * make it easy to find all of its keywords. 
+         */
+        identifier = "_" + identifier;
+
+        return identifier;
     }
 
 }
