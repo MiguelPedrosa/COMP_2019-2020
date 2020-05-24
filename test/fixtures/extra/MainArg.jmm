@@ -1,0 +1,12 @@
+import static io.println(String);
+
+class MainArg {
+    public static void main(String[] args) {
+        int i;
+        i = 0;
+        while(i < args.length) {
+            io.println(args[i]);
+            i = i + 1;
+        }
+    }
+}
