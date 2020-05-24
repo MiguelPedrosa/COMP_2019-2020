@@ -1,0 +1,59 @@
+import static io.println(int) void;
+
+class Overloader {
+    int[] array;
+
+    public static void main(String[] args) {
+        Overloader tester;
+        int[] arr;
+        tester = new Overloader();
+        tester.init(10);
+        tester.assignValues(1);
+        tester.print();
+        arr = tester.getArray();
+        tester.print(arr);
+    }
+
+    public int init(int size) {
+        array = new int[size];
+        return 0;
+    }
+
+    public int assignValues(int offset) {
+        int i;
+        i = 0;
+
+        while(i < array.length) {
+            array[i] = i + offset;
+            i = i + 1;
+        }
+        return 0;
+    }
+
+    public int print() {
+        int i;
+        i = 0;
+
+        while(i < array.length) {
+            io.println(array[i]);
+            i = i + 1;
+        }
+        return 0;
+    }
+
+    public int print(int[] array) {
+        int i;
+        i = 0;
+
+        while(i < array.length) {
+            io.println(array[i]);
+            i = i + 1;
+        }
+        return 0;
+    }
+
+    public int[] getArray() {
+        return array;
+    }
+
+}
