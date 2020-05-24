@@ -69,9 +69,6 @@ public class CodeGenerator {
             final String nodeType = child.getClass().getSimpleName();
 
             switch (nodeType) {
-                case "ASTStart":
-                    readNodes(child, scope, scopeTable);
-                    break;
                 case "ASTClassDeclaration":
                     writeClass((ASTClassDeclaration) child, scope, scopeTable);
                     break;
@@ -82,10 +79,10 @@ public class CodeGenerator {
                     writeMain((ASTMainDeclaration) child, scope, scopeTable);
                     break;
                 case "ASTVarDeclaration":
-                    writeVarDeclaration((ASTVarDeclaration) child, scope, scopeTable);
+                case "ASTImportDeclaration":
                     break;
                 default:
-                    readNodes(child, scope, scopeTable);
+                    System.err.println("Unexpected branch execution in readNodes function");
                     break;
             }
         }
@@ -146,7 +143,7 @@ public class CodeGenerator {
      * 
      */
     private void endMethod(final int scope) {
-        writeCode(".end method\n\n", scope);
+        writeCode(".end method\n", scope);
     }
 
     /**
@@ -154,7 +151,7 @@ public class CodeGenerator {
      * 
      */
     private void writeInitializer(final int scope) {
-        writeCode("; standard initializer\n", scope);
+        writeCode("\n; standard initializer\n", scope);
         writeCode(".method public <init>()V\n", scope);
         writeCode("aload_0\n", scope + 1);
         writeCode("invokenonvirtual java/lang/Object/<init>()V\n", scope + 1);
@@ -172,6 +169,16 @@ public class CodeGenerator {
         final String className = classNode.getClassId();
         writeCode(".class public " + className + "\n", scope);
         writeCode(".super java/lang/Object\n\n", scope);
+
+        // Field
+        final int numChildren = classNode.jjtGetNumChildren();
+        for (int i = 0; i < numChildren; i++) {
+            final SimpleNode child = (SimpleNode) classNode.jjtGetChild(i);
+            final String nodeType = child.getClass().getSimpleName();
+            if(nodeType.equals("ASTVarDeclaration")) {
+                writeVarDeclaration((ASTVarDeclaration) child, scope, scopeTable);
+            }
+        }
 
         writeInitializer(scope);
 
@@ -446,7 +453,10 @@ public class CodeGenerator {
 
     private void writeClassField(final ASTVarDeclaration varDecNode, final int scope, final SymbolTable scopeTable) {
         final String type = transformType(varDecNode.getType());
-        writeCode(".field " + varDecNode.getVarId() + " " + type + "\n", scope);
+        String identifier = varDecNode.getVarId();
+        identifier = JasminSanitizer.getJasminIdentifier(identifier);
+        // Field is always declared as private because that is the java default
+        writeCode(".field private " + identifier + " " + type + "\n", scope);
     }
 
     private String writeFuncCall(final ASTFuncCall funcCallNode, final int scope, final MethodManager methodManager) {
@@ -627,7 +637,9 @@ public class CodeGenerator {
                 // TODO: when array change for arrays instead of fields? prof example
                 type = this.symbolTable.getVariableType(identifier);
 
-                code = writeToString(code, "getfield " + this.symbolTable.getClasseName() + "/" + identifier + " "
+                final String filteredIdentifier = JasminSanitizer.getJasminIdentifier(identifier);
+
+                code = writeToString(code, "getfield " + this.symbolTable.getClasseName() + "/" + filteredIdentifier + " "
                         + transformType(type) + "\n", scope);
                 methodManager.addInstruction("getfield", type);
 
@@ -730,18 +742,27 @@ public class CodeGenerator {
             // TODO: when array change for arrays instead of fields? prof example
             type = this.symbolTable.getVariableType(identifier);
 
+            String filteredIdentifier = JasminSanitizer.getJasminIdentifier(identifier);
+
             // ???? aload0 antes ????
-            code = writeToString(code, "getfield " + this.symbolTable.getClasseName() + "/" + identifier + " "
-                    + transformType(type) + "\n", scope);
+            code = writeToString(code, "getfield " + this.symbolTable.getClasseName() + "/" + filteredIdentifier
+                    + " " + transformType(type) + "\n", scope);
             methodManager.addInstruction("getfield", type);
 
             return code;
         }
+
+        // Optimization :)
+        String indexForInstruction = " ";
+        if(localIndex >= 0 && localIndex <= 3)
+            indexForInstruction = "_";
+        indexForInstruction += localIndex;
+
         if (type.equals("int")) {
-            code = writeToString(code, "iload_" + localIndex + "\n", scope);
+            code = writeToString(code, "iload" + indexForInstruction + "\n", scope);
             methodManager.addInstruction("iload", type);
         } else {
-            code = writeToString(code, "aload_" + localIndex + "\n", scope);
+            code = writeToString(code, "aload" + indexForInstruction + "\n", scope);
             methodManager.addInstruction("aload", type);
         }
 
@@ -770,9 +791,9 @@ public class CodeGenerator {
             if (type == null) {
 
                 type = this.symbolTable.getVariableType(identifier);
-    
-                code = writeToString(code, "putfield " + this.symbolTable.getClasseName() + "/" + identifier + " "
-                        + transformType(type) + "\n", scope);
+                String filteredIdentifier = JasminSanitizer.getJasminIdentifier(identifier);
+                code = writeToString(code, "putfield " + this.symbolTable.getClasseName() + "/" +
+                        filteredIdentifier + " " + transformType(type) + "\n", scope);
                 methodManager.addInstruction("putfield", type);
     
                 return code;
@@ -834,12 +855,17 @@ public class CodeGenerator {
                 stackLiteral = Integer.parseInt(literal);
                 if(stackLiteral >= 0 && stackLiteral <= 5) {
                     code = writeToString(code, "iconst_" + stackLiteral + "\n", scope);
+                    methodManager.addInstruction("bipush", "int");
                 } else if(stackLiteral == -1) {
                     code = writeToString(code, "iconst_m1\n", scope);
+                    methodManager.addInstruction("bipush", "int");
+                } else if(stackLiteral > 127) {
+                    code = writeToString(code, "ldc_w " + stackLiteral + "\n", scope);
+                    methodManager.addInstruction("ldc_w", "long");
                 } else {
                     code = writeToString(code, "bipush " + stackLiteral + "\n", scope);
+                    methodManager.addInstruction("bipush", "int");
                 }
-                methodManager.addInstruction("bipush", "int");
                 break;
         }
 
