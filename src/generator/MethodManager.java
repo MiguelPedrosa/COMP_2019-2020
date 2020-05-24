@@ -26,7 +26,7 @@ public class MethodManager {
         instructionsAux.put("aload", +1);
         instructionsAux.put("iload", +1);
         instructionsAux.put("getfield", +1);
-        instructionsAux.put("putfield", -1);
+        instructionsAux.put("putfield", -2);
         instructionsAux.put("invokestatic", +1);
         instructionsAux.put("invokevirtual", +1);
 
@@ -66,7 +66,10 @@ public class MethodManager {
             case "areturn":
             case "astore":
             case "istore":
+                this.stackTypes.remove(this.stackTypes.size() - 1);
+                break;
             case "putfield":
+                this.stackTypes.remove(this.stackTypes.size() - 1);
                 this.stackTypes.remove(this.stackTypes.size() - 1);
                 break;
             case "iastore":
