@@ -707,6 +707,9 @@ public class CodeGenerator {
         if (type.equals("int") || type.equals("boolean")) {
             code = writeToString(code, "iload" + indexForInstruction + "\n", scope);
             methodManager.addInstruction("iload", type);
+        } else if (type.equals("long")) {
+            code = writeToString(code, "lload" + indexForInstruction + "\n", scope);
+            methodManager.addInstruction("lload", type);
         } else {
             code = writeToString(code, "aload" + indexForInstruction + "\n", scope);
             methodManager.addInstruction("aload", type);
@@ -729,6 +732,8 @@ public class CodeGenerator {
 
         if (methodManager.getLastTypeInStack().equals("int") || methodManager.getLastTypeInStack().equals("boolean")) {
             code = writeToString(code, "ireturn\n", scope);
+        } else if (methodManager.getLastTypeInStack().equals("long")) {
+            code = writeToString(code, "lreturn\n", scope);
         } else {
             code = writeToString(code, "areturn\n", scope);
         }
@@ -802,6 +807,9 @@ public class CodeGenerator {
         if (type.equals("int") || type.equals("boolean")) {
             code = writeToString(code, "iload" + indexForInstruction + "\n", scope);
             methodManager.addInstruction("iload", type);
+        } else if (type.equals("long")) {
+            code = writeToString(code, "lload" + indexForInstruction + "\n", scope);
+            methodManager.addInstruction("lload", type);
         } else {
             code = writeToString(code, "aload" + indexForInstruction + "\n", scope);
             methodManager.addInstruction("aload", type);
@@ -848,6 +856,9 @@ public class CodeGenerator {
             if (type.equals("int") || type.equals("boolean")) {
                 code = writeToString(code, "istore " + localIndex + "\n", scope);
                 methodManager.addInstruction("istore", type);
+            } else if (type.equals("long")) {
+                code = writeToString(code, "lstore" + localIndex + "\n", scope);
+                methodManager.addInstruction("lstore", type);
             } else {
                 code = writeToString(code, "astore " + localIndex + "\n", scope);
                 methodManager.addInstruction("astore", type);
