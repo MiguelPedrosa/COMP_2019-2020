@@ -789,8 +789,6 @@ public class CodeGenerator {
         // Store value in non-array variable
         if(childLeft instanceof ASTIdentifier) {
 
-            code += processMethodNodes(childRight,  scope, methodManager);
-
             final String identifier = ((ASTIdentifier) childLeft).getIdentifier();
             final int localIndex = methodManager.indexOfLocal(identifier);
             String type = methodManager.typeOfLocal(identifier);
@@ -803,12 +801,16 @@ public class CodeGenerator {
                 code = writeToString(code, "aload_0 \n", scope);
                 methodManager.addInstruction("aload", this.symbolTable.getClasseName());
 
+                code += processMethodNodes(childRight,  scope, methodManager);
+
                 code = writeToString(code, "putfield " + this.symbolTable.getClasseName() + "/" +
                         filteredIdentifier + " " + transformType(type) + "\n", scope);
                 methodManager.addInstruction("putfield", type);
     
                 return code;
             }
+
+            code += processMethodNodes(childRight,  scope, methodManager);
             if (type.equals("int") || type.equals("boolean")) {
                 code = writeToString(code, "istore " + localIndex + "\n", scope);
                 methodManager.addInstruction("istore", type);
@@ -1027,13 +1029,17 @@ public class CodeGenerator {
         // used and result of operation is a single value on the stack
         code += processMethodNodes(rightChild, scope, methodManager);
         code = writeToString(code, "i2l\n", scope);
-
+        methodManager.stackPop(1);
+        methodManager.addInstruction("i2l", "long");
+        
         code += processMethodNodes(leftChild, scope, methodManager);
         code = writeToString(code, "i2l\n", scope);
+        methodManager.stackPop(1);
+        methodManager.addInstruction("i2l", "long");
 
         code = writeToString(code, "lcmp\n", scope);
 
-        methodManager.stackPop(2);
+        methodManager.stackPop(4);
         methodManager.addInstruction("lcmp", "boolean");
         return code;
     }
