@@ -43,6 +43,26 @@ For this project, you need to [install Gradle](https://gradle.org/install/)
 		- [ ] neste checkpoint não é necessário a seleção das operações mais eficientes mas isto será considerado no CP3 e versão final
 	* [ ] invocação de métodos
   
+# Checkpoint 3
+  * [x] Generate JVM code accepted by jasmin for conditional instructions(ifandif-else)
+    - [x] Generated labels are not the same
+  * [x] Generate JVM code accepted by jasmin for loops;
+  * [x] Generate JVM code accepted by jasmin to deal with arrays;
+    - [x] array initialization
+    - [x] array store (astore)
+    - [x] attay access (aload)
+    - [x] array position store
+    - [x] array position access
+  * [x] Complete the compiler and test it using a set of Java-- classes
+    - [x] Have all given tests executing and passing
+    - [ ] Have at least 5 own tests comprising the overall project
+    - [ ] Have 3 to 5 top-notch examples (different from the ones provided!) that demonstrate the potential of your project!
+      * [ ] At least 3 of those examples have to be fully compatible with the project specification
+      * [ ] The other 2 can use "extras" that you have in the project
+    * [x] .stack is correctly calculated
+    * [x] .locals is correctly calculated
+
+
 
 ## Project setup
 
