@@ -1,0 +1,33 @@
+import static io.print(int);
+
+class NestedWhile {
+    public static void main(String[] args) {
+        int width;
+        int height;
+        int depth;
+        int total;
+
+        width = 30;
+        height = 30;
+        depth = 30;
+        
+        /**
+         * Calculate volume of cube using increments of 1
+         */
+        total = 0;
+        while(0 < width) {
+            while(0 < height) {
+                while(0 < depth) {
+                    total = total +1;
+                    depth = depth -1;
+                }
+                depth = 30;
+                height = height -1;
+            }
+            height = 30;
+            width = width -1;
+        }
+
+        io.print(total);
+    }
+}
