@@ -27,6 +27,7 @@ public class MethodManager {
         instructionsAux.put("ldc_w", +1);
         instructionsAux.put("aload", +1);
         instructionsAux.put("iload", +1);
+        instructionsAux.put("lload", +1);
         instructionsAux.put("getfield", +1);
         instructionsAux.put("putfield", -2);
         instructionsAux.put("invokestatic", +1);
@@ -52,9 +53,11 @@ public class MethodManager {
         instructionsAux.put("ifle", -1);
         instructionsAux.put("ireturn", -1);
         instructionsAux.put("areturn", -1);
+        instructionsAux.put("lreturn", -1);
 
         instructionsAux.put("astore", -1);
         instructionsAux.put("istore", -1);
+        instructionsAux.put("lstore", -1);
         instructionsAux.put("aastore", -3);
         instructionsAux.put("iastore", -3);
 
@@ -67,8 +70,10 @@ public class MethodManager {
             case "ifle":
             case "ireturn":
             case "areturn":
+            case "lreturn":
             case "astore":
             case "istore":
+            case "lstore":
                 this.stackTypes.remove(this.stackTypes.size() - 1);
                 break;
             case "putfield":
@@ -86,6 +91,7 @@ public class MethodManager {
             case "arraylength":
             case "aload":
             case "iload":
+            case "lload":
             case "getfield":
             case "invokestatic":
             case "invokevirtual":
