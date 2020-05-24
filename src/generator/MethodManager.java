@@ -5,6 +5,7 @@ import java.util.List;
 public class MethodManager {
     private int currentStackSize;
     private int maxStackSize;
+    private Boolean isMain;
 
     private static HashMap<String, Integer> instructions = buildInstructions();
 
@@ -16,6 +17,7 @@ public class MethodManager {
         this.maxStackSize = 0;
         this.locals = new ArrayList<>();
         this.stackTypes = new ArrayList<>();
+        this.isMain = false;
     }
 
     private static HashMap<String, Integer> buildInstructions() {
@@ -127,6 +129,18 @@ public class MethodManager {
         if (this.maxStackSize < this.currentStackSize)
             this.maxStackSize = this.currentStackSize;
 
+    }
+
+    public int getCurrentStackSize() {
+        return currentStackSize;
+    }
+
+    public Boolean getIsMain() {
+        return isMain;
+    }
+
+    public void setMain() {
+        this.isMain = true;
     }
 
     public void stackPop(int numPop) {
