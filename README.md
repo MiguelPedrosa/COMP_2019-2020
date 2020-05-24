@@ -44,7 +44,7 @@ For this project, you need to [install Gradle](https://gradle.org/install/)
 	* [ ] invocação de métodos
   
 # Checkpoint 3
-  * [x] Generate JVM code accepted by jasmin for conditional instructions(ifandif-else)
+  * [x] Generate JVM code accepted by jasmin for conditional instructions(if and if-else)
     - [x] Generated labels are not the same
   * [x] Generate JVM code accepted by jasmin for loops;
   * [x] Generate JVM code accepted by jasmin to deal with arrays;
