@@ -1,0 +1,32 @@
+import static io.println(int);
+
+class NestedIf {
+    public static void main(String[] args) {
+        int a;
+        NestedIf test;
+        test = new NestedIf();
+        a = 4;
+        
+        if(a < 5) {
+            if(a < test.justAnInt()) {
+                if(5 + a < test.justAnInt() && test.justABoolean()) {
+                    io.println(83);
+                } else {
+                    io.println(000);
+                }
+            } else {
+                io.println(000);
+            }
+        } else {
+            io.println(000);
+        }
+
+    }
+
+    public int justAnInt() {
+        return 100;
+    }
+    public boolean justABoolean() {
+        return true;
+    }
+}
