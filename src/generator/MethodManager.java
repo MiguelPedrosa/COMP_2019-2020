@@ -36,6 +36,7 @@ public class MethodManager {
         instructionsAux.put("idiv", +1);
         instructionsAux.put("iand", +1);
         instructionsAux.put("iconst", +1);
+        instructionsAux.put("i2l", +2);
 
         instructionsAux.put("aaload", +1);
         instructionsAux.put("iaload", +1);
@@ -97,6 +98,10 @@ public class MethodManager {
             case "iconst":
             case "new":
             case "newarray":
+                this.stackTypes.add(type);
+                break;
+            case "i2l":
+                this.stackTypes.add(type);
                 this.stackTypes.add(type);
                 break;
             default:
