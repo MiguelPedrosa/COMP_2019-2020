@@ -257,7 +257,7 @@ public class CodeGenerator {
                 typeString = "[Z";
                 break;
             default:
-                typeString = "L" + type;
+                typeString = "L" + type + ";";
                 break;
         }
 
