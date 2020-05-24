@@ -38,10 +38,10 @@ For this project, you need to [install Gradle](https://gradle.org/install/)
     * [x] estrutura básica de classe (incluindo construtor <init>)
 	* [x] estrutura básica de fields
 	* [x] estrutura básica de métodos (podem desconsiderar os limites neste checkpoint: limit_stack 99, limit_locals 99)
-	* [ ] assignments
-	* [ ] operações aritméticas (com prioridade de operações correta)
-		- [ ] neste checkpoint não é necessário a seleção das operações mais eficientes mas isto será considerado no CP3 e versão final
-	* [ ] invocação de métodos
+	* [x] assignments
+	* [x] operações aritméticas (com prioridade de operações correta)
+		- [x] neste checkpoint não é necessário a seleção das operações mais eficientes mas isto será considerado no CP3 e versão final
+	* [x] invocação de métodos
   
 # Checkpoint 3
   * [x] Generate JVM code accepted by jasmin for conditional instructions(if and if-else)
