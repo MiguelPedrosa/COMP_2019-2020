@@ -340,6 +340,7 @@ public class CodeGenerator {
         writeCode("\n.method public static main([Ljava/lang/String;)V\n", scope);
 
         final MethodManager methodManager = new MethodManager();
+        methodManager.setMain();
         final List<SymbolVar> locals = prepareLocals(scope + 1, "main");
 
         methodManager.setLocals(locals);
@@ -432,6 +433,15 @@ public class CodeGenerator {
                 for (int i = 0; i < numChildren; i++) {
                     final SimpleNode child = (SimpleNode) currentNode.jjtGetChild(i);
                     code += processMethodNodes(child, scope, methodManager);
+                    int stackSize = methodManager.getCurrentStackSize();
+                    // Stack cleaup if values were pushed but not used
+                    int j = 0;
+                    if(methodManager.getIsMain())
+                        j = 1;
+                    for( ; j < stackSize; j++) {
+                        code = writeToString(code, "pop\n", scope);
+                        methodManager.stackPop(1);
+                    }
                 }
                 break;
         }
@@ -489,7 +499,16 @@ public class CodeGenerator {
                 for (int i = 0; i < argsTypes.size(); i++)
                     args += this.transformType(argsTypes.get(i));
 
-                
+                String signature = methodName;
+                for (String arg : argsTypes) {
+                    signature += ";" + arg;
+                }
+                if(!this.symbolTable.containsMethod(signature) &&
+                    !this.symbolTable.getImports().containsKey(className) &&
+                    this.symbolTable.getClasseName().equals(className)) {
+                    className = this.symbolTable.getClassExtendsName();
+                }
+
                 returnType = this.getFuncReturnType(argsTypes, className, methodName, true);
 
                 codeLine = "invokestatic " + className + "/" + methodName + "(" + args + ")"
@@ -497,7 +516,8 @@ public class CodeGenerator {
                 code = writeToString(code, codeLine, scope);
 
                 methodManager.stackPop(numberArgs);
-                methodManager.addInstruction("invokestatic", returnType);
+                if(! returnType.equals("void"))
+                    methodManager.addInstruction("invokestatic", returnType);
 
             }
             // variable
@@ -521,6 +541,16 @@ public class CodeGenerator {
                 for (int i = 0; i < argsTypes.size(); i++)
                     args += this.transformType(argsTypes.get(i));
 
+                String signature = methodName;
+                for (String arg : argsTypes) {
+                    signature += ";" + arg;
+                }
+                if(!this.symbolTable.containsMethod(signature) &&
+                    !this.symbolTable.getImports().containsKey(className) &&
+                    this.symbolTable.getClasseName().equals(className)) {
+                    className = this.symbolTable.getClassExtendsName();
+                }
+
                 returnType = this.getFuncReturnType(argsTypes, className, methodName, false);
 
                 codeLine = "invokevirtual " + className + "/" + methodName + "(" + args + ")"
@@ -528,7 +558,8 @@ public class CodeGenerator {
                 code = writeToString(code, codeLine, scope);
 
                 methodManager.stackPop(numberArgs + 1);
-                methodManager.addInstruction("invokevirtual", returnType);
+                if(! returnType.equals("void"))
+                    methodManager.addInstruction("invokevirtual", returnType);
 
             }
         } else {
@@ -551,6 +582,16 @@ public class CodeGenerator {
             for (int i = 0; i < argsTypes.size(); i++)
                 args += this.transformType(argsTypes.get(i));
 
+            String signature = methodName;
+            for (String arg : argsTypes) {
+                signature += ";" + arg;
+            }
+            if(!this.symbolTable.containsMethod(signature) &&
+                !this.symbolTable.getImports().containsKey(className) &&
+                this.symbolTable.getClasseName().equals(className)) {
+                className = this.symbolTable.getClassExtendsName();
+            }
+
             returnType = this.getFuncReturnType(argsTypes, className, methodName, false);
 
             codeLine = "invokevirtual " + className + "/" + methodName + "(" + args + ")"
@@ -558,7 +599,8 @@ public class CodeGenerator {
             code = writeToString(code, codeLine, scope);
 
             methodManager.stackPop(numberArgs + 1);
-            methodManager.addInstruction("invokevirtual", returnType);
+            if(! returnType.equals("void"))
+                methodManager.addInstruction("invokevirtual", returnType);
         }
 
         return code;
@@ -679,17 +721,9 @@ public class CodeGenerator {
      */
     private String writeReturn(final ASTReturn returnNode, final int scope, final MethodManager methodManager) {
 
-        // TODO: check if this method is ok with group
         String code = "";
 
         final SimpleNode returnExpression = (SimpleNode) returnNode.jjtGetChild(0);
-
-        /*
-         * Expression Variable(identifier) literal new function call
-         * 
-         * TODO:What happens when its "return new Potato()"??? is new Potato in stack?
-         * invokevirtual like a function???
-         */
 
         code += processMethodNodes(returnExpression, scope, methodManager);
 
