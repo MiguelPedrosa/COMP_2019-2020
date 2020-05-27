@@ -283,7 +283,7 @@ void LessExpression() #void: {Token lessThan;}
 
 void SumSubExpression() #void: {Token plus, minus;}
 {
-    MulDivExpression() [
+    DivExpression() [
           plus=<PLUS>  SumSubExpression() {
             jjtThis.setPosition(plus);
         } #Plus(2)
@@ -293,15 +293,21 @@ void SumSubExpression() #void: {Token plus, minus;}
     ]
 }
 
-void MulDivExpression() #void: {Token times, dividor;}
+void DivExpression() #void: {Token dividor;}
 {
-    NotExpression() [
-          times=<TIMES> MulDivExpression() {
-            jjtThis.setPosition(times);
-        } #Times(2)
-        | dividor=<DIVIDOR> MulDivExpression() {
+    MulExpression() [
+        dividor=<DIVIDOR> DivExpression() {
             jjtThis.setPosition(dividor);
         } #Dividor(2)
+    ]
+}
+
+void MulExpression() #void: {Token times;}
+{
+    NotExpression() [
+          times=<TIMES> MulExpression() {
+            jjtThis.setPosition(times);
+        } #Times(2)
     ]
 }
 
