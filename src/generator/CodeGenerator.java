@@ -30,15 +30,17 @@ public class CodeGenerator {
     private final SimpleNode rootNode;
     private final String fileName;
     private final String filePath;
+    private final Boolean optimizeO;
 
     private final SymbolTable symbolTable;
 
     private int labelCounter = 0;
 
-    public CodeGenerator(final SimpleNode root, final SymbolTable symbolTable, final String fileName) {
+    public CodeGenerator(final SimpleNode root, final SymbolTable symbolTable, final String fileName, final Boolean optimizeO) {
         this.rootNode = root;
         this.symbolTable = symbolTable;
         this.fileName = fileName;
+        this.optimizeO = optimizeO;
         this.filePath = System.getProperty("user.dir") + "/jFiles";
     }
 

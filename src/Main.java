@@ -8,6 +8,13 @@ public class Main {
     public static void main(String args[]) throws IOException, ParseException {
 
         final String filePath = args[0];
+        boolean optimizeO = false;
+
+        for (String arg: args) {
+            if(arg.equals("-o"))
+                optimizeO = true;
+        }
+
         Parser myProgram = new Parser(openFile(filePath));
 
         SimpleNode root = myProgram.Start();
@@ -25,7 +32,10 @@ public class Main {
             throw new IOException();
         }
 
-        CodeGenerator codeGenerator = new CodeGenerator(root, classTable, getOutputFilename(filePath));
+        
+        
+
+        CodeGenerator codeGenerator = new CodeGenerator(root, classTable, getOutputFilename(filePath), optimizeO);
         codeGenerator.start();
     }
 
