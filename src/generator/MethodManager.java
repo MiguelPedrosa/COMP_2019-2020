@@ -51,6 +51,8 @@ public class MethodManager {
 
         instructionsAux.put("ifgt", -1);
         instructionsAux.put("ifle", -1);
+        instructionsAux.put("if_icmplt", -2);
+        
         instructionsAux.put("ireturn", -1);
         instructionsAux.put("areturn", -1);
         instructionsAux.put("lreturn", -1);
@@ -77,6 +79,7 @@ public class MethodManager {
                 this.stackTypes.remove(this.stackTypes.size() - 1);
                 break;
             case "putfield":
+            case "if_icmplt":
                 this.stackTypes.remove(this.stackTypes.size() - 1);
                 this.stackTypes.remove(this.stackTypes.size() - 1);
                 break;

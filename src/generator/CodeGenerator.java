@@ -1065,7 +1065,7 @@ public class CodeGenerator {
     private String writeLessThanOperation(ASTLessThan lessThanNode, int scope, MethodManager methodManager) {
         String code = "";
 
-        final SimpleNode leftChild = (SimpleNode) lessThanNode.jjtGetChild(0);
+        /* final SimpleNode leftChild = (SimpleNode) lessThanNode.jjtGetChild(0);
         final SimpleNode rightChild = (SimpleNode) lessThanNode.jjtGetChild(1);
 
         // Child order is inverted because dcmp requires it to work 
@@ -1085,7 +1085,28 @@ public class CodeGenerator {
         code = writeToString(code, "lcmp\n", scope);
 
         methodManager.stackPop(4);
-        methodManager.addInstruction("lcmp", "boolean");
+        methodManager.addInstruction("lcmp", "boolean"); */
+
+        final String lessLabel = "less" + this.labelCounter;
+        final String endLabel = "endLess" + this.labelCounter;
+        this.labelCounter++;
+
+        final SimpleNode leftChild = (SimpleNode) lessThanNode.jjtGetChild(0);
+        final SimpleNode rightChild = (SimpleNode) lessThanNode.jjtGetChild(1);
+
+        code += processMethodNodes(leftChild,  scope, methodManager);
+        code += processMethodNodes(rightChild,  scope, methodManager);
+
+        code = writeToString(code, "if_icmplt " + lessLabel + "\n", scope);
+        code = writeToString(code, "iconst_0\n", scope);
+        code = writeToString(code, "goto " + endLabel + "\n", scope);
+        code = writeToString(code, lessLabel + ":\n", 0);
+        code = writeToString(code, "iconst_1\n", scope);
+        code = writeToString(code, endLabel + ":\n", 0);
+
+        methodManager.addInstruction("if_icmplt", "void");
+        methodManager.addInstruction("iconst", "boolean");
+
         return code;
     }
 
