@@ -36,7 +36,8 @@ public class CodeGenerator {
 
     private int labelCounter = 0;
 
-    public CodeGenerator(final SimpleNode root, final SymbolTable symbolTable, final String fileName, final Boolean optimizeO) {
+    public CodeGenerator(final SimpleNode root, final SymbolTable symbolTable, final String fileName,
+            final Boolean optimizeO) {
         this.rootNode = root;
         this.symbolTable = symbolTable;
         this.fileName = fileName;
@@ -177,7 +178,7 @@ public class CodeGenerator {
         for (int i = 0; i < numChildren; i++) {
             final SimpleNode child = (SimpleNode) classNode.jjtGetChild(i);
             final String nodeType = child.getClass().getSimpleName();
-            if(nodeType.equals("ASTVarDeclaration")) {
+            if (nodeType.equals("ASTVarDeclaration")) {
                 writeVarDeclaration((ASTVarDeclaration) child, scope, scopeTable);
             }
         }
@@ -327,7 +328,7 @@ public class CodeGenerator {
         final int numChildren = methodNode.jjtGetNumChildren();
         for (int i = 0; i < numChildren; i++) {
             final SimpleNode child = (SimpleNode) methodNode.jjtGetChild(i);
-            code += processMethodNodes(child, scope +1, methodManager);
+            code += processMethodNodes(child, scope + 1, methodManager);
         }
 
         writeStack(methodManager.getMaxStackSize(), scope + 1);
@@ -352,7 +353,7 @@ public class CodeGenerator {
         final int numChildren = mainMethodNode.jjtGetNumChildren();
         for (int i = 0; i < numChildren; i++) {
             final SimpleNode child = (SimpleNode) mainMethodNode.jjtGetChild(i);
-            code += processMethodNodes(child, scope +1, methodManager);
+            code += processMethodNodes(child, scope + 1, methodManager);
         }
 
         writeStack(methodManager.getMaxStackSize(), scope + 1);
@@ -438,9 +439,9 @@ public class CodeGenerator {
                     int stackSize = methodManager.getCurrentStackSize();
                     // Stack cleaup if values were pushed but not used
                     int j = 0;
-                    if(methodManager.getIsMain())
+                    if (methodManager.getIsMain())
                         j = 1;
-                    for( ; j < stackSize; j++) {
+                    for (; j < stackSize; j++) {
                         code = writeToString(code, "pop\n", scope);
                         methodManager.stackPop(1);
                     }
@@ -505,9 +506,8 @@ public class CodeGenerator {
                 for (String arg : argsTypes) {
                     signature += ";" + arg;
                 }
-                if(!this.symbolTable.containsMethod(signature) &&
-                    !this.symbolTable.getImports().containsKey(className) &&
-                    this.symbolTable.getClasseName().equals(className)) {
+                if (!this.symbolTable.containsMethod(signature) && !this.symbolTable.getImports().containsKey(className)
+                        && this.symbolTable.getClasseName().equals(className)) {
                     className = this.symbolTable.getClassExtendsName();
                 }
 
@@ -518,7 +518,7 @@ public class CodeGenerator {
                 code = writeToString(code, codeLine, scope);
 
                 methodManager.stackPop(numberArgs);
-                if(! returnType.equals("void"))
+                if (!returnType.equals("void"))
                     methodManager.addInstruction("invokestatic", returnType);
 
             }
@@ -547,9 +547,8 @@ public class CodeGenerator {
                 for (String arg : argsTypes) {
                     signature += ";" + arg;
                 }
-                if(!this.symbolTable.containsMethod(signature) &&
-                    !this.symbolTable.getImports().containsKey(className) &&
-                    this.symbolTable.getClasseName().equals(className)) {
+                if (!this.symbolTable.containsMethod(signature) && !this.symbolTable.getImports().containsKey(className)
+                        && this.symbolTable.getClasseName().equals(className)) {
                     className = this.symbolTable.getClassExtendsName();
                 }
 
@@ -560,7 +559,7 @@ public class CodeGenerator {
                 code = writeToString(code, codeLine, scope);
 
                 methodManager.stackPop(numberArgs + 1);
-                if(! returnType.equals("void"))
+                if (!returnType.equals("void"))
                     methodManager.addInstruction("invokevirtual", returnType);
 
             }
@@ -588,9 +587,8 @@ public class CodeGenerator {
             for (String arg : argsTypes) {
                 signature += ";" + arg;
             }
-            if(!this.symbolTable.containsMethod(signature) &&
-                !this.symbolTable.getImports().containsKey(className) &&
-                this.symbolTable.getClasseName().equals(className)) {
+            if (!this.symbolTable.containsMethod(signature) && !this.symbolTable.getImports().containsKey(className)
+                    && this.symbolTable.getClasseName().equals(className)) {
                 className = this.symbolTable.getClassExtendsName();
             }
 
@@ -601,7 +599,7 @@ public class CodeGenerator {
             code = writeToString(code, codeLine, scope);
 
             methodManager.stackPop(numberArgs + 1);
-            if(! returnType.equals("void"))
+            if (!returnType.equals("void"))
                 methodManager.addInstruction("invokevirtual", returnType);
         }
 
@@ -617,11 +615,11 @@ public class CodeGenerator {
             signature += ";" + arg;
         }
 
-        if(this.symbolTable.containsMethod(signature)) {
+        if (this.symbolTable.containsMethod(signature)) {
             return this.symbolTable.getMethodReturn(signature);
         }
 
-        if(this.symbolTable.getImports().containsKey(className)) {
+        if (this.symbolTable.getImports().containsKey(className)) {
             if (isStatic) {
                 return this.symbolTable.getImports().get(className).getStaticMethodType(signature);
             } else {
@@ -629,10 +627,10 @@ public class CodeGenerator {
             }
         }
 
-        if(this.symbolTable.getClasseName().equals(className)) {
+        if (this.symbolTable.getClasseName().equals(className)) {
             className = this.symbolTable.getClassExtendsName();
 
-            if(this.symbolTable.getImports().containsKey(className)) {
+            if (this.symbolTable.getImports().containsKey(className)) {
                 if (isStatic) {
                     return this.symbolTable.getImports().get(className).getStaticMethodType(signature);
                 } else {
@@ -685,9 +683,9 @@ public class CodeGenerator {
 
                 code = writeToString(code, "aload_0 \n", scope);
                 methodManager.addInstruction("aload", this.symbolTable.getClasseName());
-                
-                code = writeToString(code, "getfield " + this.symbolTable.getClasseName() + "/" + filteredIdentifier + " "
-                + transformType(type) + "\n", scope);
+
+                code = writeToString(code, "getfield " + this.symbolTable.getClasseName() + "/" + filteredIdentifier
+                        + " " + transformType(type) + "\n", scope);
                 methodManager.stackPop(1);
                 methodManager.addInstruction("getfield", type);
 
@@ -702,7 +700,7 @@ public class CodeGenerator {
         }
         // Optimization :)
         String indexForInstruction = " ";
-        if(localIndex >= 0 && localIndex <= 3)
+        if (localIndex >= 0 && localIndex <= 3)
             indexForInstruction = "_";
         indexForInstruction += localIndex;
 
@@ -744,19 +742,19 @@ public class CodeGenerator {
     }
 
     private String writeArrayAccess(final ASTArrayAccess arrayNode, final int scope,
-        final MethodManager methodManager) {
+            final MethodManager methodManager) {
 
         String code = "";
 
-        final SimpleNode arrayNodeName  = (SimpleNode) arrayNode.jjtGetChild(0);
+        final SimpleNode arrayNodeName = (SimpleNode) arrayNode.jjtGetChild(0);
         final SimpleNode arrayNodeIndex = (SimpleNode) arrayNode.jjtGetChild(1);
 
-        code += processMethodNodes(arrayNodeName,  scope, methodManager);
+        code += processMethodNodes(arrayNodeName, scope, methodManager);
         final String arrayType = methodManager.getLastTypeInStack();
         final String simpleArrayType = methodManager.getSimpleArrayType(arrayType);
         code += processMethodNodes(arrayNodeIndex, scope, methodManager);
 
-        if(simpleArrayType.equals("int") || simpleArrayType.equals("boolean")) {
+        if (simpleArrayType.equals("int") || simpleArrayType.equals("boolean")) {
             code = writeToString(code, "iaload\n", scope);
             methodManager.stackPop(2);
             methodManager.addInstruction("iaload", "int");
@@ -792,8 +790,8 @@ public class CodeGenerator {
             code = writeToString(code, "aload_0 \n", scope);
             methodManager.addInstruction("aload", this.symbolTable.getClasseName());
 
-            code = writeToString(code, "getfield " + this.symbolTable.getClasseName() + "/" + filteredIdentifier
-                    + " " + transformType(type) + "\n", scope);
+            code = writeToString(code, "getfield " + this.symbolTable.getClasseName() + "/" + filteredIdentifier + " "
+                    + transformType(type) + "\n", scope);
             methodManager.stackPop(1);
             methodManager.addInstruction("getfield", type);
 
@@ -802,7 +800,7 @@ public class CodeGenerator {
 
         // Optimization :)
         String indexForInstruction = " ";
-        if(localIndex >= 0 && localIndex <= 3)
+        if (localIndex >= 0 && localIndex <= 3)
             indexForInstruction = "_";
         indexForInstruction += localIndex;
 
@@ -823,15 +821,40 @@ public class CodeGenerator {
     /**
      * Method to write equals to the file
      */
-    private String writeEquals(final ASTEquals equalsNode, final int scope,
-            final MethodManager methodManager) {
+    private String writeEquals(final ASTEquals equalsNode, final int scope, final MethodManager methodManager) {
         String code = "";
 
-        final SimpleNode childLeft  = (SimpleNode) equalsNode.jjtGetChild(0);
+        final SimpleNode childLeft = (SimpleNode) equalsNode.jjtGetChild(0);
         final SimpleNode childRight = (SimpleNode) equalsNode.jjtGetChild(1);
-                
+
+        if (optimizeO) {
+            if (childLeft instanceof ASTIdentifier && childRight instanceof ASTPlus) {
+                String namevar = ((ASTIdentifier) childLeft).getIdentifier();
+                final int localIndex = methodManager.indexOfLocal(namevar);
+                if (childRight.jjtGetChild(0) instanceof ASTIdentifier
+                        && childRight.jjtGetChild(1) instanceof ASTLiteral) {
+                    if (((ASTIdentifier) childRight.jjtGetChild(0)).getIdentifier() == namevar
+                            && ((ASTLiteral) childRight.jjtGetChild(1)).getLiteral().equals("1")) {
+                        code = writeToString(code, "iinc " + localIndex, scope);
+                        return code;
+
+                    }
+
+                } else if (childRight.jjtGetChild(1) instanceof ASTIdentifier
+                        && childRight.jjtGetChild(0) instanceof ASTLiteral) {
+                    if (((ASTIdentifier) childRight.jjtGetChild(1)).getIdentifier() == namevar
+                            && ((ASTLiteral) childRight.jjtGetChild(0)).getLiteral().equals("1")) {
+                        code = writeToString(code, "iinc " + localIndex, scope);
+                        return code;
+
+                    }
+
+                }
+            }
+        }
+
         // Store value in non-array variable
-        if(childLeft instanceof ASTIdentifier) {
+        if (childLeft instanceof ASTIdentifier) {
 
             final String identifier = ((ASTIdentifier) childLeft).getIdentifier();
             final int localIndex = methodManager.indexOfLocal(identifier);
@@ -845,16 +868,16 @@ public class CodeGenerator {
                 code = writeToString(code, "aload_0 \n", scope);
                 methodManager.addInstruction("aload", this.symbolTable.getClasseName());
 
-                code += processMethodNodes(childRight,  scope, methodManager);
+                code += processMethodNodes(childRight, scope, methodManager);
 
-                code = writeToString(code, "putfield " + this.symbolTable.getClasseName() + "/" +
-                        filteredIdentifier + " " + transformType(type) + "\n", scope);
+                code = writeToString(code, "putfield " + this.symbolTable.getClasseName() + "/" + filteredIdentifier
+                        + " " + transformType(type) + "\n", scope);
                 methodManager.addInstruction("putfield", type);
-    
+
                 return code;
             }
 
-            code += processMethodNodes(childRight,  scope, methodManager);
+            code += processMethodNodes(childRight, scope, methodManager);
             if (type.equals("int") || type.equals("boolean")) {
                 code = writeToString(code, "istore " + localIndex + "\n", scope);
                 methodManager.addInstruction("istore", type);
@@ -866,15 +889,15 @@ public class CodeGenerator {
                 methodManager.addInstruction("astore", type);
             }
         } else { // Store value in array variable
-            final SimpleNode arrayName  = (SimpleNode) childLeft.jjtGetChild(0);
+            final SimpleNode arrayName = (SimpleNode) childLeft.jjtGetChild(0);
             final SimpleNode arrayIndex = (SimpleNode) childLeft.jjtGetChild(1);
 
-            code += processMethodNodes(arrayName,  scope, methodManager);
+            code += processMethodNodes(arrayName, scope, methodManager);
             final String arrayType = methodManager.getLastTypeInStack();
             final String simpleArrayType = methodManager.getSimpleArrayType(arrayType);
             code += processMethodNodes(arrayIndex, scope, methodManager);
             // In arrays, new value is at the top of the stack
-            code += processMethodNodes(childRight,  scope, methodManager);
+            code += processMethodNodes(childRight, scope, methodManager);
 
             if (simpleArrayType.equals("int") || simpleArrayType.equals("boolean")) {
                 code = writeToString(code, "iastore " + "\n", scope);
@@ -913,13 +936,13 @@ public class CodeGenerator {
                 break;
             default:
                 stackLiteral = Integer.parseInt(literal);
-                if(stackLiteral >= 0 && stackLiteral <= 5) {
+                if (stackLiteral >= 0 && stackLiteral <= 5) {
                     code = writeToString(code, "iconst_" + stackLiteral + "\n", scope);
                     methodManager.addInstruction("bipush", "int");
-                } else if(stackLiteral == -1) {
+                } else if (stackLiteral == -1) {
                     code = writeToString(code, "iconst_m1\n", scope);
                     methodManager.addInstruction("bipush", "int");
-                } else if(stackLiteral > 127) {
+                } else if (stackLiteral > 127) {
                     code = writeToString(code, "ldc_w " + stackLiteral + "\n", scope);
                     methodManager.addInstruction("ldc_w", "long");
                 } else {
@@ -987,10 +1010,10 @@ public class CodeGenerator {
     private String writePlusOperation(final ASTPlus plusNode, final int scope, final MethodManager methodManager) {
         String code = "";
 
-        final SimpleNode childLeft  = (SimpleNode) plusNode.jjtGetChild(0);
+        final SimpleNode childLeft = (SimpleNode) plusNode.jjtGetChild(0);
         final SimpleNode childRight = (SimpleNode) plusNode.jjtGetChild(1);
 
-        code += processMethodNodes(childLeft,  scope, methodManager);
+        code += processMethodNodes(childLeft, scope, methodManager);
         code += processMethodNodes(childRight, scope, methodManager);
 
         code = writeToString(code, "iadd\n", scope);
@@ -1007,10 +1030,10 @@ public class CodeGenerator {
     private String writeMinusOperation(final ASTMinus minusNode, final int scope, final MethodManager methodManager) {
         String code = "";
 
-        final SimpleNode childLeft  = (SimpleNode) minusNode.jjtGetChild(0);
+        final SimpleNode childLeft = (SimpleNode) minusNode.jjtGetChild(0);
         final SimpleNode childRight = (SimpleNode) minusNode.jjtGetChild(1);
 
-        code += processMethodNodes(childLeft,  scope, methodManager);
+        code += processMethodNodes(childLeft, scope, methodManager);
         code += processMethodNodes(childRight, scope, methodManager);
 
         code = writeToString(code, "isub\n", scope);
@@ -1027,10 +1050,10 @@ public class CodeGenerator {
     private String writeMultiOperation(final ASTTimes multiNode, final int scope, final MethodManager methodManager) {
         String code = "";
 
-        final SimpleNode childLeft  = (SimpleNode) multiNode.jjtGetChild(0);
+        final SimpleNode childLeft = (SimpleNode) multiNode.jjtGetChild(0);
         final SimpleNode childRight = (SimpleNode) multiNode.jjtGetChild(1);
 
-        code += processMethodNodes(childLeft,  scope, methodManager);
+        code += processMethodNodes(childLeft, scope, methodManager);
         code += processMethodNodes(childRight, scope, methodManager);
 
         code = writeToString(code, "imul\n", scope);
@@ -1047,10 +1070,10 @@ public class CodeGenerator {
     private String writeDivOperation(final ASTDividor divNode, final int scope, final MethodManager methodManager) {
         String code = "";
 
-        final SimpleNode childLeft  = (SimpleNode) divNode.jjtGetChild(0);
+        final SimpleNode childLeft = (SimpleNode) divNode.jjtGetChild(0);
         final SimpleNode childRight = (SimpleNode) divNode.jjtGetChild(1);
 
-        code += processMethodNodes(childLeft,  scope, methodManager);
+        code += processMethodNodes(childLeft, scope, methodManager);
         code += processMethodNodes(childRight, scope, methodManager);
 
         code = writeToString(code, "idiv\n", scope);
@@ -1067,27 +1090,25 @@ public class CodeGenerator {
     private String writeLessThanOperation(ASTLessThan lessThanNode, int scope, MethodManager methodManager) {
         String code = "";
 
-        /* final SimpleNode leftChild = (SimpleNode) lessThanNode.jjtGetChild(0);
-        final SimpleNode rightChild = (SimpleNode) lessThanNode.jjtGetChild(1);
-
-        // Child order is inverted because dcmp requires it to work 
-        // as intended with a < operation
-        // Convertion to double is done so that a compare instruction can be
-        // used and result of operation is a single value on the stack
-        code += processMethodNodes(rightChild, scope, methodManager);
-        code = writeToString(code, "i2l\n", scope);
-        methodManager.stackPop(1);
-        methodManager.addInstruction("i2l", "long");
-        
-        code += processMethodNodes(leftChild, scope, methodManager);
-        code = writeToString(code, "i2l\n", scope);
-        methodManager.stackPop(1);
-        methodManager.addInstruction("i2l", "long");
-
-        code = writeToString(code, "lcmp\n", scope);
-
-        methodManager.stackPop(4);
-        methodManager.addInstruction("lcmp", "boolean"); */
+        /*
+         * final SimpleNode leftChild = (SimpleNode) lessThanNode.jjtGetChild(0); final
+         * SimpleNode rightChild = (SimpleNode) lessThanNode.jjtGetChild(1);
+         * 
+         * // Child order is inverted because dcmp requires it to work // as intended
+         * with a < operation // Convertion to double is done so that a compare
+         * instruction can be // used and result of operation is a single value on the
+         * stack code += processMethodNodes(rightChild, scope, methodManager); code =
+         * writeToString(code, "i2l\n", scope); methodManager.stackPop(1);
+         * methodManager.addInstruction("i2l", "long");
+         * 
+         * code += processMethodNodes(leftChild, scope, methodManager); code =
+         * writeToString(code, "i2l\n", scope); methodManager.stackPop(1);
+         * methodManager.addInstruction("i2l", "long");
+         * 
+         * code = writeToString(code, "lcmp\n", scope);
+         * 
+         * methodManager.stackPop(4); methodManager.addInstruction("lcmp", "boolean");
+         */
 
         final String lessLabel = "less" + this.labelCounter;
         final String endLabel = "endLess" + this.labelCounter;
@@ -1096,8 +1117,8 @@ public class CodeGenerator {
         final SimpleNode leftChild = (SimpleNode) lessThanNode.jjtGetChild(0);
         final SimpleNode rightChild = (SimpleNode) lessThanNode.jjtGetChild(1);
 
-        code += processMethodNodes(leftChild,  scope, methodManager);
-        code += processMethodNodes(rightChild,  scope, methodManager);
+        code += processMethodNodes(leftChild, scope, methodManager);
+        code += processMethodNodes(rightChild, scope, methodManager);
 
         code = writeToString(code, "if_icmplt " + lessLabel + "\n", scope);
         code = writeToString(code, "iconst_0\n", scope);
@@ -1118,10 +1139,10 @@ public class CodeGenerator {
     private String writeAndOperation(final ASTAnd andNode, final int scope, final MethodManager methodManager) {
         String code = "";
 
-        final SimpleNode childLeft  = (SimpleNode) andNode.jjtGetChild(0);
+        final SimpleNode childLeft = (SimpleNode) andNode.jjtGetChild(0);
         final SimpleNode childRight = (SimpleNode) andNode.jjtGetChild(1);
 
-        code += processMethodNodes(childLeft,  scope, methodManager);
+        code += processMethodNodes(childLeft, scope, methodManager);
         code += processMethodNodes(childRight, scope, methodManager);
 
         code = writeToString(code, "iand\n", scope);
@@ -1141,9 +1162,9 @@ public class CodeGenerator {
         final String endLabel = "endNot" + this.labelCounter;
         this.labelCounter++;
 
-        final SimpleNode child  = (SimpleNode) notNode.jjtGetChild(0);
+        final SimpleNode child = (SimpleNode) notNode.jjtGetChild(0);
 
-        code += processMethodNodes(child,  scope, methodManager);
+        code += processMethodNodes(child, scope, methodManager);
         code = writeToString(code, "ifgt " + notLabel + "\n", scope);
         code = writeToString(code, "iconst_1\n", scope);
         code = writeToString(code, "goto " + endLabel + "\n", scope);
@@ -1160,12 +1181,13 @@ public class CodeGenerator {
     /**
      * Method to write "length" array operator to the file
      */
-    private String writeLengthOperation(final ASTLength lengthNode, final int scope, final MethodManager methodManager) {
+    private String writeLengthOperation(final ASTLength lengthNode, final int scope,
+            final MethodManager methodManager) {
         String code = "";
 
-        final SimpleNode child  = (SimpleNode) lengthNode.jjtGetChild(0);
+        final SimpleNode child = (SimpleNode) lengthNode.jjtGetChild(0);
 
-        code += processMethodNodes(child,  scope, methodManager);
+        code += processMethodNodes(child, scope, methodManager);
 
         code = writeToString(code, "arraylength\n", scope);
 
@@ -1181,9 +1203,9 @@ public class CodeGenerator {
     private String writeNewOperation(final ASTNew newNode, final int scope, final MethodManager methodManager) {
         String code = "";
 
-        final SimpleNode child  = (SimpleNode) newNode.jjtGetChild(0);
+        final SimpleNode child = (SimpleNode) newNode.jjtGetChild(0);
 
-        if(child instanceof ASTExpression) {
+        if (child instanceof ASTExpression) {
             code += processMethodNodes(child, scope, methodManager);
             code = writeToString(code, "newarray int\n", scope);
             methodManager.stackPop(1);
@@ -1203,12 +1225,11 @@ public class CodeGenerator {
 
     private static String getJasminIdentifier(String identifier) {
         /**
-         * This function exists because identifiers in J-- are allowed to be
-         * declared as Jasmin keywords. As sugested, we created a method that
-         * sanitizes all identifier's names and transforms all keywords
-         * into acceptable names for Jasmin. We tried filtering as
-         * many names as possible, but Jasmin's documentation does not
-         * make it easy to find all of its keywords. 
+         * This function exists because identifiers in J-- are allowed to be declared as
+         * Jasmin keywords. As sugested, we created a method that sanitizes all
+         * identifier's names and transforms all keywords into acceptable names for
+         * Jasmin. We tried filtering as many names as possible, but Jasmin's
+         * documentation does not make it easy to find all of its keywords.
          */
         identifier = "_" + identifier;
 
