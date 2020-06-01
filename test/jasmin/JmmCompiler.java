@@ -20,10 +20,10 @@ public class JmmCompiler {
 		// This method needs to be implemented before the tests can run
 		// Below there is an example implementation, that assumes that the .j file is generated in the repository root
 		// Adapt the code according to your implementation.
-		throw new RuntimeException("Implement JmmCompiler.compile() in order to test the execution of .jmm files");			
+		//throw new RuntimeException("Implement JmmCompiler.compile() in order to test the execution of .jmm files");			
 
 
-		/*
+		
 		// Executes J-- compiler		
 		try {
             // Get class with main
@@ -44,14 +44,14 @@ public class JmmCompiler {
 		var filename = SpecsIo.removeExtension(jmm.getName()) + ".j";
 		
 		// TODO: where is the .j file? This code works when the .j file has the same name as the .jmm file, and is generated in the repository root. Adapt code according to how your J-- compiler works
-		var jFile = new File(filename);
+		var jFile = new File("jFiles/" + filename);
 				
 		if(!jFile.isFile()) {
 			throw new RuntimeException("Could not find file " + jFile.getAbsolutePath());
 		}
 
 		return SpecsIo.read(jFile);		
-		*/
+		
 				
 	}
 	

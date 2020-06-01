@@ -39,7 +39,7 @@ public class CodeGenerator {
         this.rootNode = root;
         this.symbolTable = symbolTable;
         this.fileName = fileName;
-        this.filePath = System.getProperty("user.dir");
+        this.filePath = System.getProperty("user.dir") + "/jFiles";
     }
 
     /**
