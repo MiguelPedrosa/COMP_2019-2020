@@ -9,28 +9,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+
 
 /**
  * CodeGenerator
  */
 public class CodeGenerator {
 
-    private static final String fileExtension = ".j";
-    private static final char space = ' ';
-    private static final char tab = '\t';
-    private static final String fileSeparator = System.getProperty("file.separator");
-
-    // Identation settings (can be changed later)
-    private final String identation = Character.toString(space);
-    private final int identationSize = 2;
-
-    private FileOutputStream jFile;
     private final SimpleNode rootNode;
-    private final String fileName;
-    private final String filePath;
-    private final Boolean optimizeO;
 
     private final SymbolTable symbolTable;
 
@@ -40,9 +26,9 @@ public class CodeGenerator {
             final Boolean optimizeO) {
         this.rootNode = root;
         this.symbolTable = symbolTable;
-        this.fileName = fileName;
-        this.optimizeO = optimizeO;
-        this.filePath = System.getProperty("user.dir") + "/jFiles";
+
+        CodeGeneratorUtils.setFileName(fileName);
+        Optimization.setOptimizeO(optimizeO);
     }
 
     /**
@@ -52,7 +38,7 @@ public class CodeGenerator {
      */
     public boolean start() {
         System.out.println("Code generation started...\n\n");
-        if (!generateFile()) {
+        if (!CodeGeneratorUtils.generateFile()) {
             return false;
         }
 
@@ -91,62 +77,14 @@ public class CodeGenerator {
         }
     }
 
-    /**
-     * Method to generate code file
-     */
-    private boolean generateFile() {
-        System.out.println("Generating code file...\n\n");
-        try {
-            jFile = new FileOutputStream(filePath + fileSeparator + fileName + fileExtension);
-        } catch (final FileNotFoundException e) {
-            e.printStackTrace();
-            System.out.println("Failed to generate code file!\n\n");
-            return false;
-        }
-        return true;
-    }
 
-    /**
-     * Method to write code into file
-     * 
-     * @param code
-     * @param scope
-     */
-    private void writeCode(final String code, final int scope) {
-        String identedCode = IntStream.range(0, scope * identationSize).mapToObj(i -> identation)
-                .collect(Collectors.joining(""));
-
-        identedCode += code;
-
-        try {
-            jFile.write(identedCode.getBytes());
-        } catch (final IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private String writeToString(final String oldString, final String code, final int scope) {
-        String identedCode = IntStream.range(0, scope * identationSize).mapToObj(i -> identation)
-                .collect(Collectors.joining(""));
-        identedCode += code;
-
-        return oldString + identedCode;
-    }
-
-    private void writeStringToCode(final String code) {
-        try {
-            jFile.write(code.getBytes());
-        } catch (final IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     /**
      * Method to write the end of a method to the file
      * 
      */
     private void endMethod(final int scope) {
-        writeCode(".end method\n", scope);
+        CodeGeneratorUtils.writeCode(".end method\n", scope);
     }
 
     /**
@@ -154,11 +92,11 @@ public class CodeGenerator {
      * 
      */
     private void writeInitializer(final int scope) {
-        writeCode("\n; standard initializer\n", scope);
-        writeCode(".method public <init>()V\n", scope);
-        writeCode("aload_0\n", scope + 1);
-        writeCode("invokenonvirtual java/lang/Object/<init>()V\n", scope + 1);
-        writeCode("return\n", scope + 1);
+        CodeGeneratorUtils.writeCode("\n; standard initializer\n", scope);
+        CodeGeneratorUtils.writeCode(".method public <init>()V\n", scope);
+        CodeGeneratorUtils.writeCode("aload_0\n", scope + 1);
+        CodeGeneratorUtils.writeCode("invokenonvirtual java/lang/Object/<init>()V\n", scope + 1);
+        CodeGeneratorUtils.writeCode("return\n", scope + 1);
         endMethod(scope);
     }
 
@@ -170,8 +108,8 @@ public class CodeGenerator {
     private void writeClass(final ASTClassDeclaration classNode, final int scope, final SymbolTable scopeTable) {
         // System.out.println("Writing class...");
         final String className = classNode.getClassId();
-        writeCode(".class public " + className + "\n", scope);
-        writeCode(".super java/lang/Object\n\n", scope);
+        CodeGeneratorUtils.writeCode(".class public " + className + "\n", scope);
+        CodeGeneratorUtils.writeCode(".super java/lang/Object\n\n", scope);
 
         // Field
         final int numChildren = classNode.jjtGetNumChildren();
@@ -269,11 +207,11 @@ public class CodeGenerator {
     }
 
     private void writeStack(final int numStacks, final int scope) {
-        writeCode(".limit stack " + numStacks + "\n", scope);
+        CodeGeneratorUtils.writeCode(".limit stack " + numStacks + "\n", scope);
     }
 
     private void writeLocals(final int numLocals, final int scope) {
-        writeCode(".limit locals " + numLocals + "\n", scope);
+        CodeGeneratorUtils.writeCode(".limit locals " + numLocals + "\n", scope);
     }
 
     private List<SymbolVar> prepareLocals(final int scope, final String methodKey) {
@@ -315,7 +253,7 @@ public class CodeGenerator {
             argsInJasmin = argsInJasmin.concat(argType);
         }
 
-        writeCode("\n.method public " + methodName + "(" + argsInJasmin + ")" + methodType + "\n", scope);
+        CodeGeneratorUtils.writeCode("\n.method public " + methodName + "(" + argsInJasmin + ")" + methodType + "\n", scope);
 
         final String methodKey = methodNode.getMethodKey();
         final MethodManager methodManager = new MethodManager();
@@ -334,13 +272,13 @@ public class CodeGenerator {
         writeStack(methodManager.getMaxStackSize(), scope + 1);
         writeLocals(locals.size(), scope + 1);
 
-        writeCode(code, scope);
+        CodeGeneratorUtils.writeCode(code, scope);
 
         endMethod(scope);
     }
 
     private void writeMain(final ASTMainDeclaration mainMethodNode, final int scope, final SymbolTable scopeTable) {
-        writeCode("\n.method public static main([Ljava/lang/String;)V\n", scope);
+        CodeGeneratorUtils.writeCode("\n.method public static main([Ljava/lang/String;)V\n", scope);
 
         final MethodManager methodManager = new MethodManager();
         methodManager.setMain();
@@ -358,8 +296,8 @@ public class CodeGenerator {
 
         writeStack(methodManager.getMaxStackSize(), scope + 1);
         writeLocals(locals.size(), scope + 1);
-        writeCode(code, scope);
-        writeCode("return\n", scope + 1);
+        CodeGeneratorUtils.writeCode(code, scope);
+        CodeGeneratorUtils.writeCode("return\n", scope + 1);
 
         endMethod(scope);
     }
@@ -442,7 +380,7 @@ public class CodeGenerator {
                     if (methodManager.getIsMain())
                         j = 1;
                     for (; j < stackSize; j++) {
-                        code = writeToString(code, "pop\n", scope);
+                        code = CodeGeneratorUtils.writeToString(code, "pop\n", scope);
                         methodManager.stackPop(1);
                     }
                 }
@@ -469,7 +407,7 @@ public class CodeGenerator {
         String identifier = varDecNode.getVarId();
         identifier = getJasminIdentifier(identifier);
         // Field is always declared as private because that is the java default
-        writeCode(".field private " + identifier + " " + type + "\n", scope);
+        CodeGeneratorUtils.writeCode(".field private " + identifier + " " + type + "\n", scope);
     }
 
     private String writeFuncCall(final ASTFuncCall funcCallNode, final int scope, final MethodManager methodManager) {
@@ -515,7 +453,7 @@ public class CodeGenerator {
 
                 codeLine = "invokestatic " + className + "/" + methodName + "(" + args + ")"
                         + this.transformType(returnType) + "\n";
-                code = writeToString(code, codeLine, scope);
+                code = CodeGeneratorUtils.writeToString(code, codeLine, scope);
 
                 methodManager.stackPop(numberArgs);
                 if (!returnType.equals("void"))
@@ -556,7 +494,7 @@ public class CodeGenerator {
 
                 codeLine = "invokevirtual " + className + "/" + methodName + "(" + args + ")"
                         + this.transformType(returnType) + "\n";
-                code = writeToString(code, codeLine, scope);
+                code = CodeGeneratorUtils.writeToString(code, codeLine, scope);
 
                 methodManager.stackPop(numberArgs + 1);
                 if (!returnType.equals("void"))
@@ -596,7 +534,7 @@ public class CodeGenerator {
 
             codeLine = "invokevirtual " + className + "/" + methodName + "(" + args + ")"
                     + this.transformType(returnType) + "\n";
-            code = writeToString(code, codeLine, scope);
+            code = CodeGeneratorUtils.writeToString(code, codeLine, scope);
 
             methodManager.stackPop(numberArgs + 1);
             if (!returnType.equals("void"))
@@ -681,10 +619,10 @@ public class CodeGenerator {
 
                 final String filteredIdentifier = getJasminIdentifier(identifier);
 
-                code = writeToString(code, "aload_0 \n", scope);
+                code = CodeGeneratorUtils.writeToString(code, "aload_0 \n", scope);
                 methodManager.addInstruction("aload", this.symbolTable.getClasseName());
 
-                code = writeToString(code, "getfield " + this.symbolTable.getClasseName() + "/" + filteredIdentifier
+                code = CodeGeneratorUtils.writeToString(code, "getfield " + this.symbolTable.getClasseName() + "/" + filteredIdentifier
                         + " " + transformType(type) + "\n", scope);
                 methodManager.stackPop(1);
                 methodManager.addInstruction("getfield", type);
@@ -705,13 +643,13 @@ public class CodeGenerator {
         indexForInstruction += localIndex;
 
         if (type.equals("int") || type.equals("boolean")) {
-            code = writeToString(code, "iload" + indexForInstruction + "\n", scope);
+            code = CodeGeneratorUtils.writeToString(code, "iload" + indexForInstruction + "\n", scope);
             methodManager.addInstruction("iload", type);
         } else if (type.equals("long")) {
-            code = writeToString(code, "lload" + indexForInstruction + "\n", scope);
+            code = CodeGeneratorUtils.writeToString(code, "lload" + indexForInstruction + "\n", scope);
             methodManager.addInstruction("lload", type);
         } else {
-            code = writeToString(code, "aload" + indexForInstruction + "\n", scope);
+            code = CodeGeneratorUtils.writeToString(code, "aload" + indexForInstruction + "\n", scope);
             methodManager.addInstruction("aload", type);
         }
 
@@ -731,11 +669,11 @@ public class CodeGenerator {
         code += processMethodNodes(returnExpression, scope, methodManager);
 
         if (methodManager.getLastTypeInStack().equals("int") || methodManager.getLastTypeInStack().equals("boolean")) {
-            code = writeToString(code, "ireturn\n", scope);
+            code = CodeGeneratorUtils.writeToString(code, "ireturn\n", scope);
         } else if (methodManager.getLastTypeInStack().equals("long")) {
-            code = writeToString(code, "lreturn\n", scope);
+            code = CodeGeneratorUtils.writeToString(code, "lreturn\n", scope);
         } else {
-            code = writeToString(code, "areturn\n", scope);
+            code = CodeGeneratorUtils.writeToString(code, "areturn\n", scope);
         }
 
         return code;
@@ -755,11 +693,11 @@ public class CodeGenerator {
         code += processMethodNodes(arrayNodeIndex, scope, methodManager);
 
         if (simpleArrayType.equals("int") || simpleArrayType.equals("boolean")) {
-            code = writeToString(code, "iaload\n", scope);
+            code = CodeGeneratorUtils.writeToString(code, "iaload\n", scope);
             methodManager.stackPop(2);
             methodManager.addInstruction("iaload", "int");
         } else {
-            code = writeToString(code, "aaload\n", scope);
+            code = CodeGeneratorUtils.writeToString(code, "aaload\n", scope);
             methodManager.stackPop(2);
             methodManager.addInstruction("aaload", simpleArrayType);
         }
@@ -787,10 +725,10 @@ public class CodeGenerator {
 
             String filteredIdentifier = getJasminIdentifier(identifier);
 
-            code = writeToString(code, "aload_0 \n", scope);
+            code = CodeGeneratorUtils.writeToString(code, "aload_0 \n", scope);
             methodManager.addInstruction("aload", this.symbolTable.getClasseName());
 
-            code = writeToString(code, "getfield " + this.symbolTable.getClasseName() + "/" + filteredIdentifier + " "
+            code = CodeGeneratorUtils.writeToString(code, "getfield " + this.symbolTable.getClasseName() + "/" + filteredIdentifier + " "
                     + transformType(type) + "\n", scope);
             methodManager.stackPop(1);
             methodManager.addInstruction("getfield", type);
@@ -805,13 +743,13 @@ public class CodeGenerator {
         indexForInstruction += localIndex;
 
         if (type.equals("int") || type.equals("boolean")) {
-            code = writeToString(code, "iload" + indexForInstruction + "\n", scope);
+            code = CodeGeneratorUtils.writeToString(code, "iload" + indexForInstruction + "\n", scope);
             methodManager.addInstruction("iload", type);
         } else if (type.equals("long")) {
-            code = writeToString(code, "lload" + indexForInstruction + "\n", scope);
+            code = CodeGeneratorUtils.writeToString(code, "lload" + indexForInstruction + "\n", scope);
             methodManager.addInstruction("lload", type);
         } else {
-            code = writeToString(code, "aload" + indexForInstruction + "\n", scope);
+            code = CodeGeneratorUtils.writeToString(code, "aload" + indexForInstruction + "\n", scope);
             methodManager.addInstruction("aload", type);
         }
 
@@ -824,34 +762,14 @@ public class CodeGenerator {
     private String writeEquals(final ASTEquals equalsNode, final int scope, final MethodManager methodManager) {
         String code = "";
 
+        String optimizedCode = Optimization.writeEquals(equalsNode, scope, methodManager);
+        if(optimizedCode != null){
+            code = optimizedCode;
+            return code;
+        }
+
         final SimpleNode childLeft = (SimpleNode) equalsNode.jjtGetChild(0);
         final SimpleNode childRight = (SimpleNode) equalsNode.jjtGetChild(1);
-
-        if (optimizeO) {
-            if (childLeft instanceof ASTIdentifier && childRight instanceof ASTPlus) {
-                String namevar = ((ASTIdentifier) childLeft).getIdentifier();
-                final int localIndex = methodManager.indexOfLocal(namevar);
-                if (childRight.jjtGetChild(0) instanceof ASTIdentifier
-                        && childRight.jjtGetChild(1) instanceof ASTLiteral) {
-                    if (((ASTIdentifier) childRight.jjtGetChild(0)).getIdentifier() == namevar
-                            && ((ASTLiteral) childRight.jjtGetChild(1)).getLiteral().equals("1")) {
-                        code = writeToString(code, "iinc " + localIndex, scope);
-                        return code;
-
-                    }
-
-                } else if (childRight.jjtGetChild(1) instanceof ASTIdentifier
-                        && childRight.jjtGetChild(0) instanceof ASTLiteral) {
-                    if (((ASTIdentifier) childRight.jjtGetChild(1)).getIdentifier() == namevar
-                            && ((ASTLiteral) childRight.jjtGetChild(0)).getLiteral().equals("1")) {
-                        code = writeToString(code, "iinc " + localIndex, scope);
-                        return code;
-
-                    }
-
-                }
-            }
-        }
 
         // Store value in non-array variable
         if (childLeft instanceof ASTIdentifier) {
@@ -865,12 +783,12 @@ public class CodeGenerator {
                 type = this.symbolTable.getVariableType(identifier);
                 String filteredIdentifier = getJasminIdentifier(identifier);
 
-                code = writeToString(code, "aload_0 \n", scope);
+                code = CodeGeneratorUtils.writeToString(code, "aload_0 \n", scope);
                 methodManager.addInstruction("aload", this.symbolTable.getClasseName());
 
                 code += processMethodNodes(childRight, scope, methodManager);
 
-                code = writeToString(code, "putfield " + this.symbolTable.getClasseName() + "/" + filteredIdentifier
+                code = CodeGeneratorUtils.writeToString(code, "putfield " + this.symbolTable.getClasseName() + "/" + filteredIdentifier
                         + " " + transformType(type) + "\n", scope);
                 methodManager.addInstruction("putfield", type);
 
@@ -879,13 +797,13 @@ public class CodeGenerator {
 
             code += processMethodNodes(childRight, scope, methodManager);
             if (type.equals("int") || type.equals("boolean")) {
-                code = writeToString(code, "istore " + localIndex + "\n", scope);
+                code = CodeGeneratorUtils.writeToString(code, "istore " + localIndex + "\n", scope);
                 methodManager.addInstruction("istore", type);
             } else if (type.equals("long")) {
-                code = writeToString(code, "lstore" + localIndex + "\n", scope);
+                code = CodeGeneratorUtils.writeToString(code, "lstore" + localIndex + "\n", scope);
                 methodManager.addInstruction("lstore", type);
             } else {
-                code = writeToString(code, "astore " + localIndex + "\n", scope);
+                code = CodeGeneratorUtils.writeToString(code, "astore " + localIndex + "\n", scope);
                 methodManager.addInstruction("astore", type);
             }
         } else { // Store value in array variable
@@ -900,10 +818,10 @@ public class CodeGenerator {
             code += processMethodNodes(childRight, scope, methodManager);
 
             if (simpleArrayType.equals("int") || simpleArrayType.equals("boolean")) {
-                code = writeToString(code, "iastore " + "\n", scope);
+                code = CodeGeneratorUtils.writeToString(code, "iastore " + "\n", scope);
                 methodManager.addInstruction("iastore", simpleArrayType);
             } else {
-                code = writeToString(code, "aastore " + "\n", scope);
+                code = CodeGeneratorUtils.writeToString(code, "aastore " + "\n", scope);
                 methodManager.addInstruction("aastore", simpleArrayType);
             }
         }
@@ -922,31 +840,31 @@ public class CodeGenerator {
         switch (literal) {
             case "true":
                 stackLiteral = 1;
-                code = writeToString(code, "bipush " + stackLiteral + "\n", scope);
+                code = CodeGeneratorUtils.writeToString(code, "bipush " + stackLiteral + "\n", scope);
                 methodManager.addInstruction("bipush", "boolean");
                 break;
             case "false":
                 stackLiteral = 0;
-                code = writeToString(code, "bipush " + stackLiteral + "\n", scope);
+                code = CodeGeneratorUtils.writeToString(code, "bipush " + stackLiteral + "\n", scope);
                 methodManager.addInstruction("bipush", "boolean");
                 break;
             case "this":
-                code = writeToString(code, "aload_0 \n", scope);
+                code = CodeGeneratorUtils.writeToString(code, "aload_0 \n", scope);
                 methodManager.addInstruction("aload", this.symbolTable.getClasseName());
                 break;
             default:
                 stackLiteral = Integer.parseInt(literal);
                 if (stackLiteral >= 0 && stackLiteral <= 5) {
-                    code = writeToString(code, "iconst_" + stackLiteral + "\n", scope);
+                    code = CodeGeneratorUtils.writeToString(code, "iconst_" + stackLiteral + "\n", scope);
                     methodManager.addInstruction("bipush", "int");
                 } else if (stackLiteral == -1) {
-                    code = writeToString(code, "iconst_m1\n", scope);
+                    code = CodeGeneratorUtils.writeToString(code, "iconst_m1\n", scope);
                     methodManager.addInstruction("bipush", "int");
                 } else if (stackLiteral > 127) {
-                    code = writeToString(code, "ldc_w " + stackLiteral + "\n", scope);
+                    code = CodeGeneratorUtils.writeToString(code, "ldc_w " + stackLiteral + "\n", scope);
                     methodManager.addInstruction("ldc_w", "long");
                 } else {
-                    code = writeToString(code, "bipush " + stackLiteral + "\n", scope);
+                    code = CodeGeneratorUtils.writeToString(code, "bipush " + stackLiteral + "\n", scope);
                     methodManager.addInstruction("bipush", "int");
                 }
                 break;
@@ -969,13 +887,13 @@ public class CodeGenerator {
         final SimpleNode elseScope = (SimpleNode) ifNode.jjtGetChild(2);
 
         code += processMethodNodes(conditionChild, scope, methodManager);
-        code = writeToString(code, "ifgt correct" + label + "\n", scope);
+        code = CodeGeneratorUtils.writeToString(code, "ifgt correct" + label + "\n", scope);
         methodManager.addInstruction("ifgt", "");
         code += processMethodNodes(elseScope, scope, methodManager);
-        code = writeToString(code, "goto endIf" + label + "\n", scope);
-        code = writeToString(code, "correct" + label + ":\n", 0);
+        code = CodeGeneratorUtils.writeToString(code, "goto endIf" + label + "\n", scope);
+        code = CodeGeneratorUtils.writeToString(code, "correct" + label + ":\n", 0);
         code += processMethodNodes(ifScope, scope, methodManager);
-        code = writeToString(code, "endIf" + label + ":\n", 0);
+        code = CodeGeneratorUtils.writeToString(code, "endIf" + label + ":\n", 0);
 
         return code;
     }
@@ -993,13 +911,13 @@ public class CodeGenerator {
         final SimpleNode conditionChild = (SimpleNode) whileNode.jjtGetChild(0);
         final SimpleNode scopeChild = (SimpleNode) whileNode.jjtGetChild(1);
 
-        code = writeToString(code, "while" + label + ":\n", 0);
+        code = CodeGeneratorUtils.writeToString(code, "while" + label + ":\n", 0);
         code += processMethodNodes(conditionChild, scope, methodManager);
-        code = writeToString(code, "ifle endWhile" + label + "\n", scope);
+        code = CodeGeneratorUtils.writeToString(code, "ifle endWhile" + label + "\n", scope);
         methodManager.addInstruction("ifle", "");
         code += processMethodNodes(scopeChild, scope, methodManager);
-        code = writeToString(code, "goto while" + label + "\n", scope);
-        code = writeToString(code, "endWhile" + label + ":\n", 0);
+        code = CodeGeneratorUtils.writeToString(code, "goto while" + label + "\n", scope);
+        code = CodeGeneratorUtils.writeToString(code, "endWhile" + label + ":\n", 0);
 
         return code;
     }
@@ -1016,7 +934,7 @@ public class CodeGenerator {
         code += processMethodNodes(childLeft, scope, methodManager);
         code += processMethodNodes(childRight, scope, methodManager);
 
-        code = writeToString(code, "iadd\n", scope);
+        code = CodeGeneratorUtils.writeToString(code, "iadd\n", scope);
 
         methodManager.stackPop(2);
         methodManager.addInstruction("iadd", "int");
@@ -1036,7 +954,7 @@ public class CodeGenerator {
         code += processMethodNodes(childLeft, scope, methodManager);
         code += processMethodNodes(childRight, scope, methodManager);
 
-        code = writeToString(code, "isub\n", scope);
+        code = CodeGeneratorUtils.writeToString(code, "isub\n", scope);
 
         methodManager.stackPop(2);
         methodManager.addInstruction("isub", "int");
@@ -1056,7 +974,7 @@ public class CodeGenerator {
         code += processMethodNodes(childLeft, scope, methodManager);
         code += processMethodNodes(childRight, scope, methodManager);
 
-        code = writeToString(code, "imul\n", scope);
+        code = CodeGeneratorUtils.writeToString(code, "imul\n", scope);
 
         methodManager.stackPop(2);
         methodManager.addInstruction("imul", "int");
@@ -1076,7 +994,7 @@ public class CodeGenerator {
         code += processMethodNodes(childLeft, scope, methodManager);
         code += processMethodNodes(childRight, scope, methodManager);
 
-        code = writeToString(code, "idiv\n", scope);
+        code = CodeGeneratorUtils.writeToString(code, "idiv\n", scope);
 
         methodManager.stackPop(2);
         methodManager.addInstruction("idiv", "int");
@@ -1098,14 +1016,14 @@ public class CodeGenerator {
          * with a < operation // Convertion to double is done so that a compare
          * instruction can be // used and result of operation is a single value on the
          * stack code += processMethodNodes(rightChild, scope, methodManager); code =
-         * writeToString(code, "i2l\n", scope); methodManager.stackPop(1);
+         * CodeGeneratorUtils.writeToString(code, "i2l\n", scope); methodManager.stackPop(1);
          * methodManager.addInstruction("i2l", "long");
          * 
          * code += processMethodNodes(leftChild, scope, methodManager); code =
-         * writeToString(code, "i2l\n", scope); methodManager.stackPop(1);
+         * CodeGeneratorUtils.writeToString(code, "i2l\n", scope); methodManager.stackPop(1);
          * methodManager.addInstruction("i2l", "long");
          * 
-         * code = writeToString(code, "lcmp\n", scope);
+         * code = CodeGeneratorUtils.writeToString(code, "lcmp\n", scope);
          * 
          * methodManager.stackPop(4); methodManager.addInstruction("lcmp", "boolean");
          */
@@ -1120,12 +1038,12 @@ public class CodeGenerator {
         code += processMethodNodes(leftChild, scope, methodManager);
         code += processMethodNodes(rightChild, scope, methodManager);
 
-        code = writeToString(code, "if_icmplt " + lessLabel + "\n", scope);
-        code = writeToString(code, "iconst_0\n", scope);
-        code = writeToString(code, "goto " + endLabel + "\n", scope);
-        code = writeToString(code, lessLabel + ":\n", 0);
-        code = writeToString(code, "iconst_1\n", scope);
-        code = writeToString(code, endLabel + ":\n", 0);
+        code = CodeGeneratorUtils.writeToString(code, "if_icmplt " + lessLabel + "\n", scope);
+        code = CodeGeneratorUtils.writeToString(code, "iconst_0\n", scope);
+        code = CodeGeneratorUtils.writeToString(code, "goto " + endLabel + "\n", scope);
+        code = CodeGeneratorUtils.writeToString(code, lessLabel + ":\n", 0);
+        code = CodeGeneratorUtils.writeToString(code, "iconst_1\n", scope);
+        code = CodeGeneratorUtils.writeToString(code, endLabel + ":\n", 0);
 
         methodManager.addInstruction("if_icmplt", "void");
         methodManager.addInstruction("iconst", "boolean");
@@ -1145,7 +1063,7 @@ public class CodeGenerator {
         code += processMethodNodes(childLeft, scope, methodManager);
         code += processMethodNodes(childRight, scope, methodManager);
 
-        code = writeToString(code, "iand\n", scope);
+        code = CodeGeneratorUtils.writeToString(code, "iand\n", scope);
 
         methodManager.stackPop(2);
         methodManager.addInstruction("iand", "boolean");
@@ -1165,12 +1083,12 @@ public class CodeGenerator {
         final SimpleNode child = (SimpleNode) notNode.jjtGetChild(0);
 
         code += processMethodNodes(child, scope, methodManager);
-        code = writeToString(code, "ifgt " + notLabel + "\n", scope);
-        code = writeToString(code, "iconst_1\n", scope);
-        code = writeToString(code, "goto " + endLabel + "\n", scope);
-        code = writeToString(code, notLabel + ":\n", 0);
-        code = writeToString(code, "iconst_0\n", scope);
-        code = writeToString(code, endLabel + ":\n", 0);
+        code = CodeGeneratorUtils.writeToString(code, "ifgt " + notLabel + "\n", scope);
+        code = CodeGeneratorUtils.writeToString(code, "iconst_1\n", scope);
+        code = CodeGeneratorUtils.writeToString(code, "goto " + endLabel + "\n", scope);
+        code = CodeGeneratorUtils.writeToString(code, notLabel + ":\n", 0);
+        code = CodeGeneratorUtils.writeToString(code, "iconst_0\n", scope);
+        code = CodeGeneratorUtils.writeToString(code, endLabel + ":\n", 0);
 
         methodManager.stackPop(1);
         methodManager.addInstruction("iconst", "boolean");
@@ -1189,7 +1107,7 @@ public class CodeGenerator {
 
         code += processMethodNodes(child, scope, methodManager);
 
-        code = writeToString(code, "arraylength\n", scope);
+        code = CodeGeneratorUtils.writeToString(code, "arraylength\n", scope);
 
         methodManager.stackPop(1);
         methodManager.addInstruction("arraylength", "int");
@@ -1207,15 +1125,15 @@ public class CodeGenerator {
 
         if (child instanceof ASTExpression) {
             code += processMethodNodes(child, scope, methodManager);
-            code = writeToString(code, "newarray int\n", scope);
+            code = CodeGeneratorUtils.writeToString(code, "newarray int\n", scope);
             methodManager.stackPop(1);
             methodManager.addInstruction("newarray", "int[]");
         } else { // Child is identifier: aka constructor
             String identifier = ((ASTIdentifier) child).getIdentifier();
 
-            code = writeToString(code, "new " + identifier + "\n", scope);
-            code = writeToString(code, "dup\n", scope);
-            code = writeToString(code, "invokespecial " + identifier + "/<init>()V\n", scope);
+            code = CodeGeneratorUtils.writeToString(code, "new " + identifier + "\n", scope);
+            code = CodeGeneratorUtils.writeToString(code, "dup\n", scope);
+            code = CodeGeneratorUtils.writeToString(code, "invokespecial " + identifier + "/<init>()V\n", scope);
 
             methodManager.addInstruction("new", identifier);
         }
