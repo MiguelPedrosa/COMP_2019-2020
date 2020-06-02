@@ -52,6 +52,7 @@ public class MethodManager {
 
         instructionsAux.put("ifgt", -1);
         instructionsAux.put("ifle", -1);
+        instructionsAux.put("iflt", -1);
         instructionsAux.put("if_icmplt", -2);
         
         instructionsAux.put("ireturn", -1);
@@ -71,6 +72,7 @@ public class MethodManager {
         switch (instruction) {
             case "ifgt":
             case "ifle":
+            case "iflt":
             case "ireturn":
             case "areturn":
             case "lreturn":

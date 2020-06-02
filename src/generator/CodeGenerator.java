@@ -1024,28 +1024,14 @@ public class CodeGenerator {
     private String writeLessThanOperation(ASTLessThan lessThanNode, int scope, MethodManager methodManager) {
         String code = "";
 
-        /*
-         * final SimpleNode leftChild = (SimpleNode) lessThanNode.jjtGetChild(0); final
-         * SimpleNode rightChild = (SimpleNode) lessThanNode.jjtGetChild(1);
-         * 
-         * // Child order is inverted because dcmp requires it to work // as intended
-         * with a < operation // Convertion to double is done so that a compare
-         * instruction can be // used and result of operation is a single value on the
-         * stack code += processMethodNodes(rightChild, scope, methodManager); code =
-         * CodeGeneratorUtils.writeToString(code, "i2l\n", scope); methodManager.stackPop(1);
-         * methodManager.addInstruction("i2l", "long");
-         * 
-         * code += processMethodNodes(leftChild, scope, methodManager); code =
-         * CodeGeneratorUtils.writeToString(code, "i2l\n", scope); methodManager.stackPop(1);
-         * methodManager.addInstruction("i2l", "long");
-         * 
-         * code = CodeGeneratorUtils.writeToString(code, "lcmp\n", scope);
-         * 
-         * methodManager.stackPop(4); methodManager.addInstruction("lcmp", "boolean");
-         */
-
         final String lessLabel = "less" + this.labelCounter;
         final String endLabel = "endLess" + this.labelCounter;
+
+        String optimizedCode = Optimization.writeLessThanOperation(lessThanNode, scope, methodManager, this.labelCounter);
+        if(optimizedCode != null){
+            code = optimizedCode;
+            return code;
+        }
         this.labelCounter++;
 
         final SimpleNode leftChild = (SimpleNode) lessThanNode.jjtGetChild(0);

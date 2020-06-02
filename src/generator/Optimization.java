@@ -167,6 +167,72 @@ public class Optimization {
         return null;
     }
 
+    public static String writeLessThanOperation(ASTLessThan lessThanNode, int scope, MethodManager methodManager, int labelCounter) {
+
+        if (!optimizeO)
+            return null;
+
+        String code = "";
+
+        final String lessLabel = "less" + labelCounter;
+        final String endLabel = "endLess" + labelCounter;
+
+        final SimpleNode leftChild = (SimpleNode) lessThanNode.jjtGetChild(0);
+        final SimpleNode rightChild = (SimpleNode) lessThanNode.jjtGetChild(1);
+
+        if(leftChild instanceof ASTLiteral && rightChild instanceof ASTLiteral){
+            String literalRight = ((ASTLiteral) rightChild).getLiteral();
+            String literalLeft = ((ASTLiteral) leftChild).getLiteral();
+            
+            int literalLeftInt = Integer.parseInt(literalLeft);
+            int literalRightInt = Integer.parseInt(literalRight);
+
+            if(literalLeftInt < literalRightInt)
+                code = CodeGeneratorUtils.writeToString(code, "iconst_1\n", scope);
+            else
+                code = CodeGeneratorUtils.writeToString(code, "iconst_0\n", scope);
+
+            methodManager.addInstruction("iconst", "boolean");
+
+            return code;
+        } else if(rightChild instanceof ASTLiteral){
+            String literal = ((ASTLiteral) rightChild).getLiteral();
+            if(literal.equals("0")){
+                code += codeGenerator.processMethodNodes(leftChild, scope, methodManager);
+                code = CodeGeneratorUtils.writeToString(code, "iflt " + lessLabel + "\n", scope);
+                code = CodeGeneratorUtils.writeToString(code, "iconst_0\n", scope);
+                code = CodeGeneratorUtils.writeToString(code, "goto " + endLabel + "\n", scope);
+                code = CodeGeneratorUtils.writeToString(code, lessLabel + ":\n", 0);
+                code = CodeGeneratorUtils.writeToString(code, "iconst_1\n", scope);
+                code = CodeGeneratorUtils.writeToString(code, endLabel + ":\n", 0);
+
+                methodManager.addInstruction("iflt", "void");
+                methodManager.addInstruction("iconst", "boolean");
+
+                return code;
+            }
+
+        } else if(leftChild instanceof ASTLiteral){
+            String literal = ((ASTLiteral) leftChild).getLiteral();
+            if(literal.equals("0")){
+                code += codeGenerator.processMethodNodes(rightChild, scope, methodManager);
+                code = CodeGeneratorUtils.writeToString(code, "ifgt " + lessLabel + "\n", scope);
+                code = CodeGeneratorUtils.writeToString(code, "iconst_0\n", scope);
+                code = CodeGeneratorUtils.writeToString(code, "goto " + endLabel + "\n", scope);
+                code = CodeGeneratorUtils.writeToString(code, lessLabel + ":\n", 0);
+                code = CodeGeneratorUtils.writeToString(code, "iconst_1\n", scope);
+                code = CodeGeneratorUtils.writeToString(code, endLabel + ":\n", 0);
+
+                methodManager.addInstruction("ifgt", "void");
+                methodManager.addInstruction("iconst", "boolean");
+
+                return code;
+            }
+        }
+
+        return null;
+    }
+
     public static void setOptimizeO(Boolean optimizeO) {
         Optimization.optimizeO = optimizeO;
     }
