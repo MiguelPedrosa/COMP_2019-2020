@@ -28,7 +28,7 @@ public class CodeGenerator {
         this.symbolTable = symbolTable;
 
         CodeGeneratorUtils.setFileName(fileName);
-        Optimization.setOptimizeO(optimizeO);
+        Optimization.setOptimizeO(true);
         Optimization.setCodeGenerator(this);
     }
 
@@ -861,12 +861,15 @@ public class CodeGenerator {
                 } else if (stackLiteral == -1) {
                     code = CodeGeneratorUtils.writeToString(code, "iconst_m1\n", scope);
                     methodManager.addInstruction("bipush", "int");
-                } else if (stackLiteral > 127) {
-                    code = CodeGeneratorUtils.writeToString(code, "ldc_w " + stackLiteral + "\n", scope);
-                    methodManager.addInstruction("ldc_w", "long");
-                } else {
+                } else if (stackLiteral > 5 && stackLiteral <= 127) {
                     code = CodeGeneratorUtils.writeToString(code, "bipush " + stackLiteral + "\n", scope);
                     methodManager.addInstruction("bipush", "int");
+                } else if (stackLiteral > 127 && stackLiteral <= 32767) {
+                    code = CodeGeneratorUtils.writeToString(code, "sipush " + stackLiteral + "\n", scope);
+                    methodManager.addInstruction("bipush", "int");
+                } else {
+                    code = CodeGeneratorUtils.writeToString(code, "ldc " + stackLiteral + "\n", scope);
+                    methodManager.addInstruction("ldc", "int");
                 }
                 break;
         }

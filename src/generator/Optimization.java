@@ -128,17 +128,20 @@ public class Optimization {
             int total = literalLeftInt - literalRightInt;
 
             if (total >= 0 && total <= 5) {
-                    code = CodeGeneratorUtils.writeToString(code, "iconst_" + total + "\n", scope);
-                    methodManager.addInstruction("bipush", "int");
+                code = CodeGeneratorUtils.writeToString(code, "iconst_" + total + "\n", scope);
+                methodManager.addInstruction("bipush", "int");
             } else if (total == -1) {
-                    code = CodeGeneratorUtils.writeToString(code, "iconst_m1\n", scope);
-                    methodManager.addInstruction("bipush", "int");
-            } else if (total > 127) {
-                    code = CodeGeneratorUtils.writeToString(code, "ldc_w " + total + "\n", scope);
-                    methodManager.addInstruction("ldc_w", "long");
+                code = CodeGeneratorUtils.writeToString(code, "iconst_m1\n", scope);
+                methodManager.addInstruction("bipush", "int");
+            } else if (total > 5 && total <= 127) {
+                code = CodeGeneratorUtils.writeToString(code, "bipush " + total + "\n", scope);
+                methodManager.addInstruction("bipush", "int");
+            } else if (total > 127 && total <= 32767) {
+                code = CodeGeneratorUtils.writeToString(code, "sipush " + total + "\n", scope);
+                methodManager.addInstruction("bipush", "int");
             } else {
-                    code = CodeGeneratorUtils.writeToString(code, "bipush " + total + "\n", scope);
-                    methodManager.addInstruction("bipush", "int");
+                code = CodeGeneratorUtils.writeToString(code, "ldc " + total + "\n", scope);
+                methodManager.addInstruction("ldc", "int");
             }
             return code;
         }

@@ -24,7 +24,7 @@ public class MethodManager {
         HashMap<String, Integer> instructionsAux = new HashMap<>();
 
         instructionsAux.put("bipush", +1);
-        instructionsAux.put("ldc_w", +1);
+        instructionsAux.put("ldc", +1);
         instructionsAux.put("aload", +1);
         instructionsAux.put("iload", +1);
         instructionsAux.put("lload", +1);
@@ -91,7 +91,7 @@ public class MethodManager {
                 this.stackTypes.remove(this.stackTypes.size() - 1);
                 break;
             case "bipush":
-            case "ldc_w":
+            case "ldc":
             case "arraylength":
             case "aload":
             case "iload":
