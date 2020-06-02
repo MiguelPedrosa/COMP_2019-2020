@@ -29,6 +29,7 @@ public class CodeGenerator {
 
         CodeGeneratorUtils.setFileName(fileName);
         Optimization.setOptimizeO(optimizeO);
+        Optimization.setCodeGenerator(this);
     }
 
     /**
@@ -302,7 +303,7 @@ public class CodeGenerator {
         endMethod(scope);
     }
 
-    private String processMethodNodes(final SimpleNode currentNode, final int scope,
+    public String processMethodNodes(final SimpleNode currentNode, final int scope,
             final MethodManager methodManager) {
 
         String code = "";
@@ -928,6 +929,12 @@ public class CodeGenerator {
     private String writePlusOperation(final ASTPlus plusNode, final int scope, final MethodManager methodManager) {
         String code = "";
 
+        String optimizedCode = Optimization.writePlusOperation(plusNode, scope, methodManager);
+        if(optimizedCode != null){
+            code = optimizedCode;
+            return code;
+        }
+
         final SimpleNode childLeft = (SimpleNode) plusNode.jjtGetChild(0);
         final SimpleNode childRight = (SimpleNode) plusNode.jjtGetChild(1);
 
@@ -947,6 +954,12 @@ public class CodeGenerator {
      */
     private String writeMinusOperation(final ASTMinus minusNode, final int scope, final MethodManager methodManager) {
         String code = "";
+
+        String optimizedCode = Optimization.writeMinusOperation(minusNode, scope, methodManager);
+        if(optimizedCode != null){
+            code = optimizedCode;
+            return code;
+        }
 
         final SimpleNode childLeft = (SimpleNode) minusNode.jjtGetChild(0);
         final SimpleNode childRight = (SimpleNode) minusNode.jjtGetChild(1);

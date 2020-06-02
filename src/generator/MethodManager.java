@@ -38,6 +38,7 @@ public class MethodManager {
         instructionsAux.put("imul", +1);
         instructionsAux.put("idiv", +1);
         instructionsAux.put("iand", +1);
+        instructionsAux.put("ineg", +1);
         instructionsAux.put("iconst", +1);
         instructionsAux.put("i2l", +2);
 
@@ -114,6 +115,8 @@ public class MethodManager {
             case "i2l":
                 this.stackTypes.add(type);
                 this.stackTypes.add(type);
+                break;
+            case "ineg":
                 break;
             default:
                 System.out.println("intruction" + instruction + " not being analised");
