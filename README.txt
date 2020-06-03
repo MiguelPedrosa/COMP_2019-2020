@@ -1,4 +1,6 @@
-[2:19 PM] **PROJECT TITLE: Compiler of the Java-- language to Java Bytecodes
+**PROJECT TITLE: Compiler of the Java-- language to Java Bytecodes
+
+
 **GROUP: 1A
 
     NAME1: André Filipe de Soveral Torres Lopes dos Santos, NR1: 200505634, GRADE1: 9, CONTRIBUTION1: 10%
@@ -13,22 +15,24 @@
 
 GLOBAL Grade of the project: 19
 
-**SUMMARY: (Describe what your tool does and its main features.)
+**SUMMARY: 
+    This project is a compiler for the Java-- language. 
+    The compiler generates valid JVM (Java Virtual Machine) instructions to jasmin, a tool to generate Java bytecodes given assembly programs with JVM instructions.
 
 **EXECUTE: 
 
     To run our tool, there are 2 alternatives:
 
-    1. Run ./jasmin.sh <name if the j file> (example "./jasmin.sh Life)
+        1. Run ./jasmin.sh <name if the j file> (example "./jasmin.sh Life)
 
-    2.
-    2.1. Compile with "gradle build"
+        2.
+            2.1. Compile with "gradle build"
 
-    2.2.  run java -jar jasminTest/jasmin.jar jFiles/<name if the j file>.j -d ./jasminTest/libs
+            2.2.  run java -jar jasminTest/jasmin.jar jFiles/<name if the j file>.j -d ./jasminTest/libs
 
-    2.3. run java -cp jasminTest/libs <name if the j file>
+            2.3. run java -cp jasminTest/libs <name if the j file>
 
-    2.4. rm -r ./jasminTest/libs/$@.class
+            2.4. rm -r ./jasminTest/libs/$@.class
 
 **DEALING WITH SYNTACTIC ERRORS: (Describe how the syntactic error recovery of your tool does work. Does it exit after the first error?)
 
@@ -43,6 +47,9 @@ GLOBAL Grade of the project: 19
 **TASK DISTRIBUTION: 
 
     * André Lopes dos Santos: minor contribution to code generation and optimization.
+    * Diogo Silva: 
+    * Luís Miguel  Henriques: WRITE HERE
+    * Pedro Noevo: WRITE HERE
 
 **PROS:
     * It generates and runs correctly all the test files provided.

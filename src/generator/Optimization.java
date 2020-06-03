@@ -35,7 +35,7 @@ public class Optimization {
             return null;
 
         String code = "";
-        
+
         final SimpleNode childLeft = (SimpleNode) equalsNode.jjtGetChild(0);
         SimpleNode childRight = (SimpleNode) equalsNode.jjtGetChild(1);
 
@@ -43,31 +43,35 @@ public class Optimization {
             String namevar = ((ASTIdentifier) childLeft).getIdentifier();
             final int localIndex = methodManager.indexOfLocal(namevar);
             childRight = (SimpleNode) childRight.jjtGetChild(0);
-            if(localIndex != -1){ //faz parte das variaveis locais
+            if (localIndex != -1) { // faz parte das variaveis locais
                 String sign = " ";
 
-                if(childRight instanceof ASTMinus) //controla se é soma ou subtração
+                if (childRight instanceof ASTMinus) // controla se é soma ou subtração
                     sign = " -";
-                else if(!(childRight instanceof ASTPlus))
+                else if (!(childRight instanceof ASTPlus))
                     return null;
 
-                if (childRight.jjtGetChild(0) instanceof ASTIdentifier && childRight.jjtGetChild(1) instanceof ASTLiteral) {
+                if (childRight.jjtGetChild(0) instanceof ASTIdentifier
+                        && childRight.jjtGetChild(1) instanceof ASTLiteral) {
                     String nameVar2 = ((ASTIdentifier) childRight.jjtGetChild(0)).getIdentifier();
                     String literal = ((ASTLiteral) childRight.jjtGetChild(1)).getLiteral();
                     if (nameVar2.equals(namevar)) {
-                        if(literal.equals("0"))
+                        if (literal.equals("0"))
                             return "";
-                        code = CodeGeneratorUtils.writeToString(code, "iinc " + localIndex + sign + literal + "\n", scope);
+                        code = CodeGeneratorUtils.writeToString(code, "iinc " + localIndex + sign + literal + "\n",
+                                scope);
                         return code;
                     }
-    
-                } else if (childRight.jjtGetChild(1) instanceof ASTIdentifier && childRight.jjtGetChild(0) instanceof ASTLiteral) {
+
+                } else if (childRight.jjtGetChild(1) instanceof ASTIdentifier
+                        && childRight.jjtGetChild(0) instanceof ASTLiteral) {
                     String nameVar2 = ((ASTIdentifier) childRight.jjtGetChild(1)).getIdentifier();
                     String literal = ((ASTLiteral) childRight.jjtGetChild(0)).getLiteral();
                     if (nameVar2.equals(namevar)) {
-                        if(literal.equals("0"))
+                        if (literal.equals("0"))
                             return "";
-                        code = CodeGeneratorUtils.writeToString(code, "iinc " + localIndex + sign + literal + "\n", scope);
+                        code = CodeGeneratorUtils.writeToString(code, "iinc " + localIndex + sign + literal + "\n",
+                                scope);
                         return code;
                     }
                 }
@@ -76,18 +80,19 @@ public class Optimization {
         return null;
     }
 
-    public static String writePlusOperation(final ASTPlus plusNode, final int scope, final MethodManager methodManager) {
+    public static String writePlusOperation(final ASTPlus plusNode, final int scope,
+            final MethodManager methodManager) {
 
         if (!optimizeO)
             return null;
 
         String code = "";
-        
+
         final SimpleNode childLeft = (SimpleNode) plusNode.jjtGetChild(0);
         final SimpleNode childRight = (SimpleNode) plusNode.jjtGetChild(1);
 
-        //caso soma de dois literals
-        if(childLeft instanceof ASTLiteral && childRight instanceof ASTLiteral){
+        // caso soma de dois literals
+        if (childLeft instanceof ASTLiteral && childRight instanceof ASTLiteral) {
             String literalLeft = ((ASTLiteral) childLeft).getLiteral();
             String literalRight = ((ASTLiteral) childRight).getLiteral();
 
@@ -99,18 +104,18 @@ public class Optimization {
             code += Optimization.writeInteger(total, scope, methodManager);
 
             return code;
-        } 
-        //caso um dos elementos da soma ser 0
-        else if(childLeft instanceof ASTLiteral){        
+        }
+        // caso um dos elementos da soma ser 0
+        else if (childLeft instanceof ASTLiteral) {
             String literal = ((ASTLiteral) childLeft).getLiteral();
-            if(literal.equals("0")){
+            if (literal.equals("0")) {
                 code += codeGenerator.processMethodNodes(childRight, scope, methodManager);
                 return code;
             }
 
-        } else if (childRight instanceof ASTLiteral){
+        } else if (childRight instanceof ASTLiteral) {
             String literal = ((ASTLiteral) childRight).getLiteral();
-            if(literal.equals("0")){
+            if (literal.equals("0")) {
                 code += codeGenerator.processMethodNodes(childLeft, scope, methodManager);
                 return code;
             }
@@ -119,18 +124,19 @@ public class Optimization {
         return null;
     }
 
-    public static String writeMinusOperation(final ASTMinus minusNode, final int scope, final MethodManager methodManager) {
+    public static String writeMinusOperation(final ASTMinus minusNode, final int scope,
+            final MethodManager methodManager) {
 
         if (!optimizeO)
             return null;
 
         String code = "";
-        
+
         final SimpleNode childLeft = (SimpleNode) minusNode.jjtGetChild(0);
         final SimpleNode childRight = (SimpleNode) minusNode.jjtGetChild(1);
 
-        //caso subtração de dois literals
-        if(childLeft instanceof ASTLiteral && childRight instanceof ASTLiteral){
+        // caso subtração de dois literals
+        if (childLeft instanceof ASTLiteral && childRight instanceof ASTLiteral) {
             String literalLeft = ((ASTLiteral) childLeft).getLiteral();
             String literalRight = ((ASTLiteral) childRight).getLiteral();
 
@@ -143,20 +149,20 @@ public class Optimization {
 
             return code;
         }
-        //caso um dos elementos da subtração ser 0
-        else if(childLeft instanceof ASTLiteral){        
+        // caso um dos elementos da subtração ser 0
+        else if (childLeft instanceof ASTLiteral) {
             String literal = ((ASTLiteral) childLeft).getLiteral();
-            if(literal.equals("0")){
+            if (literal.equals("0")) {
                 code += codeGenerator.processMethodNodes(childRight, scope, methodManager);
-                //0 do lado esquerdo é necessário negar o valor obtido no lado direito
+                // 0 do lado esquerdo é necessário negar o valor obtido no lado direito
                 code = CodeGeneratorUtils.writeToString(code, "ineg\n", scope);
                 methodManager.addInstruction("ineg", "int");
                 return code;
             }
 
-        } else if (childRight instanceof ASTLiteral){
+        } else if (childRight instanceof ASTLiteral) {
             String literal = ((ASTLiteral) childRight).getLiteral();
-            if(literal.equals("0")){
+            if (literal.equals("0")) {
                 code += codeGenerator.processMethodNodes(childLeft, scope, methodManager);
                 return code;
             }
@@ -165,7 +171,68 @@ public class Optimization {
         return null;
     }
 
-    public static String writeLessThanOperation(ASTLessThan lessThanNode, int scope, MethodManager methodManager, int labelCounter) {
+    private String writeMultiOperation(final ASTTimes multiNode, final int scope, final MethodManager methodManager) {
+
+        if (!optimizeO)
+            return null;
+
+        String code = "";
+
+        final SimpleNode childLeft = (SimpleNode) multiNode.jjtGetChild(0);
+        final SimpleNode childRight = (SimpleNode) multiNode.jjtGetChild(1);
+
+        // caso multiplicação de dois literals
+        if (childLeft instanceof ASTLiteral && childRight instanceof ASTLiteral) {
+            String literalLeft = ((ASTLiteral) childLeft).getLiteral();
+            String literalRight = ((ASTLiteral) childRight).getLiteral();
+
+            int literalLeftInt = Integer.parseInt(literalLeft);
+            int literalRightInt = Integer.parseInt(literalRight);
+
+            int total = literalLeftInt * literalRightInt;
+
+            code += Optimization.writeInteger(total, scope, methodManager);
+
+            return code;
+        } else if (childLeft instanceof ASTLiteral && childRight instanceof ASTIdentifier) { // 8 * i
+
+            String literal = ((ASTLiteral) childLeft).getLiteral();
+            int numero = Integer.parseInt(literal);
+            double check = Math.log((double) numero) / Math.log(2); // verificar se o número a ser multiplicado é uma
+                                                                    // potencia de 2
+
+            if (check % 1 == 0) {
+                code += codeGenerator.processMethodNodes(childRight, scope, methodManager);
+                code = CodeGeneratorUtils.writeToString(code, "ishl\n", scope);
+                return code;
+            }
+        } else if (childRight instanceof ASTLiteral && childLeft instanceof ASTIdentifier) { // i * 8
+
+            String literal = ((ASTLiteral) childRight).getLiteral();
+            int numero = Integer.parseInt(literal);
+            double check = Math.log((double) numero) / Math.log(2); // verificar se o número a ser multiplicado é uma
+                                                                    // potencia de 2
+
+            if (check % 1 == 0) {
+                code += codeGenerator.processMethodNodes(childLeft, scope, methodManager);
+                code = CodeGeneratorUtils.writeToString(code, "ishl\n", scope);
+                return code;
+            }
+        }
+
+        code += codeGenerator.processMethodNodes(childLeft, scope, methodManager);
+        code += codeGenerator.processMethodNodes(childRight, scope, methodManager);
+
+        code = CodeGeneratorUtils.writeToString(code, "imul\n", scope);
+
+        methodManager.stackPop(2);
+        methodManager.addInstruction("imul", "int");
+
+        return code;
+    }
+
+    public static String writeLessThanOperation(ASTLessThan lessThanNode, int scope, MethodManager methodManager,
+            int labelCounter) {
 
         if (!optimizeO)
             return null;
@@ -178,14 +245,14 @@ public class Optimization {
         final SimpleNode leftChild = (SimpleNode) lessThanNode.jjtGetChild(0);
         final SimpleNode rightChild = (SimpleNode) lessThanNode.jjtGetChild(1);
 
-        if(leftChild instanceof ASTLiteral && rightChild instanceof ASTLiteral){
+        if (leftChild instanceof ASTLiteral && rightChild instanceof ASTLiteral) {
             String literalRight = ((ASTLiteral) rightChild).getLiteral();
             String literalLeft = ((ASTLiteral) leftChild).getLiteral();
-            
+
             int literalLeftInt = Integer.parseInt(literalLeft);
             int literalRightInt = Integer.parseInt(literalRight);
 
-            if(literalLeftInt < literalRightInt)
+            if (literalLeftInt < literalRightInt)
                 code = CodeGeneratorUtils.writeToString(code, "iconst_1\n", scope);
             else
                 code = CodeGeneratorUtils.writeToString(code, "iconst_0\n", scope);
@@ -193,9 +260,9 @@ public class Optimization {
             methodManager.addInstruction("iconst", "boolean");
 
             return code;
-        } else if(rightChild instanceof ASTLiteral){
+        } else if (rightChild instanceof ASTLiteral) {
             String literal = ((ASTLiteral) rightChild).getLiteral();
-            if(literal.equals("0")){
+            if (literal.equals("0")) {
                 code += codeGenerator.processMethodNodes(leftChild, scope, methodManager);
                 code = CodeGeneratorUtils.writeToString(code, "iflt " + lessLabel + "\n", scope);
                 code = CodeGeneratorUtils.writeToString(code, "iconst_0\n", scope);
@@ -210,9 +277,9 @@ public class Optimization {
                 return code;
             }
 
-        } else if(leftChild instanceof ASTLiteral){
+        } else if (leftChild instanceof ASTLiteral) {
             String literal = ((ASTLiteral) leftChild).getLiteral();
-            if(literal.equals("0")){
+            if (literal.equals("0")) {
                 code += codeGenerator.processMethodNodes(rightChild, scope, methodManager);
                 code = CodeGeneratorUtils.writeToString(code, "ifgt " + lessLabel + "\n", scope);
                 code = CodeGeneratorUtils.writeToString(code, "iconst_0\n", scope);
@@ -231,7 +298,8 @@ public class Optimization {
         return null;
     }
 
-    public static String writeIdentifier(final ASTIdentifier identifierNode, final int scope, final MethodManager methodManager) {
+    public static String writeIdentifier(final ASTIdentifier identifierNode, final int scope,
+            final MethodManager methodManager) {
 
         if (!optimizeO)
             return null;
@@ -240,22 +308,20 @@ public class Optimization {
         final String identifier = ((ASTIdentifier) identifierNode).getIdentifier();
 
         String valueOfIdentifier = methodManager.getValueOfLocal(identifier);
-        if(valueOfIdentifier != null){
-            if(valueOfIdentifier.equals("true")) {
+        if (valueOfIdentifier != null) {
+            if (valueOfIdentifier.equals("true")) {
                 System.out.println(identifier + "-- Supposed: " + valueOfIdentifier + " Got: iconst_1");
                 methodManager.addInstruction("iconst", "boolean");
-            }
-            else if(valueOfIdentifier.equals("false")) {
+            } else if (valueOfIdentifier.equals("false")) {
                 System.out.println(identifier + "-- Supposed: " + valueOfIdentifier + " Got: iconst_0");
                 methodManager.addInstruction("iconst", "boolean");
-            }
-            else if(!valueOfIdentifier.equals("this")) {
+            } else if (!valueOfIdentifier.equals("this")) {
                 int value = Integer.parseInt(valueOfIdentifier);
                 code += Optimization.writeInteger(value, scope, methodManager);
             }
             return code;
         }
-        
+
         return null;
     }
 
