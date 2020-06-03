@@ -231,11 +231,43 @@ public class Optimization {
         return null;
     }
 
+    public static String writeIdentifier(final ASTIdentifier identifierNode, final int scope, final MethodManager methodManager) {
+
+        if (!optimizeO)
+            return null;
+
+        String code = "";
+        final String identifier = ((ASTIdentifier) identifierNode).getIdentifier();
+
+        String valueOfIdentifier = methodManager.getValueOfLocal(identifier);
+        if(valueOfIdentifier != null){
+            if(valueOfIdentifier.equals("true")) {
+                System.out.println(identifier + "-- Supposed: " + valueOfIdentifier + " Got: iconst_1");
+                methodManager.addInstruction("iconst", "boolean");
+            }
+            else if(valueOfIdentifier.equals("false")) {
+                System.out.println(identifier + "-- Supposed: " + valueOfIdentifier + " Got: iconst_0");
+                methodManager.addInstruction("iconst", "boolean");
+            }
+            else if(!valueOfIdentifier.equals("this")) {
+                int value = Integer.parseInt(valueOfIdentifier);
+                code += Optimization.writeInteger(value, scope, methodManager);
+            }
+            return code;
+        }
+        
+        return null;
+    }
+
     public static String getEqualsValue(SimpleNode node, MethodManager mothodManager) {
         if (!optimizeO)
             return null;
 
         return PreCalculator.getEqualsValue(node, mothodManager);
+    }
+
+    public static Boolean getOptimizeO() {
+        return optimizeO;
     }
 
     public static void setOptimizeO(Boolean optimizeO) {

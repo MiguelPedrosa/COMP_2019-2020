@@ -314,10 +314,16 @@ public class CodeGenerator {
                 // variable arlready added in locals
                 break;
             case "ASTIF":
+                Boolean isOptimizeIf = Optimization.getOptimizeO();
+                Optimization.setOptimizeO(false);
                 code += writeIf((ASTIF) currentNode, scope, methodManager);
+                Optimization.setOptimizeO(isOptimizeIf);
                 break;
             case "ASTWhile":
+                Boolean isOptimizeWhile = Optimization.getOptimizeO();
+                Optimization.setOptimizeO(false);
                 code += writeWhile((ASTWhile) currentNode, scope, methodManager);
+                Optimization.setOptimizeO(isOptimizeWhile);
                 break;
             case "ASTEquals":
                 code += writeEquals((ASTEquals) currentNode, scope, methodManager);
@@ -719,9 +725,6 @@ public class CodeGenerator {
         String type = methodManager.typeOfLocal(identifier);
 
         if (type == null) {
-
-            // TODO: check if group agree with code
-            // TODO: when array change for arrays instead of fields? prof example
             type = this.symbolTable.getVariableType(identifier);
 
             String filteredIdentifier = getJasminIdentifier(identifier);
@@ -736,6 +739,13 @@ public class CodeGenerator {
 
             return code;
         }
+
+        String optimizedCode = Optimization.writeIdentifier(identifierNode, scope, methodManager);
+        if(optimizedCode != null){
+            code = optimizedCode;
+            return code;
+        }
+        
 
         // Optimization :)
         String indexForInstruction = " ";
@@ -797,6 +807,7 @@ public class CodeGenerator {
             }
 
             String equalsValue = Optimization.getEqualsValue(childRight, methodManager);
+            methodManager.setValueOfLocal(identifier, equalsValue);
             if(equalsValue != null){
                 if(equalsValue.equals("true")) {
                     code = CodeGeneratorUtils.writeToString(code, "iconst_1 \n", scope);
@@ -816,9 +827,6 @@ public class CodeGenerator {
                     code = CodeGeneratorUtils.writeToString(code, "istore " + localIndex + "\n", scope);
                     methodManager.addInstruction("istore", type);
                 }
-
-                methodManager.setValueOfLocal(identifier, equalsValue);
-                
                 return code;
             }
 
@@ -852,6 +860,7 @@ public class CodeGenerator {
                 methodManager.addInstruction("aastore", simpleArrayType);
             }
         }
+
 
         return code;
     }
@@ -917,7 +926,6 @@ public class CodeGenerator {
      * Method to write "while" to the file
      */
     private String writeWhile(final ASTWhile whileNode, final int scope, final MethodManager methodManager) {
-
         String code = "";
 
         final int label = this.labelCounter;

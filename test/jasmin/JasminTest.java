@@ -34,10 +34,10 @@ public class JasminTest {
     }
 	
 
-	@Test
+/* 	@Test
     public void testTicTacToe() {
 		JasminUtils.testJmm("fixtures/public/TicTacToe.jmm", JasminUtils.getResource("fixtures/public/TicTacToe.txt"), JasminUtils.getResource("fixtures/public/TicTacToe.input"));
-	}
+	} */
 
 	@Test
     public void testWhileAndIF() {
