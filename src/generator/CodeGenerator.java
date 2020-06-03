@@ -796,6 +796,32 @@ public class CodeGenerator {
                 return code;
             }
 
+            String equalsValue = Optimization.getEqualsValue(childRight, methodManager);
+            if(equalsValue != null){
+                if(equalsValue.equals("true")) {
+                    code = CodeGeneratorUtils.writeToString(code, "iconst_1 \n", scope);
+                    methodManager.addInstruction("iconst", "boolean");
+                    code = CodeGeneratorUtils.writeToString(code, "istore " + localIndex + "\n", scope);
+                    methodManager.addInstruction("istore", type);
+                }
+                else if(equalsValue.equals("false")) {
+                    code = CodeGeneratorUtils.writeToString(code, "iconst_0 \n", scope);
+                    methodManager.addInstruction("iconst", "boolean");
+                    code = CodeGeneratorUtils.writeToString(code, "istore " + localIndex + "\n", scope);
+                    methodManager.addInstruction("istore", type);
+                }
+                else {
+                    int value = Integer.parseInt(equalsValue);
+                    code += Optimization.writeInteger(value, scope, methodManager);
+                    code = CodeGeneratorUtils.writeToString(code, "istore " + localIndex + "\n", scope);
+                    methodManager.addInstruction("istore", type);
+                }
+
+                methodManager.setValueOfLocal(identifier, equalsValue);
+                
+                return code;
+            }
+
             code += processMethodNodes(childRight, scope, methodManager);
             if (type.equals("int") || type.equals("boolean")) {
                 code = CodeGeneratorUtils.writeToString(code, "istore " + localIndex + "\n", scope);
@@ -855,22 +881,7 @@ public class CodeGenerator {
                 break;
             default:
                 stackLiteral = Integer.parseInt(literal);
-                if (stackLiteral >= 0 && stackLiteral <= 5) {
-                    code = CodeGeneratorUtils.writeToString(code, "iconst_" + stackLiteral + "\n", scope);
-                    methodManager.addInstruction("bipush", "int");
-                } else if (stackLiteral == -1) {
-                    code = CodeGeneratorUtils.writeToString(code, "iconst_m1\n", scope);
-                    methodManager.addInstruction("bipush", "int");
-                } else if (stackLiteral > 5 && stackLiteral <= 127) {
-                    code = CodeGeneratorUtils.writeToString(code, "bipush " + stackLiteral + "\n", scope);
-                    methodManager.addInstruction("bipush", "int");
-                } else if (stackLiteral > 127 && stackLiteral <= 32767) {
-                    code = CodeGeneratorUtils.writeToString(code, "sipush " + stackLiteral + "\n", scope);
-                    methodManager.addInstruction("bipush", "int");
-                } else {
-                    code = CodeGeneratorUtils.writeToString(code, "ldc " + stackLiteral + "\n", scope);
-                    methodManager.addInstruction("ldc", "int");
-                }
+                code += Optimization.writeInteger(stackLiteral, scope, methodManager);
                 break;
         }
 

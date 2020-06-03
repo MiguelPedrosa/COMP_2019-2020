@@ -4,11 +4,13 @@ public class SymbolVar {
     private String type;
     private int initialized;
     private Boolean isArray;
+    private String value;
 
     public SymbolVar(String name, String type) {
         this.name = name;
         this.type = type;
         this.initialized = 0;
+        this.value = null;
         this.isArray = this.isArrayType();
     }
 
@@ -19,6 +21,10 @@ public class SymbolVar {
             }
         }
         return false;
+    }
+
+    public String getValue() {
+        return value;
     }
 
     public String getName() {
@@ -35,6 +41,10 @@ public class SymbolVar {
 
     public Boolean getIsArray() {
         return isArray;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
 
     public void setInitialize(int initialized) {

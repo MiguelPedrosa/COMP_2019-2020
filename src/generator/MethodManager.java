@@ -183,6 +183,19 @@ public class MethodManager {
         return null;
     }
 
+    public String getValueOfLocal(String local) {
+        for (int i = 0; i < this.locals.size(); i++)
+            if (this.locals.get(i).getName().equals(local))
+                return this.locals.get(i).getValue();
+        return null;
+    }
+
+    public void setValueOfLocal(String local, String value) {
+        for (int i = 0; i < this.locals.size(); i++)
+            if (this.locals.get(i).getName().equals(local))
+                this.locals.get(i).setValue(value);
+    }
+
     public String getLastTypeInStack() {
         if (this.stackTypes.size() == 0)
             return "";

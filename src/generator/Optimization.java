@@ -6,6 +6,29 @@ public class Optimization {
     private static Boolean optimizeO;
     private static CodeGenerator codeGenerator;
 
+    public static String writeInteger(int integer, final int scope, final MethodManager methodManager) {
+        String code = "";
+
+        if (integer >= 0 && integer <= 5) {
+            code = CodeGeneratorUtils.writeToString(code, "iconst_" + integer + "\n", scope);
+            methodManager.addInstruction("bipush", "int");
+        } else if (integer == -1) {
+            code = CodeGeneratorUtils.writeToString(code, "iconst_m1\n", scope);
+            methodManager.addInstruction("bipush", "int");
+        } else if (integer > 5 && integer <= 127) {
+            code = CodeGeneratorUtils.writeToString(code, "bipush " + integer + "\n", scope);
+            methodManager.addInstruction("bipush", "int");
+        } else if (integer > 127 && integer <= 32767) {
+            code = CodeGeneratorUtils.writeToString(code, "sipush " + integer + "\n", scope);
+            methodManager.addInstruction("bipush", "int");
+        } else {
+            code = CodeGeneratorUtils.writeToString(code, "ldc " + integer + "\n", scope);
+            methodManager.addInstruction("ldc", "int");
+        }
+
+        return code;
+    }
+
     public static String writeEquals(final ASTEquals equalsNode, final int scope, final MethodManager methodManager) {
 
         if (!optimizeO)
@@ -73,19 +96,8 @@ public class Optimization {
 
             int total = literalLeftInt + literalRightInt;
 
-            if (total >= 0 && total <= 5) {
-                    code = CodeGeneratorUtils.writeToString(code, "iconst_" + total + "\n", scope);
-                    methodManager.addInstruction("bipush", "int");
-            } else if (total == -1) {
-                    code = CodeGeneratorUtils.writeToString(code, "iconst_m1\n", scope);
-                    methodManager.addInstruction("bipush", "int");
-            } else if (total > 127) {
-                    code = CodeGeneratorUtils.writeToString(code, "ldc_w " + total + "\n", scope);
-                    methodManager.addInstruction("ldc_w", "long");
-            } else {
-                    code = CodeGeneratorUtils.writeToString(code, "bipush " + total + "\n", scope);
-                    methodManager.addInstruction("bipush", "int");
-            }
+            code += Optimization.writeInteger(total, scope, methodManager);
+
             return code;
         } 
         //caso um dos elementos da soma ser 0
@@ -127,22 +139,8 @@ public class Optimization {
 
             int total = literalLeftInt - literalRightInt;
 
-            if (total >= 0 && total <= 5) {
-                code = CodeGeneratorUtils.writeToString(code, "iconst_" + total + "\n", scope);
-                methodManager.addInstruction("bipush", "int");
-            } else if (total == -1) {
-                code = CodeGeneratorUtils.writeToString(code, "iconst_m1\n", scope);
-                methodManager.addInstruction("bipush", "int");
-            } else if (total > 5 && total <= 127) {
-                code = CodeGeneratorUtils.writeToString(code, "bipush " + total + "\n", scope);
-                methodManager.addInstruction("bipush", "int");
-            } else if (total > 127 && total <= 32767) {
-                code = CodeGeneratorUtils.writeToString(code, "sipush " + total + "\n", scope);
-                methodManager.addInstruction("bipush", "int");
-            } else {
-                code = CodeGeneratorUtils.writeToString(code, "ldc " + total + "\n", scope);
-                methodManager.addInstruction("ldc", "int");
-            }
+            code += Optimization.writeInteger(total, scope, methodManager);
+
             return code;
         }
         //caso um dos elementos da subtração ser 0
@@ -231,6 +229,13 @@ public class Optimization {
         }
 
         return null;
+    }
+
+    public static String getEqualsValue(SimpleNode node, MethodManager mothodManager) {
+        if (!optimizeO)
+            return null;
+
+        return PreCalculator.getEqualsValue(node, mothodManager);
     }
 
     public static void setOptimizeO(Boolean optimizeO) {
