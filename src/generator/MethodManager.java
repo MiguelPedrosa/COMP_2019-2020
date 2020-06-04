@@ -41,11 +41,12 @@ public class MethodManager {
         instructionsAux.put("ineg", +1);
         instructionsAux.put("iconst", +1);
         instructionsAux.put("i2l", +2);
+        instructionsAux.put("ishl", +1);
 
         instructionsAux.put("aaload", +1);
         instructionsAux.put("iaload", +1);
         instructionsAux.put("lcmp", +1);
-        
+
         instructionsAux.put("arraylength", +1);
         instructionsAux.put("new", +1);
         instructionsAux.put("newarray", +1);
@@ -54,7 +55,7 @@ public class MethodManager {
         instructionsAux.put("ifle", -1);
         instructionsAux.put("iflt", -1);
         instructionsAux.put("if_icmplt", -2);
-        
+
         instructionsAux.put("ireturn", -1);
         instructionsAux.put("areturn", -1);
         instructionsAux.put("lreturn", -1);
@@ -111,6 +112,7 @@ public class MethodManager {
             case "iand":
             case "iconst":
             case "new":
+            case "ishl":
             case "newarray":
                 this.stackTypes.add(type);
                 break;

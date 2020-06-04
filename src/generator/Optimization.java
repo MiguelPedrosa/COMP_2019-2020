@@ -171,7 +171,8 @@ public class Optimization {
         return null;
     }
 
-    private String writeMultiOperation(final ASTTimes multiNode, final int scope, final MethodManager methodManager) {
+    public static String writeMultiOperation(final ASTTimes multiNode, final int scope,
+            final MethodManager methodManager) {
 
         if (!optimizeO)
             return null;
@@ -198,37 +199,41 @@ public class Optimization {
 
             String literal = ((ASTLiteral) childLeft).getLiteral();
             int numero = Integer.parseInt(literal);
-            double check = Math.log((double) numero) / Math.log(2); // verificar se o número a ser multiplicado é uma
-                                                                    // potencia de 2
+            if (numero > 0) {
+                double check = Math.log((double) numero) / Math.log(2); // verificar se o número a ser multiplicado é
+                                                                        // uma
+                                                                        // potencia de 2
 
-            if (check % 1 == 0) {
-                code += codeGenerator.processMethodNodes(childRight, scope, methodManager);
-                code = CodeGeneratorUtils.writeToString(code, "ishl\n", scope);
-                return code;
+                if (check % 1 == 0) {
+                    code += codeGenerator.processMethodNodes(childRight, scope, methodManager);
+                    code += Optimization.writeInteger((int) check, scope, methodManager);
+                    code = CodeGeneratorUtils.writeToString(code, "ishl\n", scope);
+                    methodManager.stackPop(2);
+                    methodManager.addInstruction("ishl", "int");
+                    return code;
+                }
             }
         } else if (childRight instanceof ASTLiteral && childLeft instanceof ASTIdentifier) { // i * 8
 
             String literal = ((ASTLiteral) childRight).getLiteral();
             int numero = Integer.parseInt(literal);
-            double check = Math.log((double) numero) / Math.log(2); // verificar se o número a ser multiplicado é uma
-                                                                    // potencia de 2
+            if (numero > 0) {
+                double check = Math.log((double) numero) / Math.log(2); // verificar se o número a ser multiplicado é
+                                                                        // uma
+                                                                        // potencia de 2
 
-            if (check % 1 == 0) {
-                code += codeGenerator.processMethodNodes(childLeft, scope, methodManager);
-                code = CodeGeneratorUtils.writeToString(code, "ishl\n", scope);
-                return code;
+                if (check % 1 == 0) {
+                    code += codeGenerator.processMethodNodes(childLeft, scope, methodManager);
+                    code += Optimization.writeInteger((int) check, scope, methodManager);
+                    code = CodeGeneratorUtils.writeToString(code, "ishl\n", scope);
+                    methodManager.stackPop(2);
+                    methodManager.addInstruction("ishl", "int");
+                    return code;
+                }
             }
         }
 
-        code += codeGenerator.processMethodNodes(childLeft, scope, methodManager);
-        code += codeGenerator.processMethodNodes(childRight, scope, methodManager);
-
-        code = CodeGeneratorUtils.writeToString(code, "imul\n", scope);
-
-        methodManager.stackPop(2);
-        methodManager.addInstruction("imul", "int");
-
-        return code;
+        return null;
     }
 
     public static String writeLessThanOperation(ASTLessThan lessThanNode, int scope, MethodManager methodManager,
