@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 /**
  * CodeGenerator
  */
@@ -79,8 +78,6 @@ public class CodeGenerator {
             }
         }
     }
-
-
 
     /**
      * Method to write the end of a method to the file
@@ -257,7 +254,8 @@ public class CodeGenerator {
             argsInJasmin = argsInJasmin.concat(argType);
         }
 
-        CodeGeneratorUtils.writeCode("\n.method public " + methodName + "(" + argsInJasmin + ")" + methodType + "\n", scope);
+        CodeGeneratorUtils.writeCode("\n.method public " + methodName + "(" + argsInJasmin + ")" + methodType + "\n",
+                scope);
 
         final String methodKey = methodNode.getMethodKey();
         final MethodManager methodManager = new MethodManager();
@@ -307,8 +305,7 @@ public class CodeGenerator {
         endMethod(scope);
     }
 
-    public String processMethodNodes(final SimpleNode currentNode, final int scope,
-            final MethodManager methodManager) {
+    public String processMethodNodes(final SimpleNode currentNode, final int scope, final MethodManager methodManager) {
 
         String code = "";
         final String nodeType = currentNode.getClass().getSimpleName();
@@ -627,8 +624,8 @@ public class CodeGenerator {
                 code = CodeGeneratorUtils.writeToString(code, "aload_0 \n", scope);
                 methodManager.addInstruction("aload", this.symbolTable.getClasseName());
 
-                code = CodeGeneratorUtils.writeToString(code, "getfield " + this.symbolTable.getClasseName() + "/" + filteredIdentifier
-                        + " " + transformType(type) + "\n", scope);
+                code = CodeGeneratorUtils.writeToString(code, "getfield " + this.symbolTable.getClasseName() + "/"
+                        + filteredIdentifier + " " + transformType(type) + "\n", scope);
                 methodManager.stackPop(1);
                 methodManager.addInstruction("getfield", type);
 
@@ -730,8 +727,8 @@ public class CodeGenerator {
             code = CodeGeneratorUtils.writeToString(code, "aload_0 \n", scope);
             methodManager.addInstruction("aload", this.symbolTable.getClasseName());
 
-            code = CodeGeneratorUtils.writeToString(code, "getfield " + this.symbolTable.getClasseName() + "/" + filteredIdentifier + " "
-                    + transformType(type) + "\n", scope);
+            code = CodeGeneratorUtils.writeToString(code, "getfield " + this.symbolTable.getClasseName() + "/"
+                    + filteredIdentifier + " " + transformType(type) + "\n", scope);
             methodManager.stackPop(1);
             methodManager.addInstruction("getfield", type);
 
@@ -739,11 +736,10 @@ public class CodeGenerator {
         }
 
         String optimizedCode = Optimization.writeIdentifier(identifierNode, scope, methodManager);
-        if(optimizedCode != null){
+        if (optimizedCode != null) {
             code = optimizedCode;
             return code;
         }
-        
 
         // Optimization :)
         String indexForInstruction = " ";
@@ -772,7 +768,7 @@ public class CodeGenerator {
         String code = "";
 
         String optimizedCode = Optimization.writeEquals(equalsNode, scope, methodManager);
-        if(optimizedCode != null){
+        if (optimizedCode != null) {
             code = optimizedCode;
             return code;
         }
@@ -797,8 +793,8 @@ public class CodeGenerator {
 
                 code += processMethodNodes(childRight, scope, methodManager);
 
-                code = CodeGeneratorUtils.writeToString(code, "putfield " + this.symbolTable.getClasseName() + "/" + filteredIdentifier
-                        + " " + transformType(type) + "\n", scope);
+                code = CodeGeneratorUtils.writeToString(code, "putfield " + this.symbolTable.getClasseName() + "/"
+                        + filteredIdentifier + " " + transformType(type) + "\n", scope);
                 methodManager.addInstruction("putfield", type);
 
                 return code;
@@ -806,20 +802,18 @@ public class CodeGenerator {
 
             String equalsValue = Optimization.getEqualsValue(childRight, methodManager);
             methodManager.setValueOfLocal(identifier, equalsValue);
-            if(equalsValue != null){
-                if(equalsValue.equals("true")) {
+            if (equalsValue != null) {
+                if (equalsValue.equals("true")) {
                     code = CodeGeneratorUtils.writeToString(code, "iconst_1 \n", scope);
                     methodManager.addInstruction("iconst", "boolean");
                     code = CodeGeneratorUtils.writeToString(code, "istore " + localIndex + "\n", scope);
                     methodManager.addInstruction("istore", type);
-                }
-                else if(equalsValue.equals("false")) {
+                } else if (equalsValue.equals("false")) {
                     code = CodeGeneratorUtils.writeToString(code, "iconst_0 \n", scope);
                     methodManager.addInstruction("iconst", "boolean");
                     code = CodeGeneratorUtils.writeToString(code, "istore " + localIndex + "\n", scope);
                     methodManager.addInstruction("istore", type);
-                }
-                else {
+                } else {
                     int value = Integer.parseInt(equalsValue);
                     code += Optimization.writeInteger(value, scope, methodManager);
                     code = CodeGeneratorUtils.writeToString(code, "istore " + localIndex + "\n", scope);
@@ -858,7 +852,6 @@ public class CodeGenerator {
                 methodManager.addInstruction("aastore", simpleArrayType);
             }
         }
-
 
         return code;
     }
@@ -967,7 +960,7 @@ public class CodeGenerator {
         String code = "";
 
         String optimizedCode = Optimization.writePlusOperation(plusNode, scope, methodManager);
-        if(optimizedCode != null){
+        if (optimizedCode != null) {
             code = optimizedCode;
             return code;
         }
@@ -993,7 +986,7 @@ public class CodeGenerator {
         String code = "";
 
         String optimizedCode = Optimization.writeMinusOperation(minusNode, scope, methodManager);
-        if(optimizedCode != null){
+        if (optimizedCode != null) {
             code = optimizedCode;
             return code;
         }
@@ -1017,6 +1010,12 @@ public class CodeGenerator {
      */
     private String writeMultiOperation(final ASTTimes multiNode, final int scope, final MethodManager methodManager) {
         String code = "";
+
+        String optimizedCode = Optimization.writeMultiOperation(multiNode, scope, methodManager);
+        if (optimizedCode != null) {
+            code = optimizedCode;
+            return code;
+        }
 
         final SimpleNode childLeft = (SimpleNode) multiNode.jjtGetChild(0);
         final SimpleNode childRight = (SimpleNode) multiNode.jjtGetChild(1);
@@ -1061,8 +1060,9 @@ public class CodeGenerator {
         final String lessLabel = "less" + this.labelCounter;
         final String endLabel = "endLess" + this.labelCounter;
 
-        String optimizedCode = Optimization.writeLessThanOperation(lessThanNode, scope, methodManager, this.labelCounter);
-        if(optimizedCode != null){
+        String optimizedCode = Optimization.writeLessThanOperation(lessThanNode, scope, methodManager,
+                this.labelCounter);
+        if (optimizedCode != null) {
             code = optimizedCode;
             return code;
         }
