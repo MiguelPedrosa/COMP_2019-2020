@@ -17,8 +17,8 @@ import java.util.Set;
 public class CodeGenerator {
 
     private final SimpleNode rootNode;
-
     private final SymbolTable symbolTable;
+    private final Boolean optimizeO;
 
     private int labelCounter = 0;
 
@@ -26,9 +26,11 @@ public class CodeGenerator {
             final Boolean optimizeO) {
         this.rootNode = root;
         this.symbolTable = symbolTable;
+        this.optimizeO = true; //TODO: change hardcoded
 
         CodeGeneratorUtils.setFileName(fileName);
-        Optimization.setOptimizeO(true);
+        Optimization.setOptimizeO(this.optimizeO);
+        Optimization.setOptimizeAtribution(this.optimizeO);
         Optimization.setCodeGenerator(this);
     }
 
@@ -243,6 +245,7 @@ public class CodeGenerator {
      * Method to write a Method (or function) into the file
      */
     private void writeMethod(final ASTMethodDeclaration methodNode, final int scope, final SymbolTable scopeTable) {
+        Optimization.setOptimizeAtribution(this.optimizeO);
         final String methodName = methodNode.getMethodName();
         final String methodType = transformType(methodNode.getReturnType());
 
@@ -279,6 +282,7 @@ public class CodeGenerator {
     }
 
     private void writeMain(final ASTMainDeclaration mainMethodNode, final int scope, final SymbolTable scopeTable) {
+        Optimization.setOptimizeAtribution(this.optimizeO);
         CodeGeneratorUtils.writeCode("\n.method public static main([Ljava/lang/String;)V\n", scope);
 
         final MethodManager methodManager = new MethodManager();
@@ -314,16 +318,10 @@ public class CodeGenerator {
                 // variable arlready added in locals
                 break;
             case "ASTIF":
-                Boolean isOptimizeIf = Optimization.getOptimizeO();
-                Optimization.setOptimizeO(false);
                 code += writeIf((ASTIF) currentNode, scope, methodManager);
-                Optimization.setOptimizeO(isOptimizeIf);
                 break;
             case "ASTWhile":
-                Boolean isOptimizeWhile = Optimization.getOptimizeO();
-                Optimization.setOptimizeO(false);
                 code += writeWhile((ASTWhile) currentNode, scope, methodManager);
-                Optimization.setOptimizeO(isOptimizeWhile);
                 break;
             case "ASTEquals":
                 code += writeEquals((ASTEquals) currentNode, scope, methodManager);
@@ -903,12 +901,21 @@ public class CodeGenerator {
     private String writeIf(final ASTIF ifNode, final int scope, final MethodManager methodManager) {
 
         String code = "";
+
+        String optimizedCode = Optimization.writeIf(ifNode, scope, methodManager);
+        if(optimizedCode != null){
+            code = optimizedCode;
+            return code;
+        }
+
         final int label = this.labelCounter;
         this.labelCounter++;
 
         final SimpleNode conditionChild = (SimpleNode) ifNode.jjtGetChild(0);
         final SimpleNode ifScope = (SimpleNode) ifNode.jjtGetChild(1);
         final SimpleNode elseScope = (SimpleNode) ifNode.jjtGetChild(2);
+        
+        Optimization.setOptimizeAtribution(false);
 
         code += processMethodNodes(conditionChild, scope, methodManager);
         code = CodeGeneratorUtils.writeToString(code, "ifgt correct" + label + "\n", scope);
@@ -926,7 +933,15 @@ public class CodeGenerator {
      * Method to write "while" to the file
      */
     private String writeWhile(final ASTWhile whileNode, final int scope, final MethodManager methodManager) {
+
         String code = "";
+
+        String optimizedCode = Optimization.writeWhile(whileNode, scope, methodManager);
+        if(optimizedCode != null){
+            code = optimizedCode;
+            return code;
+        }
+        Optimization.setOptimizeAtribution(false);
 
         final int label = this.labelCounter;
         this.labelCounter++;

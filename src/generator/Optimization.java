@@ -4,6 +4,7 @@
 public class Optimization {
 
     private static Boolean optimizeO;
+    private static Boolean optimizeAtribution;
     private static CodeGenerator codeGenerator;
 
     public static String writeInteger(int integer, final int scope, final MethodManager methodManager) {
@@ -298,8 +299,59 @@ public class Optimization {
         return null;
     }
 
+    public static String writeIf (final ASTIF ifNode, final int scope, final MethodManager methodManager) {
+
+        if (!optimizeO)
+            return null;
+
+        String code = "";
+
+        final SimpleNode conditionChild = (SimpleNode) ifNode.jjtGetChild(0);
+        final SimpleNode ifScope = (SimpleNode) ifNode.jjtGetChild(1);
+        final SimpleNode elseScope = (SimpleNode) ifNode.jjtGetChild(2);
+
+        String equalsValue = Optimization.getEqualsValue(conditionChild, methodManager);
+        if(equalsValue != null){
+            if(equalsValue.equals("true")){
+                code += codeGenerator.processMethodNodes(ifScope, scope, methodManager);
+                return code;
+            }
+            else if(equalsValue.equals("false")) {
+                code += codeGenerator.processMethodNodes(elseScope, scope, methodManager);
+                return code;
+            }
+        }
+
+        return null;
+    }
+
+    public static String writeWhile (final ASTWhile whileNode, final int scope, final MethodManager methodManager) {
+
+        if (!optimizeO)
+            return null;
+
+        String code = "";
+
+        final SimpleNode conditionChild = (SimpleNode) whileNode.jjtGetChild(0);
+
+        String equalsValue = Optimization.getEqualsValue(conditionChild, methodManager);
+        if(equalsValue != null){
+            if(equalsValue.equals("true")){
+                return null;
+            }
+            else if(equalsValue.equals("false")) {
+                return "";
+            }
+        }
+
+        return null;
+    }
+
     public static String writeIdentifier(final ASTIdentifier identifierNode, final int scope,
             final MethodManager methodManager) {
+
+        if (!optimizeAtribution)
+            return null;
 
         if (!optimizeO)
             return null;
@@ -310,10 +362,10 @@ public class Optimization {
         String valueOfIdentifier = methodManager.getValueOfLocal(identifier);
         if (valueOfIdentifier != null) {
             if (valueOfIdentifier.equals("true")) {
-                System.out.println(identifier + "-- Supposed: " + valueOfIdentifier + " Got: iconst_1");
+                code = CodeGeneratorUtils.writeToString(code, "iconst_1\n", scope);
                 methodManager.addInstruction("iconst", "boolean");
             } else if (valueOfIdentifier.equals("false")) {
-                System.out.println(identifier + "-- Supposed: " + valueOfIdentifier + " Got: iconst_0");
+                code = CodeGeneratorUtils.writeToString(code, "iconst_0\n", scope);
                 methodManager.addInstruction("iconst", "boolean");
             } else if (!valueOfIdentifier.equals("this")) {
                 int value = Integer.parseInt(valueOfIdentifier);
@@ -326,6 +378,10 @@ public class Optimization {
     }
 
     public static String getEqualsValue(SimpleNode node, MethodManager mothodManager) {
+
+        if (!optimizeAtribution)
+            return null;
+
         if (!optimizeO)
             return null;
 
@@ -336,11 +392,19 @@ public class Optimization {
         return optimizeO;
     }
 
+    public static Boolean getOptimizeAtribution() {
+        return optimizeAtribution;
+    }
+
     public static void setOptimizeO(Boolean optimizeO) {
         Optimization.optimizeO = optimizeO;
     }
 
     public static void setCodeGenerator(CodeGenerator codeGenerator) {
         Optimization.codeGenerator = codeGenerator;
+    }
+
+    public static void setOptimizeAtribution(Boolean optimizeAtribution) {
+        Optimization.optimizeAtribution = optimizeAtribution;
     }
 }
