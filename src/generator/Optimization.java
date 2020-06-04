@@ -383,10 +383,6 @@ public class Optimization {
     }
 
     public static String getEqualsValue(SimpleNode node, MethodManager mothodManager) {
-
-        if (!optimizeAtribution)
-            return null;
-
         if (!optimizeO)
             return null;
 

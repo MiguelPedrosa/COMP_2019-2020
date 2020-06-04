@@ -191,6 +191,9 @@ public class PreCalculator {
 
     private static String getIdentifierValue(SimpleNode identifierNode, MethodManager methodManager){
         String identifier = ((ASTIdentifier) identifierNode).getIdentifier();
+        
+        if (!Optimization.getOptimizeAtribution())
+            return null;
 
         return methodManager.getValueOfLocal(identifier);
     }
