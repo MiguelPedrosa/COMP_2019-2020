@@ -237,6 +237,55 @@ public class Optimization {
         return null;
     }
 
+    public static String writeDivOperation(final ASTDividor divNode, final int scope,
+            final MethodManager methodManager) {
+
+        if (!optimizeO)
+            return null;
+
+        String code = "";
+
+        final SimpleNode childLeft = (SimpleNode) divNode.jjtGetChild(0);
+        final SimpleNode childRight = (SimpleNode) divNode.jjtGetChild(1);
+
+        // caso multiplicação de dois literals
+        if (childLeft instanceof ASTLiteral && childRight instanceof ASTLiteral) {
+            String literalLeft = ((ASTLiteral) childLeft).getLiteral();
+            String literalRight = ((ASTLiteral) childRight).getLiteral();
+
+            int literalLeftInt = Integer.parseInt(literalLeft);
+            int literalRightInt = Integer.parseInt(literalRight);
+
+            if (literalRightInt != 0) {
+                int total = literalLeftInt / literalRightInt;
+
+                code += Optimization.writeInteger(total, scope, methodManager);
+
+                return code;
+            }
+        } else if (childRight instanceof ASTLiteral && childLeft instanceof ASTIdentifier) { // i / 8
+
+            String literal = ((ASTLiteral) childRight).getLiteral();
+            int numero = Integer.parseInt(literal);
+            if (numero > 0) {
+                double check = Math.log((double) numero) / Math.log(2); // verificar se o número a ser dividido é
+                                                                        // uma
+                                                                        // potencia de 2
+
+                if (check % 1 == 0) {
+                    code += codeGenerator.processMethodNodes(childLeft, scope, methodManager);
+                    code += Optimization.writeInteger((int) check, scope, methodManager);
+                    code = CodeGeneratorUtils.writeToString(code, "ishr\n", scope);
+                    methodManager.stackPop(2);
+                    methodManager.addInstruction("ishr", "int");
+                    return code;
+                }
+            }
+        }
+
+        return null;
+    }
+
     public static String writeLessThanOperation(ASTLessThan lessThanNode, int scope, MethodManager methodManager,
             int labelCounter) {
 
@@ -304,7 +353,7 @@ public class Optimization {
         return null;
     }
 
-    public static String writeIf (final ASTIF ifNode, final int scope, final MethodManager methodManager) {
+    public static String writeIf(final ASTIF ifNode, final int scope, final MethodManager methodManager) {
 
         if (!optimizeO)
             return null;
@@ -316,12 +365,11 @@ public class Optimization {
         final SimpleNode elseScope = (SimpleNode) ifNode.jjtGetChild(2);
 
         String equalsValue = Optimization.getEqualsValue(conditionChild, methodManager);
-        if(equalsValue != null){
-            if(equalsValue.equals("true")){
+        if (equalsValue != null) {
+            if (equalsValue.equals("true")) {
                 code += codeGenerator.processMethodNodes(ifScope, scope, methodManager);
                 return code;
-            }
-            else if(equalsValue.equals("false")) {
+            } else if (equalsValue.equals("false")) {
                 code += codeGenerator.processMethodNodes(elseScope, scope, methodManager);
                 return code;
             }
@@ -330,7 +378,7 @@ public class Optimization {
         return null;
     }
 
-    public static String writeWhile (final ASTWhile whileNode, final int scope, final MethodManager methodManager) {
+    public static String writeWhile(final ASTWhile whileNode, final int scope, final MethodManager methodManager) {
 
         if (!optimizeO)
             return null;
@@ -340,11 +388,10 @@ public class Optimization {
         final SimpleNode conditionChild = (SimpleNode) whileNode.jjtGetChild(0);
 
         String equalsValue = Optimization.getEqualsValue(conditionChild, methodManager);
-        if(equalsValue != null){
-            if(equalsValue.equals("true")){
+        if (equalsValue != null) {
+            if (equalsValue.equals("true")) {
                 return null;
-            }
-            else if(equalsValue.equals("false")) {
+            } else if (equalsValue.equals("false")) {
                 return "";
             }
         }

@@ -25,7 +25,7 @@ public class CodeGenerator {
             final Boolean optimizeO) {
         this.rootNode = root;
         this.symbolTable = symbolTable;
-        this.optimizeO = true; //TODO: change hardcoded
+        this.optimizeO = true; // TODO: change hardcoded
 
         CodeGeneratorUtils.setFileName(fileName);
         Optimization.setOptimizeO(this.optimizeO);
@@ -896,7 +896,7 @@ public class CodeGenerator {
         String code = "";
 
         String optimizedCode = Optimization.writeIf(ifNode, scope, methodManager);
-        if(optimizedCode != null){
+        if (optimizedCode != null) {
             code = optimizedCode;
             return code;
         }
@@ -907,7 +907,7 @@ public class CodeGenerator {
         final SimpleNode conditionChild = (SimpleNode) ifNode.jjtGetChild(0);
         final SimpleNode ifScope = (SimpleNode) ifNode.jjtGetChild(1);
         final SimpleNode elseScope = (SimpleNode) ifNode.jjtGetChild(2);
-        
+
         Optimization.setOptimizeAtribution(false);
 
         code += processMethodNodes(conditionChild, scope, methodManager);
@@ -930,7 +930,7 @@ public class CodeGenerator {
         String code = "";
 
         String optimizedCode = Optimization.writeWhile(whileNode, scope, methodManager);
-        if(optimizedCode != null){
+        if (optimizedCode != null) {
             code = optimizedCode;
             return code;
         }
@@ -1036,6 +1036,12 @@ public class CodeGenerator {
      */
     private String writeDivOperation(final ASTDividor divNode, final int scope, final MethodManager methodManager) {
         String code = "";
+
+        String optimizedCode = Optimization.writeDivOperation(divNode, scope, methodManager);
+        if (optimizedCode != null) {
+            code = optimizedCode;
+            return code;
+        }
 
         final SimpleNode childLeft = (SimpleNode) divNode.jjtGetChild(0);
         final SimpleNode childRight = (SimpleNode) divNode.jjtGetChild(1);
