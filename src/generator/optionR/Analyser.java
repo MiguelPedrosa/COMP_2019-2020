@@ -132,8 +132,8 @@ public class Analyser {
     }
 
     private void analyseEquals(ASTEquals equals, NodeR nodeR) {
-        final SimpleNode leftNode =  equals.jjtGetChild(0);
-        final SimpleNode rightNode =  equals.jjtGetChild(1);
+        final SimpleNode leftNode = equals.jjtGetChild(0);
+        final SimpleNode rightNode = equals.jjtGetChild(1);
 
         String varName = null;
         if(leftNode instanceof ASTIdentifier) {
@@ -153,8 +153,8 @@ public class Analyser {
 
     private void processIf(ASTIF ifNode, NodeR nodeR) {
         final SimpleNode test =  ifNode.jjtGetChild(0);
-        final SimpleNode caseTrue =  ifNode.jjtGetChild(1);
-        final SimpleNode caseFalse =  ifNode.jjtGetChild(2);
+        final SimpleNode caseTrue = ifNode.jjtGetChild(1);
+        final SimpleNode caseFalse = ifNode.jjtGetChild(2);
 
         processExpression(test, nodeR);
         //Future position of if statment in list
@@ -169,7 +169,7 @@ public class Analyser {
     }
 
     private void processWhile(ASTWhile whileNode, NodeR nodeR) {
-        final SimpleNode test =  whileNode.jjtGetChild(0);
+        final SimpleNode test = whileNode.jjtGetChild(0);
         final SimpleNode whileBody = whileNode.jjtGetChild(1);
 
         processExpression(test, nodeR);
