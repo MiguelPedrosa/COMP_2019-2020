@@ -200,7 +200,15 @@ public class Optimization {
 
             String literal = ((ASTLiteral) childLeft).getLiteral();
             int numero = Integer.parseInt(literal);
-            if (numero > 0) {
+
+            if(numero == 0) {
+                code += CodeGeneratorUtils.writeToString(code, "iconst_0 \n", scope);
+                methodManager.addInstruction("iconst", "int");
+                return code;
+            } else if(numero == 1) {
+                code += codeGenerator.processMethodNodes(childRight, scope, methodManager);
+                return code;
+            } else if (numero > 1) {
                 double check = Math.log((double) numero) / Math.log(2); // verificar se o número a ser multiplicado é
                                                                         // uma
                                                                         // potencia de 2
@@ -218,7 +226,15 @@ public class Optimization {
 
             String literal = ((ASTLiteral) childRight).getLiteral();
             int numero = Integer.parseInt(literal);
-            if (numero > 0) {
+            
+            if(numero == 0) {
+                code += CodeGeneratorUtils.writeToString(code, "iconst_0 \n", scope);
+                methodManager.addInstruction("iconst", "int");
+                return code;
+            } else if(numero == 1) {
+                code += codeGenerator.processMethodNodes(childLeft, scope, methodManager);
+                return code;
+            } else if (numero > 1) {
                 double check = Math.log((double) numero) / Math.log(2); // verificar se o número a ser multiplicado é
                                                                         // uma
                                                                         // potencia de 2
@@ -267,7 +283,11 @@ public class Optimization {
 
             String literal = ((ASTLiteral) childRight).getLiteral();
             int numero = Integer.parseInt(literal);
-            if (numero > 0) {
+
+            if (numero == 1){
+                code += codeGenerator.processMethodNodes(childLeft, scope, methodManager);
+                return code;
+            } else if (numero > 1) {
                 double check = Math.log((double) numero) / Math.log(2); // verificar se o número a ser dividido é
                                                                         // uma
                                                                         // potencia de 2
@@ -280,6 +300,16 @@ public class Optimization {
                     methodManager.addInstruction("ishr", "int");
                     return code;
                 }
+            }
+        } else if (childLeft instanceof ASTLiteral && childRight instanceof ASTIdentifier) { // 0 / i
+
+            String literal = ((ASTLiteral) childLeft).getLiteral();
+            int numero = Integer.parseInt(literal);
+
+            if (numero == 0){
+                code += CodeGeneratorUtils.writeToString(code, "iconst_0 \n", scope);
+                methodManager.addInstruction("iconst", "int");
+                return code;
             }
         }
 
