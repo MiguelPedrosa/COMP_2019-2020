@@ -66,6 +66,7 @@ public class Analyser {
 
     public void run() {
         final Graph graph = new Graph(this.statments, this.varNames, targetSize);
+        graph.colorGraph();
         graph.printNodes();
     }
 
