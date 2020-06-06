@@ -32,7 +32,6 @@ public class Graph {
         for (Map.Entry<String, GraphNode> entry : nodes.entrySet()) {
             System.out.printf("Node: %s\n",entry.getKey());
             entry.getValue().printNode();
-            System.out.println();
         }
     }
 }
