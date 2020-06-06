@@ -21,6 +21,21 @@ class FindMaximum {
 		return maximum;
 	}
 
+	public int myTest() {
+		int s;
+		int i;
+		int t;
+
+		s = 0;
+		i = 0;
+		while(i < 3){
+			t = i;
+			s = s + t;
+			i = i + 1;
+		}
+		return s;
+	}
+
 	public int build_test_arr() {
 		test_arr = new int[5];
 		test_arr[0] = 14;

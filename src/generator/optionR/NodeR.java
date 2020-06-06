@@ -1,6 +1,6 @@
-package generator.optionR;
-
+import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.List;
 
 public class NodeR {
     /**
@@ -45,28 +45,52 @@ public class NodeR {
     public void setDef(int index) {
         this.def.set(index);
     }
-    public void setIn(int index) {
-        this.in.set(index);
+
+    public void setIn(BitSet bitSet) {
+        this.in = bitSet;
     }
-    public void setOut(int index) {
-        this.out.set(index);
+
+    public void setOut(BitSet bitSet) {
+        this.out = bitSet;
     }
 
     public void clearIn(int index) {
         this.in.clear(index);
     }
 
-    public Boolean getUse(int index) {
-        return this.use.get(index);
+    public BitSet getUse() {
+        return this.use;
     }
-    public Boolean getDef(int index) {
-        return this.def.get(index);
+    public BitSet getDef() {
+        return this.def;
     }
-    public Boolean getIn(int index) {
-        return this.in.get(index);
+    public BitSet getIn() {
+        return this.in;
     }
-    public Boolean getOut(int index) {
-        return this.out.get(index);
+    public BitSet getOut() {
+        return this.out;
+    }
+
+    public List<Integer> getActiveVars() {
+        List<Integer> list = new ArrayList<>();
+
+        //usar lenght ou size?
+        for(int i = 0; i < this.in.length(); i++)
+            if(this.in.get(i))
+                if(!list.contains(i))
+                    list.add(i);
+        
+
+        for(int i = 0; i < this.out.length(); i++)
+            if(this.out.get(i))
+                if(!list.contains(i))
+                    list.add(i);
+            
+        return list;
+    }
+
+    public void printNode() {
+        System.out.printf("%d,%d\t\t%s\t%s\t%s\t%s\n", successor1, successor2, def, use, in, out);
     }
 
 }
