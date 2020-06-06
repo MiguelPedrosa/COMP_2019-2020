@@ -262,11 +262,12 @@ public class CodeGenerator {
         final List<SymbolVar> locals = prepareLocals(scope + 1, methodKey);
 
         //TODO: change hardcoded
-        Analyser analyser = new Analyser(locals, 4);
+        Analyser analyser = new Analyser(locals, 10);
         analyser.setup(methodNode);
         System.out.println();
         System.out.println(methodName);
         analyser.printNodes();
+        analyser.run();
 
         methodManager.setLocals(locals);
 
@@ -295,11 +296,12 @@ public class CodeGenerator {
         final List<SymbolVar> locals = prepareLocals(scope + 1, "main");
 
         //TODO: change hardcoded
-        Analyser analyser = new Analyser(locals, 4);
+        Analyser analyser = new Analyser(locals, 10);
         analyser.setup(mainMethodNode);
         System.out.println();
         System.out.println("Main");
         analyser.printNodes();
+        analyser.run();
 
         methodManager.setLocals(locals);
 
@@ -629,8 +631,6 @@ public class CodeGenerator {
 
         if (type == null) {
             if (this.symbolTable.containsVariable(identifier)) {
-                // TODO: check if group agree with code
-                // TODO: when array change for arrays instead of fields? prof example
                 type = this.symbolTable.getVariableType(identifier);
 
                 final String filteredIdentifier = getJasminIdentifier(identifier);
