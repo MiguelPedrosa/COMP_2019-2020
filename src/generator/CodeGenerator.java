@@ -18,14 +18,16 @@ public class CodeGenerator {
     private final SimpleNode rootNode;
     private final SymbolTable symbolTable;
     private final Boolean optimizeO;
+    private final int Rvalue;
 
     private int labelCounter = 0;
 
     public CodeGenerator(final SimpleNode root, final SymbolTable symbolTable, final String fileName,
-            final Boolean optimizeO) {
+            final Boolean optimizeO, int Rvalue) {
         this.rootNode = root;
         this.symbolTable = symbolTable;
         this.optimizeO = true; // TODO: change hardcoded
+        this.Rvalue = Rvalue;
 
         CodeGeneratorUtils.setFileName(fileName);
         Optimization.setOptimizeO(this.optimizeO);
@@ -261,13 +263,14 @@ public class CodeGenerator {
         final MethodManager methodManager = new MethodManager();
         final List<SymbolVar> locals = prepareLocals(scope + 1, methodKey);
 
-        //TODO: change hardcoded
-        Analyser analyser = new Analyser(locals, 10);
-        analyser.setup(methodNode);
-        System.out.println();
-        System.out.println(methodName);
-        analyser.printNodes();
-        analyser.run();
+        if(this.Rvalue != -1) {
+            Analyser analyser = new Analyser(locals, this.Rvalue);
+            analyser.setup(methodNode);
+            System.out.println();
+            System.out.println(methodName);
+            analyser.printNodes();
+            analyser.run();
+        }
 
         methodManager.setLocals(locals);
 
@@ -295,13 +298,14 @@ public class CodeGenerator {
         methodManager.setMain();
         final List<SymbolVar> locals = prepareLocals(scope + 1, "main");
 
-        //TODO: change hardcoded
-        Analyser analyser = new Analyser(locals, 10);
-        analyser.setup(mainMethodNode);
-        System.out.println();
-        System.out.println("Main");
-        analyser.printNodes();
-        analyser.run();
+        if(this.Rvalue != -1) {
+            Analyser analyser = new Analyser(locals, this.Rvalue);
+            analyser.setup(mainMethodNode);
+            System.out.println();
+            System.out.println("Main");
+            analyser.printNodes();
+            analyser.run();
+        }
 
         methodManager.setLocals(locals);
 

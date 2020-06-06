@@ -9,10 +9,14 @@ public class Main {
 
         final String filePath = args[0];
         boolean optimizeO = false;
+        int Rvalue = -1;
 
         for (String arg: args) {
             if(arg.equals("-o"))
                 optimizeO = true;
+            else if(arg.contains("-r=")) {
+                Rvalue = Integer.parseInt(arg.split("=", 0)[1]);
+            }
         }
 
         Parser myProgram = new Parser(openFile(filePath));
@@ -32,10 +36,7 @@ public class Main {
             throw new IOException();
         }
 
-        
-        
-
-        CodeGenerator codeGenerator = new CodeGenerator(root, classTable, getOutputFilename(filePath), optimizeO);
+        CodeGenerator codeGenerator = new CodeGenerator(root, classTable, getOutputFilename(filePath), optimizeO, Rvalue);
         codeGenerator.start();
     }
 
