@@ -65,7 +65,8 @@ public class Analyser {
     }
 
     public void run() {
-        Graph graph = new Graph(this.statments, this.varNames, targetSize);
+        final Graph graph = new Graph(this.statments, this.varNames, targetSize);
+        graph.printNodes();
     }
 
     private void in_out_setup() {
