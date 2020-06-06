@@ -176,7 +176,7 @@ public class MethodManager {
     public int indexOfLocal(String local) {
         for (int i = 0; i < this.locals.size(); i++)
             if (this.locals.get(i).getName().equals(local))
-                return i;
+                return this.locals.get(i).getIndex();
         return -1;
     }
 
