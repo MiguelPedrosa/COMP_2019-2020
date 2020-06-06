@@ -19,7 +19,6 @@ public class Analyser {
      * use. If it's impossible, program terminates
      */
     private int targetSize;
-
     /**
      * All statments from a given method enumerated
      * and can be referenced by an index 
@@ -31,10 +30,18 @@ public class Analyser {
      * on/off while working with BitSets
      */
     private HashMap<String, Integer> varNames;
+    /**
+     * Used to store the max number of simultaneous
+     * variables used at the same time. This value
+     * is calculated during the lifetime analysis to
+     * prevent adicional loops.
+     */
+    private int maxVarIntesections;
 
 
     public Analyser(List<SymbolVar> locals, int targetSize) {
         this.targetSize = targetSize;
+        this.maxVarIntesections = 0;
         statments = new ArrayList<>();
         varNames = new HashMap<>();
         for(int i = 0; i < locals.size(); i++)
@@ -47,7 +54,6 @@ public class Analyser {
             processStatment((SimpleNode) method.jjtGetChild(i), -1, -1);
         }
         this.in_out_setup();
-        Graph graph = new Graph(statments);
     }
 
     public void setup(ASTMainDeclaration method) {
@@ -58,15 +64,24 @@ public class Analyser {
         this.in_out_setup();
     }
 
+    public void run() {
+        Graph graph = new Graph(this.statments, this.varNames, targetSize);
+    }
+
     private void in_out_setup() {
         if(statments.size() == 0){
             System.out.println("Statements in method not found");
             return;
         }
 
-        // while incompleto...
         while(this.in_out_iteration());
 
+        if(this.maxVarIntesections > this.targetSize) {
+            System.err.printf("Cannot continue compilation due to insuficient size of locals given. Current function required %d, but was given %d\n",
+                this.maxVarIntesections,
+                this.targetSize);
+            System.exit(1);
+        }
     }
 
     private boolean in_out_iteration() {
@@ -106,6 +121,17 @@ public class Analyser {
             in.andNot(def);
             in.or(use);
             node.setIn(in);
+
+            // Calculate if new interation, produced more
+            // variable intersections
+            final int inSize = in.cardinality();
+            if(inSize > this.maxVarIntesections) {
+                this.maxVarIntesections = inSize;
+            }
+            final int outSize = out.cardinality();
+            if (outSize > this.maxVarIntesections) {
+                this.maxVarIntesections = outSize;
+            }
 
             if(!out.equals(prevOut) || !in.equals(prevIn))
                 flag = true; 
