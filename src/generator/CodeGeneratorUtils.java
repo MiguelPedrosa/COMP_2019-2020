@@ -1,3 +1,4 @@
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -30,6 +31,10 @@ public class CodeGeneratorUtils {
     public static boolean generateFile() {
         System.out.println("Generating code file...\n\n");
         try {
+            // Create directory if one does not exist already
+            File dir = new File("jFiles");
+            if(!dir.exists())
+                dir.mkdir();
             jFile = new FileOutputStream(filePath + fileSeparator + fileName + fileExtension);
         } catch (final FileNotFoundException e) {
             e.printStackTrace();
