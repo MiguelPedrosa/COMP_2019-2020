@@ -37,6 +37,11 @@ public class Analyser {
      * prevent adicional loops.
      */
     private int maxVarIntesections;
+    /**
+     * K-color graph, to give register indexes to
+     * each local variable
+     */
+    private Graph graph;
 
 
     public Analyser(List<SymbolVar> locals, int targetSize) {
@@ -64,10 +69,40 @@ public class Analyser {
         this.in_out_setup();
     }
 
-    public void run() {
-        final Graph graph = new Graph(this.statments, this.varNames, targetSize);
-        graph.colorGraph();
+    public void run(List<String[]> arguments) {
+        this.graph = new Graph(this.statments, this.varNames, targetSize);
+        graph.colorGraph(arguments);
         graph.printNodes();
+    }
+
+    public int adjustLocalsIndex(List<SymbolVar> locals) {
+        final HashMap<String, GraphNode> nodes = this.graph.getNodes();
+/*         if(nodes.get("this")) {
+            nodes.get("this").setIndex(0);
+        }
+        for(SymbolVar local : locals) {
+            final String name = local.getName();
+            final GraphNode node = nodes.get(name);
+            final int color = node.getColor();
+            for(SymbolVar symbol : locals) {
+
+            }
+            if(color == thisColor) {
+                local.setIndex(0);
+            }
+        } */
+
+        int maxIndex = 0;
+        for(SymbolVar local : locals) {
+            final String name = local.getName();
+            final GraphNode node = nodes.get(name);
+            final int index = node.getColor();
+            local.setIndex(index);
+            if(index > maxIndex) {
+                maxIndex = index;
+            }
+        }
+        return maxIndex +1;
     }
 
     private void in_out_setup() {
