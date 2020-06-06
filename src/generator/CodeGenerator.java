@@ -225,16 +225,23 @@ public class CodeGenerator {
         Map<String, SymbolVar> variables;
         final List<SymbolVar> locals = new ArrayList<>();
 
+        int index = 0;
         if (methodKey.equals("main")) {
             variables = this.symbolTable.getMain().getVariables();
         } else {
             variables = this.symbolTable.getMethodTable(methodKey).getVariables();
-            locals.add(new SymbolVar("this", this.symbolTable.getClasseName()));
+            final SymbolVar thisVar = new SymbolVar("this", this.symbolTable.getClasseName());
+            thisVar.setIndex(index);
+            locals.add(thisVar);
+            index = 1;
         }
 
         // Add variables to locals container
         for (final Map.Entry<String, SymbolVar> entry : variables.entrySet()) {
-            locals.add(entry.getValue());
+            final SymbolVar local = entry.getValue();
+            local.setIndex(index);
+            locals.add(local);
+            index++;
         }
 
         return locals;
@@ -263,13 +270,17 @@ public class CodeGenerator {
         final MethodManager methodManager = new MethodManager();
         final List<SymbolVar> locals = prepareLocals(scope + 1, methodKey);
 
+        int maxLocalValue = locals.size();
         if(this.Rvalue != -1) {
             Analyser analyser = new Analyser(locals, this.Rvalue);
             analyser.setup(methodNode);
             System.out.println();
             System.out.println(methodName);
             analyser.printNodes();
-            analyser.run();
+            analyser.run(arguments);
+
+            // Changed local's indexs
+            maxLocalValue = analyser.adjustLocalsIndex(locals);
         }
 
         methodManager.setLocals(locals);
@@ -283,7 +294,7 @@ public class CodeGenerator {
         }
 
         writeStack(methodManager.getMaxStackSize(), scope + 1);
-        writeLocals(locals.size(), scope + 1);
+        writeLocals(maxLocalValue, scope + 1);
 
         CodeGeneratorUtils.writeCode(code, scope);
 
@@ -298,13 +309,19 @@ public class CodeGenerator {
         methodManager.setMain();
         final List<SymbolVar> locals = prepareLocals(scope + 1, "main");
 
+        int maxLocalValue = locals.size();
         if(this.Rvalue != -1) {
+            List<String[]> arguments = new ArrayList();
+            arguments.add(new String[]{"args", "String[]"});
             Analyser analyser = new Analyser(locals, this.Rvalue);
             analyser.setup(mainMethodNode);
             System.out.println();
             System.out.println("Main");
             analyser.printNodes();
-            analyser.run();
+            analyser.run(arguments);
+
+            // Changed local's indexs
+            maxLocalValue = analyser.adjustLocalsIndex(locals);
         }
 
         methodManager.setLocals(locals);
@@ -318,7 +335,7 @@ public class CodeGenerator {
         }
 
         writeStack(methodManager.getMaxStackSize(), scope + 1);
-        writeLocals(locals.size(), scope + 1);
+        writeLocals(maxLocalValue, scope + 1);
         CodeGeneratorUtils.writeCode(code, scope);
         CodeGeneratorUtils.writeCode("return\n", scope + 1);
 
