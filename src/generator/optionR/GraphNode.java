@@ -4,11 +4,13 @@ import java.util.List;
 public class GraphNode {
 
     private List<GraphNode> neighbours; 
-    private int color; 
+    private int color;
+    private int index;
     private Boolean hidden; 
 
     public GraphNode() {
         this.color = -1;
+        this.index = -1;
         this.hidden = false;
         this.neighbours = new ArrayList<>();
     }
@@ -24,6 +26,14 @@ public class GraphNode {
             this.color,
             (hidden ? "true" : "false"),
             this.neighbours);
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
     }
 
 	public int getColor() {
