@@ -1,29 +1,38 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Graph {
 
-    private List<GraphNode> nodes;
+    private HashMap<String, GraphNode> nodes;
+    private int Kcolors;
 
-    public Graph(List<NodeR> statments) {
-        this.nodes = new ArrayList<>();
-        this.setup(statments);
+    public Graph(List<NodeR> statments, HashMap<String, Integer> varNames, int Kcolors) {
+        this.Kcolors = Kcolors;
+        this.nodes = new HashMap<>();
+        this.setup(statments, varNames);
     }
 
-    private void setup(List<NodeR> statments){
-        for(NodeR nodeR: statments){
-            List<Integer> activeVars = nodeR.getActiveVars();
-            for(Integer activeVar: activeVars)
-                if(!containsNode(activeVar))
-                    nodes.add(new GraphNode(activeVar));
+    private void setup(List<NodeR> statments, HashMap<String, Integer> varNames) {
+        for (Map.Entry<String, Integer> entry : varNames.entrySet()) {
+            final GraphNode newNode = new GraphNode();
+            nodes.put(entry.getKey(), newNode);
         }
+
+        /**
+         * Statment 0: in{}; out{4, 5, ..}
+         * Statment 1: in{}; out{4, 5, ..}
+         * Statment 2: in{}; out{4, 5, ..}
+         */
+
     }
 
-    private Boolean containsNode(Integer var){
-        for(GraphNode node: nodes)
-            if(node.getVar() == var)
-                return true;
-
-        return false;
+    public void printNodes() {
+        for (Map.Entry<String, GraphNode> entry : nodes.entrySet()) {
+            System.out.printf("Node: %s\n",entry.getKey());
+            entry.getValue().printNode();
+            System.out.println();
+        }
     }
 }
