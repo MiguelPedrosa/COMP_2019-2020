@@ -8,15 +8,18 @@ import java.util.Stack;
 public class Graph {
 
     private HashMap<String, GraphNode> nodes;
+    private HashMap<Integer, Integer> indexColor;
+
     private int Kcolors;
 
     public Graph(List<NodeR> statments, HashMap<String, Integer> varNames, int Kcolors) {
         this.Kcolors = Kcolors;
         this.nodes = new HashMap<>();
+        this.indexColor = new HashMap<>();
         this.setup(statments, varNames);
     }
 
-    public void colorGraph() {
+    public void colorGraph(List<String[]> arguments) {
         final Stack<String> nodeStorage = new Stack<>();
         String nextNodeName = null;
         
@@ -24,7 +27,7 @@ public class Graph {
             nodes.get(nextNodeName).setHidden(true);
             nodeStorage.push(nextNodeName);
         }
-
+        int count = 1;
         while(! nodeStorage.empty()) {
             nextNodeName = nodeStorage.pop();
             final GraphNode nextNode = nodes.get(nextNodeName);
@@ -32,6 +35,23 @@ public class Graph {
             nextNode.setColor(nextColor);
             nextNode.setHidden(false);
         }
+
+        //1. Find color of this
+        //2. Replace of indexs of same color with 0
+        //3. n = 0; index = 1;
+        //3. Find color of arg[n]; n++
+        //4. If node.index == -1:
+        //4.1. Replace of indexs of same color with {index}; {index}++
+        //5. l = 0
+        //6. Find color of local[l]; l++
+        //7. If node.index == -1:
+        //7.1. Replace of indexs of same color with {index}; {index}++
+        
+
+    }
+
+    public HashMap<String, GraphNode> getNodes() {
+        return nodes;
     }
 
     private void setup(List<NodeR> statments, HashMap<String, Integer> varNames) {
