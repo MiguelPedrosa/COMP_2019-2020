@@ -28,20 +28,11 @@ class FindMaximum {
 
 		s = 0;
 		i = 0;
-		t = 0;
 		while(i < 3){
-			if(i < 3){
-				t = i;
-			}else{
-				if(i < 3){
-					t = i;
-				}
-				else{
-				
-				}
-			}
+			t = i;
+			s = s + t;
+			i = i + 1;
 		}
-		
 		return s;
 	}
 

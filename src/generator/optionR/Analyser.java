@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
 
@@ -45,12 +46,73 @@ public class Analyser {
         for(int i = 0; i < numChildren; i++) {
             processStatment((SimpleNode) method.jjtGetChild(i), -1, -1);
         }
+        this.in_out_setup();
+        Graph graph = new Graph(statments);
     }
+
     public void setup(ASTMainDeclaration method) {
         final int numChildren = method.jjtGetNumChildren();
         for(int i = 0; i < numChildren; i++) {
             processStatment((SimpleNode) method.jjtGetChild(i), -1, -1);
         }
+        this.in_out_setup();
+    }
+
+    private void in_out_setup() {
+        if(statments.size() == 0){
+            System.out.println("Statements in method not found");
+            return;
+        }
+
+        // while incompleto...
+        while(this.in_out_iteration());
+
+    }
+
+    private boolean in_out_iteration() {
+        final int nVariables = varNames.size();
+        boolean flag = false;
+
+        for(int i = statments.size() - 1; i >= 0; i--){
+            //set out
+            NodeR node = statments.get(i);
+            BitSet prevIn = (BitSet) node.getIn().clone();
+            BitSet prevOut = (BitSet) node.getOut().clone();
+            
+            //fix main with no return
+            if(node.getSuccessor1() >= statments.size())
+                node.setSuccessor1(-1);
+            if(node.getSuccessor2() >= statments.size())
+                node.setSuccessor2(-1);
+
+            BitSet inS1 = new BitSet(nVariables);
+            BitSet inS2 = new BitSet(nVariables);
+            BitSet out = new BitSet(nVariables);
+
+            if(node.getSuccessor1() != -1)
+                inS1 = statments.get(node.getSuccessor1()).getIn();
+
+            if(node.getSuccessor2() != -1)
+                inS2 = statments.get(node.getSuccessor2()).getIn();
+
+            out.or(inS1);
+            out.or(inS2);
+            node.setOut(out);
+
+            //set in
+            BitSet use = node.getUse();
+            BitSet def = node.getDef();
+            BitSet in = (BitSet) out.clone();
+            in.andNot(def);
+            in.or(use);
+            node.setIn(in);
+
+            if(!out.equals(prevOut) || !in.equals(prevIn))
+                flag = true; 
+            
+        }
+
+        return flag;
     }
 
     private void processStatment(SimpleNode node, int lastOffsetNodePosition, int offsetNodePosition) {
@@ -60,11 +122,11 @@ public class Analyser {
 
         final int currentNodePosition = statments.size();
         // Check if last node of while
-        if(lastOffsetNodePosition == currentNodePosition) {
+        if(lastOffsetNodePosition == currentNodePosition) 
             nodeR.setSuccessor1(offsetNodePosition);
-        } else {
+        else
             nodeR.setSuccessor1(currentNodePosition +1);
-        }
+        
 
         if(nodeType.equals("ASTVarDeclaration"))
             return;
@@ -96,7 +158,7 @@ public class Analyser {
                 System.err.printf("Node not processed: %s\n", nodeType);
             case "ASTVarDeclaration":
                 return;
-        }        
+        }
     }
 
     private void processExpression(SimpleNode node, NodeR nodeR) {
