@@ -36,12 +36,9 @@ public class PreCalculator {
                 value = getDividorValue(node, methodManager);
                 break;
             case "ASTArrayAccess":
-                //value = getEqualsValue(node.jjtGetChild(0), methodManager);
-                break;
             case "ASTFuncCall":
-                //value = getEqualsValue(node.jjtGetChild(0), methodManager);
-                break;
             case "ASTNew":
+            case "ASTLength":
                 //value = getEqualsValue(node.jjtGetChild(0), methodManager);
                 break;
             default:

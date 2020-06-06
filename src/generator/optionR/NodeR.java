@@ -1,5 +1,3 @@
-package generator.optionR;
-
 import java.util.BitSet;
 
 public class NodeR {
@@ -67,6 +65,10 @@ public class NodeR {
     }
     public Boolean getOut(int index) {
         return this.out.get(index);
+    }
+
+    public void printNode() {
+        System.out.printf("%d,%d\t\t%s\t%s\t%s\t%s\n", successor1, successor2, def, use, in, out);
     }
 
 }

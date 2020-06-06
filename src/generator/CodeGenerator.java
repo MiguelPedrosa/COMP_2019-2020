@@ -261,6 +261,13 @@ public class CodeGenerator {
         final MethodManager methodManager = new MethodManager();
         final List<SymbolVar> locals = prepareLocals(scope + 1, methodKey);
 
+        //TODO: change hardcoded
+        Analyser analyser = new Analyser(locals, 4);
+        analyser.setup(methodNode);
+        System.out.println();
+        System.out.println(methodName);
+        analyser.printNodes();
+
         methodManager.setLocals(locals);
 
         String code = "";
@@ -286,6 +293,13 @@ public class CodeGenerator {
         final MethodManager methodManager = new MethodManager();
         methodManager.setMain();
         final List<SymbolVar> locals = prepareLocals(scope + 1, "main");
+
+        //TODO: change hardcoded
+        Analyser analyser = new Analyser(locals, 4);
+        analyser.setup(mainMethodNode);
+        System.out.println();
+        System.out.println("Main");
+        analyser.printNodes();
 
         methodManager.setLocals(locals);
 
