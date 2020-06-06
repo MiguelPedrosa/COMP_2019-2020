@@ -71,24 +71,6 @@ public class NodeR {
         return this.out;
     }
 
-    public List<Integer> getActiveVars() {
-        List<Integer> list = new ArrayList<>();
-
-        //usar lenght ou size?
-        for(int i = 0; i < this.in.length(); i++)
-            if(this.in.get(i))
-                if(!list.contains(i))
-                    list.add(i);
-        
-
-        for(int i = 0; i < this.out.length(); i++)
-            if(this.out.get(i))
-                if(!list.contains(i))
-                    list.add(i);
-            
-        return list;
-    }
-
     public void printNode() {
         System.out.printf("%d,%d\t\t%s\t%s\t%s\t%s\n", successor1, successor2, def, use, in, out);
     }
