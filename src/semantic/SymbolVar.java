@@ -5,10 +5,12 @@ public class SymbolVar {
     private int initialized;
     private Boolean isArray;
     private String value;
+    private int index;
 
     public SymbolVar(String name, String type) {
         this.name = name;
         this.type = type;
+        this.index = -1;
         this.initialized = 0;
         this.value = null;
         this.isArray = this.isArrayType();
@@ -33,6 +35,14 @@ public class SymbolVar {
 
     public String getType() {
         return type;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
     }
 
     public int getInitialized() {
