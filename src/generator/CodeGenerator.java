@@ -27,7 +27,7 @@ public class CodeGenerator {
         this.rootNode = root;
         this.symbolTable = symbolTable;
         this.optimizeO = true; // TODO: change hardcoded
-        this.Rvalue = Rvalue;
+        this.Rvalue = 10;
 
         CodeGeneratorUtils.setFileName(fileName);
         Optimization.setOptimizeO(this.optimizeO);
@@ -970,6 +970,8 @@ public class CodeGenerator {
         String optimizedCode = Optimization.writeWhile(whileNode, scope, methodManager, label);
         if (optimizedCode != null) {
             code = optimizedCode;
+            System.out.println("-----------------------------------------------------HERE2: " + optimizedCode);
+
             return code;
         }
         Optimization.setOptimizeAtribution(false);

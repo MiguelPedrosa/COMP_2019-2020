@@ -8,14 +8,12 @@ import java.util.Stack;
 public class Graph {
 
     private HashMap<String, GraphNode> nodes;
-    private HashMap<Integer, Integer> indexColor;
 
     private int Kcolors;
 
     public Graph(List<NodeR> statments, HashMap<String, Integer> varNames, int Kcolors) {
         this.Kcolors = Kcolors;
         this.nodes = new HashMap<>();
-        this.indexColor = new HashMap<>();
         this.setup(statments, varNames);
     }
 

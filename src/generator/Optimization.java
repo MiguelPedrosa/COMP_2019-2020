@@ -430,6 +430,7 @@ public class Optimization {
                 code = CodeGeneratorUtils.writeToString(code, "ifgt while" + label + "\n", scope);
                 methodManager.addInstruction("ifgt", "");
 
+                System.out.println("-----------------------------------------------------HERE: " + code);
                 return code;
             } else if (equalsValue.equals("false")) {
                 return "";

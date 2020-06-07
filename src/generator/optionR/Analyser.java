@@ -161,8 +161,8 @@ public class Analyser {
             node.setOut(out);
 
             //set in
-            BitSet use = node.getUse();
-            BitSet def = node.getDef();
+            BitSet use = (BitSet) node.getUse().clone();
+            BitSet def = (BitSet) node.getDef().clone();
             BitSet in = (BitSet) out.clone();
             in.andNot(def);
             in.or(use);
@@ -283,6 +283,11 @@ public class Analyser {
         if(this.varNames.containsKey(identifier)){
             final int varIndex = this.varNames.get(identifier);
             nodeR.setUse(varIndex);
+        } else {
+            if(this.varNames.containsKey("this")){
+                final int varIndex = this.varNames.get("this");
+                nodeR.setUse(varIndex);
+            }
         }
     }
 
@@ -303,8 +308,10 @@ public class Analyser {
             final int varIndex = this.varNames.get(varName);
             nodeR.setUse(varIndex);
         } else {
-            final int varIndex = this.varNames.get("this");
-            nodeR.setUse(varIndex);
+            if(this.varNames.containsKey("this")){
+                final int varIndex = this.varNames.get("this");
+                nodeR.setUse(varIndex);
+            }
         }
 
         processExpression(rightNode, nodeR);
@@ -327,6 +334,11 @@ public class Analyser {
         if(this.varNames.containsKey(varName)){
             final int varIndex = this.varNames.get(varName);
             nodeR.setDef(varIndex);
+        } else {
+            if(this.varNames.containsKey("this")){
+                final int varIndex = this.varNames.get("this");
+                nodeR.setUse(varIndex);
+            }
         }
 
         processExpression(rightNode, nodeR);
