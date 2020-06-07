@@ -408,7 +408,7 @@ public class Optimization {
         return null;
     }
 
-    public static String writeWhile(final ASTWhile whileNode, final int scope, final MethodManager methodManager) {
+    public static String writeWhile(final ASTWhile whileNode, final int scope, final MethodManager methodManager, final int label) {
 
         if (!optimizeO)
             return null;
@@ -420,11 +420,33 @@ public class Optimization {
         String equalsValue = Optimization.getEqualsValue(conditionChild, methodManager);
         if (equalsValue != null) {
             if (equalsValue.equals("true")) {
-                return null;
+
+                final SimpleNode scopeChild = (SimpleNode) whileNode.jjtGetChild(1);
+                Optimization.setOptimizeAtribution(false);
+
+                code = CodeGeneratorUtils.writeToString(code, "while" + label + ":\n", 0);
+                code += codeGenerator.processMethodNodes(scopeChild, scope, methodManager);
+                code += codeGenerator.processMethodNodes(conditionChild, scope, methodManager);
+                code = CodeGeneratorUtils.writeToString(code, "ifgt while" + label + "\n", scope);
+                methodManager.addInstruction("ifgt", "");
+
+                return code;
             } else if (equalsValue.equals("false")) {
                 return "";
             }
         }
+
+        /* final SimpleNode scopeChild = (SimpleNode) whileNode.jjtGetChild(1);
+
+        code = CodeGeneratorUtils.writeToString(code, "while" + label + ":\n", 0);
+        code += processMethodNodes(conditionChild, scope, methodManager);
+        code = CodeGeneratorUtils.writeToString(code, "ifle endWhile" + label + "\n", scope);
+        methodManager.addInstruction("ifle", "");
+        code += processMethodNodes(scopeChild, scope, methodManager);
+        code = CodeGeneratorUtils.writeToString(code, "goto while" + label + "\n", scope);
+        code = CodeGeneratorUtils.writeToString(code, "endWhile" + label + ":\n", 0); */
+
+
 
         return null;
     }
