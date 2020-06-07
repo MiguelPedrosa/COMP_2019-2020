@@ -200,7 +200,15 @@ public class Optimization {
 
             String literal = ((ASTLiteral) childLeft).getLiteral();
             int numero = Integer.parseInt(literal);
-            if (numero > 0) {
+
+            if(numero == 0) {
+                code += CodeGeneratorUtils.writeToString(code, "iconst_0 \n", scope);
+                methodManager.addInstruction("iconst", "int");
+                return code;
+            } else if(numero == 1) {
+                code += codeGenerator.processMethodNodes(childRight, scope, methodManager);
+                return code;
+            } else if (numero > 1) {
                 double check = Math.log((double) numero) / Math.log(2); // verificar se o número a ser multiplicado é
                                                                         // uma
                                                                         // potencia de 2
@@ -218,7 +226,15 @@ public class Optimization {
 
             String literal = ((ASTLiteral) childRight).getLiteral();
             int numero = Integer.parseInt(literal);
-            if (numero > 0) {
+            
+            if(numero == 0) {
+                code += CodeGeneratorUtils.writeToString(code, "iconst_0 \n", scope);
+                methodManager.addInstruction("iconst", "int");
+                return code;
+            } else if(numero == 1) {
+                code += codeGenerator.processMethodNodes(childLeft, scope, methodManager);
+                return code;
+            } else if (numero > 1) {
                 double check = Math.log((double) numero) / Math.log(2); // verificar se o número a ser multiplicado é
                                                                         // uma
                                                                         // potencia de 2
@@ -267,7 +283,11 @@ public class Optimization {
 
             String literal = ((ASTLiteral) childRight).getLiteral();
             int numero = Integer.parseInt(literal);
-            if (numero > 0) {
+
+            if (numero == 1){
+                code += codeGenerator.processMethodNodes(childLeft, scope, methodManager);
+                return code;
+            } else if (numero > 1) {
                 double check = Math.log((double) numero) / Math.log(2); // verificar se o número a ser dividido é
                                                                         // uma
                                                                         // potencia de 2
@@ -280,6 +300,16 @@ public class Optimization {
                     methodManager.addInstruction("ishr", "int");
                     return code;
                 }
+            }
+        } else if (childLeft instanceof ASTLiteral && childRight instanceof ASTIdentifier) { // 0 / i
+
+            String literal = ((ASTLiteral) childLeft).getLiteral();
+            int numero = Integer.parseInt(literal);
+
+            if (numero == 0){
+                code += CodeGeneratorUtils.writeToString(code, "iconst_0 \n", scope);
+                methodManager.addInstruction("iconst", "int");
+                return code;
             }
         }
 
@@ -378,7 +408,7 @@ public class Optimization {
         return null;
     }
 
-    public static String writeWhile(final ASTWhile whileNode, final int scope, final MethodManager methodManager) {
+    public static String writeWhile(final ASTWhile whileNode, final int scope, final MethodManager methodManager, final int label) {
 
         if (!optimizeO)
             return null;
@@ -390,11 +420,33 @@ public class Optimization {
         String equalsValue = Optimization.getEqualsValue(conditionChild, methodManager);
         if (equalsValue != null) {
             if (equalsValue.equals("true")) {
-                return null;
+
+                final SimpleNode scopeChild = (SimpleNode) whileNode.jjtGetChild(1);
+                Optimization.setOptimizeAtribution(false);
+
+                code = CodeGeneratorUtils.writeToString(code, "while" + label + ":\n", 0);
+                code += codeGenerator.processMethodNodes(scopeChild, scope, methodManager);
+                code += codeGenerator.processMethodNodes(conditionChild, scope, methodManager);
+                code = CodeGeneratorUtils.writeToString(code, "ifgt while" + label + "\n", scope);
+                methodManager.addInstruction("ifgt", "");
+
+                return code;
             } else if (equalsValue.equals("false")) {
                 return "";
             }
         }
+
+        /* final SimpleNode scopeChild = (SimpleNode) whileNode.jjtGetChild(1);
+
+        code = CodeGeneratorUtils.writeToString(code, "while" + label + ":\n", 0);
+        code += processMethodNodes(conditionChild, scope, methodManager);
+        code = CodeGeneratorUtils.writeToString(code, "ifle endWhile" + label + "\n", scope);
+        methodManager.addInstruction("ifle", "");
+        code += processMethodNodes(scopeChild, scope, methodManager);
+        code = CodeGeneratorUtils.writeToString(code, "goto while" + label + "\n", scope);
+        code = CodeGeneratorUtils.writeToString(code, "endWhile" + label + ":\n", 0); */
+
+
 
         return null;
     }

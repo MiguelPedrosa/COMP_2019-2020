@@ -964,15 +964,15 @@ public class CodeGenerator {
 
         String code = "";
 
-        String optimizedCode = Optimization.writeWhile(whileNode, scope, methodManager);
+        final int label = this.labelCounter;
+        this.labelCounter++;
+
+        String optimizedCode = Optimization.writeWhile(whileNode, scope, methodManager, label);
         if (optimizedCode != null) {
             code = optimizedCode;
             return code;
         }
         Optimization.setOptimizeAtribution(false);
-
-        final int label = this.labelCounter;
-        this.labelCounter++;
 
         final SimpleNode conditionChild = (SimpleNode) whileNode.jjtGetChild(0);
         final SimpleNode scopeChild = (SimpleNode) whileNode.jjtGetChild(1);
@@ -984,6 +984,14 @@ public class CodeGenerator {
         code += processMethodNodes(scopeChild, scope, methodManager);
         code = CodeGeneratorUtils.writeToString(code, "goto while" + label + "\n", scope);
         code = CodeGeneratorUtils.writeToString(code, "endWhile" + label + ":\n", 0);
+
+        /* code = CodeGeneratorUtils.writeToString(code, "goto whileCondition" + label + "\n", scope);
+        code = CodeGeneratorUtils.writeToString(code, "while" + label + ":\n", 0);
+        code += processMethodNodes(scopeChild, scope, methodManager);
+        code = CodeGeneratorUtils.writeToString(code, "whileCondition" + label + ":\n", 0);
+        code += processMethodNodes(conditionChild, scope, methodManager);
+        code = CodeGeneratorUtils.writeToString(code, "ifgt while" + label + "\n", scope);
+        methodManager.addInstruction("ifgt", ""); */
 
         return code;
     }
