@@ -43,8 +43,17 @@ public class Analyser {
      */
     private Graph graph;
 
+    private List<String[]> arguments;
 
-    public Analyser(List<SymbolVar> locals, int targetSize) {
+    public Analyser(List<SymbolVar> locals,List<String[]> arguments, int targetSize) {
+        if((arguments.size() + 1) > targetSize) {
+            System.err.printf("Cannot continue compilation due to insuficient size of locals given. Current function required at least %d, but was given %d\n",
+                (arguments.size() + 1),
+                targetSize);
+            System.exit(1);
+        }
+
+        this.arguments = arguments;
         this.targetSize = targetSize;
         this.maxVarIntesections = 0;
         statments = new ArrayList<>();
@@ -69,9 +78,9 @@ public class Analyser {
         this.in_out_setup();
     }
 
-    public void run(List<String[]> arguments) {
+    public void run() {
         this.graph = new Graph(this.statments, this.varNames, targetSize);
-        graph.colorGraph(arguments);
+        graph.colorGraph(this.arguments);
         graph.printNodes();
     }
 
@@ -292,6 +301,9 @@ public class Analyser {
         final String varName = ((ASTIdentifier) leftNode).getIdentifier();
         if(this.varNames.containsKey(varName)){
             final int varIndex = this.varNames.get(varName);
+            nodeR.setUse(varIndex);
+        } else {
+            final int varIndex = this.varNames.get("this");
             nodeR.setUse(varIndex);
         }
 

@@ -19,10 +19,34 @@ public class Graph {
         this.setup(statments, varNames);
     }
 
+    private int getIndexOfArg(String arg, List<String[]> arguments){
+        int index = 0;
+        for(String[] argument: arguments){
+            String argName = argument[0];
+            if(argName.equals(arg))
+                return index;
+            index ++;
+        }
+        return -1;
+    }
+
     public void colorGraph(List<String[]> arguments) {
         final Stack<String> nodeStorage = new Stack<>();
         String nextNodeName = null;
         
+        for (Map.Entry<String, GraphNode> entry : nodes.entrySet()) {
+            if(entry.getKey().equals("this")){
+                entry.getValue().setColor(0);
+                entry.getValue().setHidden(false);
+            } else{
+                int argIndex = this.getIndexOfArg(entry.getKey(), arguments);
+                if(argIndex != -1){
+                    entry.getValue().setColor(argIndex + 1);
+                    entry.getValue().setHidden(false);
+                }
+            }
+        }
+
         while((nextNodeName = getNextVisibleNode()) != null) {
             nodes.get(nextNodeName).setHidden(true);
             nodeStorage.push(nextNodeName);
@@ -36,8 +60,24 @@ public class Graph {
             nextNode.setHidden(false);
         }
 
+        /* for (Map.Entry<String, GraphNode> entry : nodes.entrySet()) {
+            if(entry.getKey().equals("this"))
+                this.indexColor.put(0, entry.getValue().getColor());
+        }
+
+        int auxIndex;
+        for(String[] arg: arguments){
+            String argName = arg[0];
+            for (Map.Entry<String, GraphNode> entry : nodes.entrySet()) {
+                if(entry.getKey().equals(argName))
+                    if()
+                    this.indexColor.put(0, entry.getValue().getColor());
+            }
+        } */
+
         //1. Find color of this
         //2. Replace of indexs of same color with 0
+
         //3. n = 0; index = 1;
         //3. Find color of arg[n]; n++
         //4. If node.index == -1:
@@ -98,7 +138,8 @@ public class Graph {
     private String getNextVisibleNode() {
         for (Map.Entry<String, GraphNode> entry : this.nodes.entrySet()) {
             if(! entry.getValue().getHidden() &&
-                entry.getValue().getTotalVisibleNeighbours() < Kcolors)
+                entry.getValue().getTotalVisibleNeighbours() < Kcolors &&
+                entry.getValue().getColor() == -1)
                 return entry.getKey();
         }
         return null;

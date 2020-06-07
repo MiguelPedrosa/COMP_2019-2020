@@ -272,12 +272,12 @@ public class CodeGenerator {
 
         int maxLocalValue = locals.size();
         if(this.Rvalue != -1) {
-            Analyser analyser = new Analyser(locals, this.Rvalue);
+            Analyser analyser = new Analyser(locals, arguments, this.Rvalue);
             analyser.setup(methodNode);
             System.out.println();
             System.out.println(methodName);
             analyser.printNodes();
-            analyser.run(arguments);
+            analyser.run();
 
             // Changed local's indexs
             maxLocalValue = analyser.adjustLocalsIndex(locals);
@@ -313,12 +313,12 @@ public class CodeGenerator {
         if(this.Rvalue != -1) {
             List<String[]> arguments = new ArrayList();
             arguments.add(new String[]{"args", "String[]"});
-            Analyser analyser = new Analyser(locals, this.Rvalue);
+            Analyser analyser = new Analyser(locals, arguments, this.Rvalue);
             analyser.setup(mainMethodNode);
             System.out.println();
             System.out.println("Main");
             analyser.printNodes();
-            analyser.run(arguments);
+            analyser.run();
 
             // Changed local's indexs
             maxLocalValue = analyser.adjustLocalsIndex(locals);
