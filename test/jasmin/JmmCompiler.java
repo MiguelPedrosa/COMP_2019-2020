@@ -43,7 +43,6 @@ public class JmmCompiler {
 
 		var filename = SpecsIo.removeExtension(jmm.getName()) + ".j";
 		
-		// TODO: where is the .j file? This code works when the .j file has the same name as the .jmm file, and is generated in the repository root. Adapt code according to how your J-- compiler works
 		var jFile = new File("jFiles/" + filename);
 				
 		if(!jFile.isFile()) {

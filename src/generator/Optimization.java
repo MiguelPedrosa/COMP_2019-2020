@@ -430,25 +430,11 @@ public class Optimization {
                 code = CodeGeneratorUtils.writeToString(code, "ifgt while" + label + "\n", scope);
                 methodManager.addInstruction("ifgt", "");
 
-                System.out.println("-----------------------------------------------------HERE: " + code);
                 return code;
             } else if (equalsValue.equals("false")) {
                 return "";
             }
         }
-
-        /* final SimpleNode scopeChild = (SimpleNode) whileNode.jjtGetChild(1);
-
-        code = CodeGeneratorUtils.writeToString(code, "while" + label + ":\n", 0);
-        code += processMethodNodes(conditionChild, scope, methodManager);
-        code = CodeGeneratorUtils.writeToString(code, "ifle endWhile" + label + "\n", scope);
-        methodManager.addInstruction("ifle", "");
-        code += processMethodNodes(scopeChild, scope, methodManager);
-        code = CodeGeneratorUtils.writeToString(code, "goto while" + label + "\n", scope);
-        code = CodeGeneratorUtils.writeToString(code, "endWhile" + label + ":\n", 0); */
-
-
-
         return null;
     }
 

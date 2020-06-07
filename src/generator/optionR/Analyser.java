@@ -151,10 +151,10 @@ public class Analyser {
             BitSet out = new BitSet(nVariables);
 
             if(node.getSuccessor1() != -1)
-                inS1 = statments.get(node.getSuccessor1()).getIn();
+                inS1 = (BitSet) statments.get(node.getSuccessor1()).getIn().clone();
 
             if(node.getSuccessor2() != -1)
-                inS2 = statments.get(node.getSuccessor2()).getIn();
+                inS2 = (BitSet) statments.get(node.getSuccessor2()).getIn().clone();
 
             out.or(inS1);
             out.or(inS2);
@@ -334,6 +334,7 @@ public class Analyser {
         if(this.varNames.containsKey(varName)){
             final int varIndex = this.varNames.get(varName);
             nodeR.setDef(varIndex);
+            //nodeR.setUse(varIndex);
         } else {
             if(this.varNames.containsKey("this")){
                 final int varIndex = this.varNames.get("this");

@@ -26,8 +26,8 @@ public class CodeGenerator {
             final Boolean optimizeO, int Rvalue) {
         this.rootNode = root;
         this.symbolTable = symbolTable;
-        this.optimizeO = true; // TODO: change hardcoded
-        this.Rvalue = 10;
+        this.optimizeO = optimizeO;
+        this.Rvalue = Rvalue;
 
         CodeGeneratorUtils.setFileName(fileName);
         Optimization.setOptimizeO(this.optimizeO);
@@ -970,8 +970,6 @@ public class CodeGenerator {
         String optimizedCode = Optimization.writeWhile(whileNode, scope, methodManager, label);
         if (optimizedCode != null) {
             code = optimizedCode;
-            System.out.println("-----------------------------------------------------HERE2: " + optimizedCode);
-
             return code;
         }
         Optimization.setOptimizeAtribution(false);
@@ -979,21 +977,13 @@ public class CodeGenerator {
         final SimpleNode conditionChild = (SimpleNode) whileNode.jjtGetChild(0);
         final SimpleNode scopeChild = (SimpleNode) whileNode.jjtGetChild(1);
 
-        code = CodeGeneratorUtils.writeToString(code, "while" + label + ":\n", 0);
-        code += processMethodNodes(conditionChild, scope, methodManager);
-        code = CodeGeneratorUtils.writeToString(code, "ifle endWhile" + label + "\n", scope);
-        methodManager.addInstruction("ifle", "");
-        code += processMethodNodes(scopeChild, scope, methodManager);
-        code = CodeGeneratorUtils.writeToString(code, "goto while" + label + "\n", scope);
-        code = CodeGeneratorUtils.writeToString(code, "endWhile" + label + ":\n", 0);
-
-        /* code = CodeGeneratorUtils.writeToString(code, "goto whileCondition" + label + "\n", scope);
+        code = CodeGeneratorUtils.writeToString(code, "goto whileCondition" + label + "\n", scope);
         code = CodeGeneratorUtils.writeToString(code, "while" + label + ":\n", 0);
         code += processMethodNodes(scopeChild, scope, methodManager);
         code = CodeGeneratorUtils.writeToString(code, "whileCondition" + label + ":\n", 0);
         code += processMethodNodes(conditionChild, scope, methodManager);
         code = CodeGeneratorUtils.writeToString(code, "ifgt while" + label + "\n", scope);
-        methodManager.addInstruction("ifgt", ""); */
+        methodManager.addInstruction("ifgt", "");
 
         return code;
     }
@@ -1108,16 +1098,19 @@ public class CodeGenerator {
     private String writeLessThanOperation(ASTLessThan lessThanNode, int scope, MethodManager methodManager) {
         String code = "";
 
-        final String lessLabel = "less" + this.labelCounter;
-        final String endLabel = "endLess" + this.labelCounter;
+
+        final int label = this.labelCounter;
+        this.labelCounter++;
+
+        final String lessLabel = "less" + label;
+        final String endLabel = "endLess" + label;
 
         String optimizedCode = Optimization.writeLessThanOperation(lessThanNode, scope, methodManager,
-                this.labelCounter);
+                label);
         if (optimizedCode != null) {
             code = optimizedCode;
             return code;
         }
-        this.labelCounter++;
 
         final SimpleNode leftChild = (SimpleNode) lessThanNode.jjtGetChild(0);
         final SimpleNode rightChild = (SimpleNode) lessThanNode.jjtGetChild(1);
