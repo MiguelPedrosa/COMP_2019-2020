@@ -86,20 +86,6 @@ public class Analyser {
 
     public int adjustLocalsIndex(List<SymbolVar> locals) {
         final HashMap<String, GraphNode> nodes = this.graph.getNodes();
-/*         if(nodes.get("this")) {
-            nodes.get("this").setIndex(0);
-        }
-        for(SymbolVar local : locals) {
-            final String name = local.getName();
-            final GraphNode node = nodes.get(name);
-            final int color = node.getColor();
-            for(SymbolVar symbol : locals) {
-
-            }
-            if(color == thisColor) {
-                local.setIndex(0);
-            }
-        } */
 
         int maxIndex = 0;
         for(SymbolVar local : locals) {
@@ -334,7 +320,6 @@ public class Analyser {
         if(this.varNames.containsKey(varName)){
             final int varIndex = this.varNames.get(varName);
             nodeR.setDef(varIndex);
-            //nodeR.setUse(varIndex);
         } else {
             if(this.varNames.containsKey("this")){
                 final int varIndex = this.varNames.get("this");

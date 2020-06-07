@@ -349,7 +349,7 @@ public class CodeGenerator {
 
         switch (nodeType) {
             case "ASTVarDeclaration":
-                // variable arlready added in locals
+                // variable already added in locals
                 break;
             case "ASTIF":
                 code += writeIf((ASTIF) currentNode, scope, methodManager);
@@ -1226,8 +1226,7 @@ public class CodeGenerator {
          * This function exists because identifiers in J-- are allowed to be declared as
          * Jasmin keywords. As sugested, we created a method that sanitizes all
          * identifier's names and transforms all keywords into acceptable names for
-         * Jasmin. We tried filtering as many names as possible, but Jasmin's
-         * documentation does not make it easy to find all of its keywords.
+         * Jasmin.
          */
         identifier = "_" + identifier;
 

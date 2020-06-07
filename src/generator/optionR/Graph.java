@@ -58,34 +58,6 @@ public class Graph {
             nextNode.setHidden(false);
         }
 
-        /* for (Map.Entry<String, GraphNode> entry : nodes.entrySet()) {
-            if(entry.getKey().equals("this"))
-                this.indexColor.put(0, entry.getValue().getColor());
-        }
-
-        int auxIndex;
-        for(String[] arg: arguments){
-            String argName = arg[0];
-            for (Map.Entry<String, GraphNode> entry : nodes.entrySet()) {
-                if(entry.getKey().equals(argName))
-                    if()
-                    this.indexColor.put(0, entry.getValue().getColor());
-            }
-        } */
-
-        //1. Find color of this
-        //2. Replace of indexs of same color with 0
-
-        //3. n = 0; index = 1;
-        //3. Find color of arg[n]; n++
-        //4. If node.index == -1:
-        //4.1. Replace of indexs of same color with {index}; {index}++
-        //5. l = 0
-        //6. Find color of local[l]; l++
-        //7. If node.index == -1:
-        //7.1. Replace of indexs of same color with {index}; {index}++
-        
-
     }
 
     public HashMap<String, GraphNode> getNodes() {

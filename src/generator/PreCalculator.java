@@ -39,7 +39,6 @@ public class PreCalculator {
             case "ASTFuncCall":
             case "ASTNew":
             case "ASTLength":
-                //value = getEqualsValue(node.jjtGetChild(0), methodManager);
                 break;
             default:
                 System.out.println("Am I supposed to get in here? " + nodeType);

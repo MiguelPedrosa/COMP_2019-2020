@@ -132,7 +132,7 @@ public class SemanticAnalyser {
     private void processVarNode(ASTVarDeclaration childNode) {
         String type = childNode.getType();
         String varID = childNode.getVarId();
-        // warning: might not need true
+
         if (classExists(this.getSimpleArrayType(type), true)) {
             if (!type.equals("void"))
                 this.ST.addVariable(type, varID, childNode.getLine());
@@ -184,7 +184,7 @@ public class SemanticAnalyser {
     private void processLocalVarDeclaration(String key, ASTVarDeclaration childNode) {
         String type = childNode.getType();
         String varID = childNode.getVarId();
-        // warning: might not need true
+
         if (classExists(this.getSimpleArrayType(type), true)) {
             if (!type.equals("void"))
                 this.ST.addLocalVariable(key, type, varID, childNode.getLine());
@@ -414,7 +414,7 @@ public class SemanticAnalyser {
                 }
             } else {
                 String name = this.getExpressionType(methodKey, firstChild);
-                // warning: might not need true
+
                 if (this.classExists(name, true))
                     classType = name;
                 else
